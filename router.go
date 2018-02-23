@@ -27,8 +27,8 @@ func NewRouter(mode string, getRoutes func(*Router)) *Router {
 }
 
 // Run the Gin engine.
-func (r *Router) Run(addr ...string) {
-	r.Engine.Run(addr...)
+func (r *Router) Run(addr ...string) error {
+	return r.Engine.Run(addr...)
 }
 
 // Set a map of key-value pairs that will be added to the Gin registry when the
