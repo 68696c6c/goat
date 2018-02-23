@@ -56,7 +56,7 @@ func (r *Router) initRouter() *gin.Engine {
 	r.Engine.Use(gin.Recovery())
 
 	// Setup logging.
-	logger := GetCustomLogger("http")
+	logger := NewCustomLogger("http")
 	gin.DefaultWriter = io.MultiWriter(os.Stdout, logger.Out)
 	r.Engine.Use(gin.Logger())
 
