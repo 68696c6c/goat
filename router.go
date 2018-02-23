@@ -16,7 +16,9 @@ type Router struct {
 	config     map[string]interface{}
 }
 
+// Router constructor.  Will panic if goat has not been initialized.
 func NewRouter(mode string, getRoutes func(*Router), ) *gin.Engine {
+	mustBeInitialized()
 	r := &Router{
 		Mode:       mode,
 		RoutesFunc: getRoutes,
