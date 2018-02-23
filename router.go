@@ -17,7 +17,7 @@ type Router struct {
 }
 
 // Router constructor.  Will panic if goat has not been initialized.
-func NewRouter(mode string, getRoutes func(*Router), ) *gin.Engine {
+func NewRouter(mode string, getRoutes func(*Router)) *Router {
 	mustBeInitialized()
 	r := &Router{
 		Mode:       mode,
@@ -26,10 +26,9 @@ func NewRouter(mode string, getRoutes func(*Router), ) *gin.Engine {
 	return r.initRouter()
 }
 
-// Set the database connection that the router will use to build the service
-// container.
-func (r *Router) SetDBConnection(db *gorm.DB) {
-	r.DB = db
+// Run the Gin engine.
+func (r *Router) Run(addr ...string) {
+	r.Engine.Run(addr...)
 }
 
 // Set a map of key-value pairs that will be added to the Gin registry when the
@@ -50,7 +49,7 @@ func (r *Router) initRegistry() gin.HandlerFunc {
 }
 
 // Initialize Gin and call the routes callback.
-func (r *Router) initRouter() *gin.Engine {
+func (r *Router) initRouter() *Router {
 	gin.SetMode(r.Mode)
 	r.Engine = gin.New()
 	r.Engine.Use(gin.Recovery())
@@ -69,5 +68,5 @@ func (r *Router) initRouter() *gin.Engine {
 	// Setup routes.
 	r.RoutesFunc(r)
 
-	return r.Engine
+	return r
 }
