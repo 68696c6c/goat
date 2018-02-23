@@ -32,7 +32,7 @@ func Root() string {
 
 // Returns the path to the current working directory.
 func CWD() string {
-	_, b, _, ok := runtime.Caller(0)
+	_, b, _, ok := runtime.Caller(1)
 	if !ok {
 		addError("failed to get current directory")
 	}
