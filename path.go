@@ -18,7 +18,7 @@ func executableClean() (string, error) {
 }
 
 // Set the path to the running executable.
-func SetRoot() (bool, error) {
+func initPath() (bool, error) {
 	exeDir = filepath.Dir(exePath)
 	haveRoot = exeErr == nil
 	return exeErr == nil, exeErr
@@ -34,7 +34,7 @@ func Root() string {
 func CWD() string {
 	_, b, _, ok := runtime.Caller(0)
 	if !ok {
-		panic("Failed get base path.")
+		addError("failed to get current directory")
 	}
 	return filepath.Dir(b)
 }
