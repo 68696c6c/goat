@@ -10,6 +10,7 @@ var (
 	exePath, exeErr = executableClean()
 	exeDir          string
 	haveRoot        bool
+	rootPath        string
 )
 
 func executableClean() (string, error) {
@@ -21,13 +22,21 @@ func executableClean() (string, error) {
 func initPath() (bool, error) {
 	exeDir = filepath.Dir(exePath)
 	haveRoot = exeErr == nil
+	rootPath = exeDir
 	return exeErr == nil, exeErr
 }
 
 // Returns the path to the running executable.
 func Root() string {
 	mustHaveRoot()
-	return exeDir
+	return rootPath
+}
+
+// Set the project root path manually, overriding the default, which is the path
+// to the running executable.
+func SetRoot(p string) {
+	rootPath = p
+	haveRoot = true
 }
 
 // Returns the path to the current working directory.
