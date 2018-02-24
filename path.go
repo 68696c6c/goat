@@ -39,6 +39,19 @@ func SetRoot(p string) {
 	haveRoot = true
 }
 
+// Returns the path to the running executable.
+// Will panic if goat has not been initialized.
+func ExePath() string {
+	return exePath
+}
+
+// Returns the path to the dir holding the running executable.
+// Will panic if goat has not been initialized.
+func ExeDir() string {
+	mustBeInitialized()
+	return exeDir
+}
+
 // Returns the path to the current working directory.
 func CWD() string {
 	_, b, _, ok := runtime.Caller(1)
