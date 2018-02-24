@@ -12,7 +12,7 @@ var (
 
 func SetConfigFile(s string) error {
 	if haveConfigFile {
-		addAndReturnError("config already set")
+		return addAndGetError("config already set")
 	}
 	configFile = s
 	haveConfigFile = true

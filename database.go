@@ -22,6 +22,10 @@ type DBConfig struct {
 	Debug    bool
 }
 
+func (d *DBConfig) String() string {
+	return fmt.Sprintf("Host: %v, Port: %v, Username: %v, Password: %v, Database: %v, Debug: %v", d.Host, d.Port, d.Username, d.Password, d.Database, d.Debug)
+}
+
 // Set whether or not to panic if a database connection fails.  Default is true.
 // Will panic if goat has not been initialized.
 func SetDBPanicMode(b bool) {
@@ -32,7 +36,7 @@ func SetDBPanicMode(b bool) {
 // Database connection constructor.  Will attempt to connect to a database using
 // connection info from the app config.  Will panic if goat has not been
 // initialized and add an error to the error stack if the connection fails.
-func NewDB() *gorm.DB {
+func NewDB() (*gorm.DB, error) {
 	mustBeInitialized()
 	password := viper.GetString("db.password")
 	return NewCustomDB(DBConfig{
@@ -48,7 +52,7 @@ func NewDB() *gorm.DB {
 // Returns a new database connection using the provided connection info.
 // Will panic if goat has not been initialized and add an error to the error
 // stack if the connection fails.
-func NewCustomDB(c DBConfig) *gorm.DB {
+func NewCustomDB(c DBConfig) (*gorm.DB, error) {
 	mustBeInitialized()
 	cs := fmt.Sprintf(dbConnectionTemplate, c.Username, c.Password, c.Host, c.Port, c.Database)
 	connection, err := gorm.Open("mysql", cs)
@@ -57,12 +61,12 @@ func NewCustomDB(c DBConfig) *gorm.DB {
 		if panicOnFailedConnection {
 			panic(msg)
 		} else {
-			addError(msg)
-			return nil
+			err := addAndGetError(msg)
+			return nil, err
 		}
 	}
 	connection.LogMode(c.Debug)
-	return connection
+	return connection, nil
 }
 
 func RecordNotFound(errs []error) bool {
