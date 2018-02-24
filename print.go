@@ -2,7 +2,6 @@ package goat
 
 import (
 	"github.com/fatih/color"
-	"encoding/json"
 )
 
 func PrintSuccess(s string) {
@@ -27,5 +26,5 @@ func PrintHeading(s string) {
 }
 
 func PrintIndent(s string) {
-	json.MarshalIndent(s, "", "\t")
+	println("    " + s)
 }
