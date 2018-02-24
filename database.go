@@ -26,6 +26,18 @@ func (d *DBConfig) String() string {
 	return fmt.Sprintf("Host: %v, Port: %v, Username: %v, Password: %v, Database: %v, Debug: %v", d.Host, d.Port, d.Username, d.Password, d.Database, d.Debug)
 }
 
+func GetDefaultDBConfig() DBConfig {
+	mustBeInitialized()
+	return DBConfig{
+		Host:     viper.GetString("db.host"),
+		Port:     viper.GetInt("db.port"),
+		Database: viper.GetString("db.database"),
+		Username: viper.GetString("db.username"),
+		Password: url.QueryEscape(viper.GetString("db.password")),
+		Debug:    viper.GetBool("db.debug"),
+	}
+}
+
 // Set whether or not to panic if a database connection fails.  Default is true.
 // Will panic if goat has not been initialized.
 func SetDBPanicMode(b bool) {
@@ -37,16 +49,8 @@ func SetDBPanicMode(b bool) {
 // connection info from the app config.  Will panic if goat has not been
 // initialized and add an error to the error stack if the connection fails.
 func NewDB() (*gorm.DB, error) {
-	mustBeInitialized()
-	password := viper.GetString("db.password")
-	return NewCustomDB(DBConfig{
-		Host:     viper.GetString("db.host"),
-		Port:     viper.GetInt("db.port"),
-		Database: viper.GetString("db.database"),
-		Username: viper.GetString("db.username"),
-		Password: url.QueryEscape(password),
-		Debug:    viper.GetBool("db.debug"),
-	})
+	dbConfig := GetDefaultDBConfig()
+	return NewCustomDB(dbConfig)
 }
 
 // Returns a new database connection using the provided connection info.
