@@ -15,5 +15,10 @@ func PrintFail(s string) {
 }
 
 func PrintWarning(s string) {
-	color.Red(s)
+	color.Yellow(s)
+}
+
+func PrintHeading(s string) {
+	d := color.New(color.FgHiWhite, color.Bold)
+	d.Println(s)
 }
