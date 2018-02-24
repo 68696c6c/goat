@@ -38,6 +38,7 @@ func NewCustomLogger(l string) *logrus.Logger {
 
 		fname, err := filepath.Abs(conf)
 		if err != nil {
+			// @TODO add a SetLoggerPanicMode(bool) function
 			log.Printf("Error resolving path for log file %s: %s", conf, err)
 			panic(err)
 		}

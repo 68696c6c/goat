@@ -5,7 +5,7 @@
   branch = "master"
   name = "github.com/68696c6c/goat"
   packages = ["."]
-  revision = "a98e8f6c85f8ec9f2b0c093b09998fac2e4092f4"
+  revision = "f563eca309980bc1a513f6ab4804a29bc7760049"
 
 [[projects]]
   name = "github.com/Sirupsen/logrus"
