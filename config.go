@@ -10,12 +10,13 @@ var (
 	defaultConfigFile = "config.yml"
 )
 
-func SetConfigFile(s string) {
+func SetConfigFile(s string) error {
 	if haveConfigFile {
-		addError("config already set")
+		addAndReturnError("config already set")
 	}
 	configFile = s
 	haveConfigFile = true
+	return nil
 }
 
 func GetConfigFile() string {

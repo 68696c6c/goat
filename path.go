@@ -63,6 +63,6 @@ func CWD() string {
 
 func mustHaveRoot() {
 	if !haveRoot {
-		addError("goat root not set")
+		panic("goat root not set")
 	}
 }

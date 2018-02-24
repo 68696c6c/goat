@@ -2,10 +2,14 @@ package goat
 
 var initialized bool
 
-func Init() {
+func Init() []error {
 	initPath()
 	initConfig()
-	initialized = true
+	errs := GetErrors()
+	if len(errs) == 0 {
+		initialized = true
+	}
+	return errs
 }
 
 func mustBeInitialized() {

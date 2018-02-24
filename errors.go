@@ -15,6 +15,13 @@ func addError(s string) {
 	errs = append(errs, errors.New(s))
 }
 
+func addAndReturnError(s string) error {
+	err := errors.New(s)
+	haveErrors = true
+	errs = append(errs, err)
+	return err
+}
+
 func HasErrors() bool {
 	return haveErrors
 }

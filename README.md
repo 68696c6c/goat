@@ -9,3 +9,5 @@ into the directory and run:
 dep ensure
 ./run.sh
 ```
+
+Running the example app will print some information on how to use Goat.

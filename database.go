@@ -58,6 +58,7 @@ func NewCustomDB(c DBConfig) *gorm.DB {
 			panic(msg)
 		} else {
 			addError(msg)
+			return nil
 		}
 	}
 	connection.LogMode(c.Debug)
