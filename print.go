@@ -1,6 +1,9 @@
 package goat
 
-import "github.com/fatih/color"
+import (
+	"github.com/fatih/color"
+	"encoding/json"
+)
 
 func PrintSuccess(s string) {
 	color.Green(s)
@@ -21,4 +24,8 @@ func PrintWarning(s string) {
 func PrintHeading(s string) {
 	d := color.New(color.FgHiWhite, color.Bold)
 	d.Println(s)
+}
+
+func PrintIndent(s string) {
+	json.MarshalIndent(s, "", "\t")
 }
