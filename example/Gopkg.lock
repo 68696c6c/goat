@@ -5,7 +5,7 @@
   branch = "master"
   name = "github.com/68696c6c/goat"
   packages = ["."]
-  revision = "f563eca309980bc1a513f6ab4804a29bc7760049"
+  revision = "976ca1ced538a81747ebb283a1c8da19a6a346ca"
 
 [[projects]]
   name = "github.com/Sirupsen/logrus"
@@ -154,7 +154,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "49796115aa4b964c318aad4f3084fdb41e9aa067"
+  revision = "beaf6a35706e5032ae4c3fcf342c663c069f44d2"
 
 [[projects]]
   branch = "master"
@@ -163,7 +163,7 @@
     "unix",
     "windows"
   ]
-  revision = "88d2dcc510266da9f7f8c7f34e1940716cab5f5c"
+  revision = "f6cff0780e542efa0c8e864dc8fa522808f6a598"
 
 [[projects]]
   name = "golang.org/x/text"
