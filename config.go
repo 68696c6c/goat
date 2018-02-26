@@ -5,10 +5,15 @@ import (
 )
 
 var (
-	configFile     string
-	haveConfigFile bool
+	readConfig        = true
+	configFile        string
+	haveConfigFile    bool
 	defaultConfigFile = "config.yml"
 )
+
+func ReadConfig(b bool) {
+	readConfig = b
+}
 
 func SetConfigFile(s string) error {
 	if haveConfigFile {
@@ -28,9 +33,11 @@ func GetConfigFile() string {
 }
 
 func initConfig() {
-	c := Root() + "/" + GetConfigFile()
-	viper.SetConfigFile(c)
-	if err := viper.ReadInConfig(); err != nil {
-		addError("failed to load config: " + err.Error())
+	if readConfig {
+		c := Root() + "/" + GetConfigFile()
+		viper.SetConfigFile(c)
+		if err := viper.ReadInConfig(); err != nil {
+			addError("failed to load config: " + err.Error())
+		}
 	}
 }
