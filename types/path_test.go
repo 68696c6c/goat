@@ -19,6 +19,11 @@ func TestPath_Root_Success(t *testing.T) {
 	assert.Equal(t, root, p.Root(), "failed to set root")
 }
 
+func TestPath_RootDefault_Success(t *testing.T) {
+	p := setupPathTypeTest("")
+	assert.NotEmpty(t, p.Root(), "failed to set root")
+}
+
 func TestPath_Root_Panic(t *testing.T) {
 	p := Path{}
 	defer func() {

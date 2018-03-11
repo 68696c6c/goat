@@ -6,7 +6,6 @@ import (
 
 type Path struct {
 	callerFunc func(int) (uintptr, string, int, bool)
-	utils      GoatUtilsInterface
 	haveRoot   bool
 	rootPath   string
 	exePath    string
@@ -65,7 +64,7 @@ func (p *Path) ExeDir() string {
 
 // Returns the path to the current working directory.
 func (p *Path) CWD() string {
-	_, b, _, ok := p.callerFunc(1)
+	_, b, _, ok := p.callerFunc(2)
 	if !ok {
 		// @TODO need an errors interface
 		//addError("failed to get current directory")
