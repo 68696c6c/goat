@@ -121,10 +121,9 @@ func demoConfig() {
 	goat.PrintSuccess("Note that unlike most other Goat functions, goat.ReadConfig(), goat.SetConfigFile(), and goat.SetConfigFilePath() need to be called BEFORE you call goat.Init().")
 	goat.PrintSuccess("Calling these functions after calling goat.Init() will have no effect and will add an error to Goat's error stack.  We will take a look at these errors later.")
 
-	goat.PrintSuccess("After calling goat.Init(), you can call goat.GetConfig() to get a struct containing some information about the config file that was used.")
-	c, _ := goat.GetConfig()
-	goat.PrintIndent("Goat config file: " + c.FileName)
-	goat.PrintIndent("Goat config path: " + c.FilePath)
+	goat.PrintSuccess("After calling goat.Init(), you can call goat.ConfigFileName() and goat.ConfigFilePath() to get information about the config file that was used.")
+	goat.PrintIndent("Goat config file: " + goat.ConfigFileName())
+	goat.PrintIndent("Goat config path: " + goat.ConfigFilePath())
 
 
 	goat.PrintSuccess("Goat will read your config using Viper.  Immediately after calling goat.Init() you can use viper to access your config values.")
