@@ -10,7 +10,6 @@ import (
 var (
 	exePath, exeErr = executableClean()
 	exeDir          string
-	haveRoot        bool
 	rootPath        string
 )
 
@@ -20,7 +19,7 @@ func executableClean() (string, error) {
 }
 
 func initPath() (types.PathInterface, error) {
-	if !haveRoot {
+	if rootPath == "" {
 		rootPath = exeDir
 	}
 	path := types.NewPath(exePath, exeErr, rootPath, runtime.Caller)
@@ -31,5 +30,4 @@ func initPath() (types.PathInterface, error) {
 // to the running executable.
 func SetRoot(p string) {
 	rootPath = p
-	haveRoot = true
 }
