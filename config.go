@@ -2,35 +2,64 @@ package goat
 
 import (
 	"github.com/spf13/viper"
+	"goat/types"
+)
+
+const (
+	configFileDefault = "config.yml"
 )
 
 var (
+	config         *types.Config
+	configFileSet  bool
 	configFile     string
-	haveConfigFile bool
-	defaultConfigFile = "config.yml"
+	configPath     string
+	configPathType = types.ConfigPathTypeDefault
 )
 
-func SetConfigFile(s string) error {
-	if haveConfigFile {
+func initConfig() (*types.Config, error) {
+	switch configPathType {
+	case types.ConfigPathTypeDefault:
+		configPath = RootPath(configFileDefault)
+		break
+	case types.ConfigPathTypeRel:
+		configPath = RootPath(configFile)
+		break
+	case types.ConfigPathTypeAbs:
+		configPath = configFile
+		break
+	}
+	config = types.NewConfig(configFile, configPath)
+	viper.SetConfigFile(config.FilePath)
+	if err := viper.ReadInConfig(); err != nil {
+		return nil, addAndGetError("failed to load config: " + err.Error())
+	}
+	return config, nil
+}
+
+func SetConfigFilePath(path string) error {
+	if configFileSet {
 		return addAndGetError("config already set")
 	}
-	configFile = s
-	haveConfigFile = true
+	configPathType = types.ConfigPathTypeAbs
+	configFile = path
+	configFileSet = true
 	return nil
 }
 
-func GetConfigFile() string {
-	if configFile == "" {
-		configFile = defaultConfigFile
-		haveConfigFile = true
+func SetConfigFile(filename string) error {
+	if configFileSet {
+		return addAndGetError("config already set")
 	}
-	return configFile
+	configPathType = types.ConfigPathTypeRel
+	configFile = filename
+	configFileSet = true
+	return nil
 }
 
-func initConfig() {
-	c := Root() + "/" + GetConfigFile()
-	viper.SetConfigFile(c)
-	if err := viper.ReadInConfig(); err != nil {
-		addError("failed to load config: " + err.Error())
+func GetConfig() (*types.Config, error) {
+	if !configFileSet {
+		return nil, addAndGetError("config already set")
 	}
+	return config, nil
 }

@@ -32,6 +32,10 @@ func Root() string {
 	return rootPath
 }
 
+func RootPath(path string) string {
+	return Root() + "/" + path
+}
+
 // Set the project root path manually, overriding the default, which is the path
 // to the running executable.
 func SetRoot(p string) {
