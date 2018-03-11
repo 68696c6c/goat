@@ -22,12 +22,16 @@ type PathInterface interface {
 }
 
 func NewPath(exePath string, exeError error, rootPath string, cf func(int) (uintptr, string, int, bool)) *Path {
+	exeDir := filepath.Dir(exePath)
+	if rootPath == "" {
+		rootPath = exeDir
+	}
 	return &Path{
 		callerFunc: cf,
 		haveRoot:   exeError == nil,
 		rootPath:   rootPath,
 		exePath:    exePath,
-		exeDir:     filepath.Dir(exePath),
+		exeDir:     exeDir,
 	}
 }
 

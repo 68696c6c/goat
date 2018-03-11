@@ -9,7 +9,6 @@ import (
 
 var (
 	exePath, exeErr = executableClean()
-	exeDir          string
 	rootPath        string
 )
 
@@ -19,9 +18,6 @@ func executableClean() (string, error) {
 }
 
 func initPath() (types.PathInterface, error) {
-	if rootPath == "" {
-		rootPath = exeDir
-	}
 	path := types.NewPath(exePath, exeErr, rootPath, runtime.Caller)
 	return path, exeErr
 }
