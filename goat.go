@@ -13,12 +13,14 @@ func Init() []error {
 	errs := GetErrors()
 	if len(errs) == 0 {
 		container.Utils.SetInitialized(true)
+		initialized = true
 		return errs
 	}
 	errString := ErrorsToString(errs)
 	panic("failed to initialize goat: " + errString)
 }
 
+// @TODO refactor out
 func mustBeInitialized() {
 	if !initialized {
 		panic("goat is not initialized! Call goat.Init() before calling this function.")
