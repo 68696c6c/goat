@@ -25,7 +25,7 @@ func mockPath() (*types.GoatUtils, *types.Path) {
 	u := types.NewGoatUtils()
 	_, b, _, ok := runtime.Caller(1)
 	if !ok {
-		panic("failed to set test root dir")
+		panic("failed to set config test root dir")
 	}
 	rootPath := filepath.Dir(b)
 	exePath := rootPath + "/mock"

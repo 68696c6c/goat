@@ -27,6 +27,7 @@ func initPath(u types.GoatUtilsInterface) (types.PathInterface, error) {
 }
 
 // Returns the path to the running executable.
+// @TODO remove
 func Root() string {
 	mustHaveRoot()
 	return rootPath
@@ -40,6 +41,7 @@ func SetRoot(p string) {
 }
 
 // Panics if the root path has not been set.
+// @TODO remove
 func mustHaveRoot() {
 	if !haveRoot {
 		panic("goat root not set")
