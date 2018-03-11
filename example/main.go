@@ -36,7 +36,9 @@ func main() {
 
 	// Config demo
 	goat.PrintHeading("\nApp Configuration")
-	goat.PrintSuccess("Goat expects that your config file will be named `config.yml`, in your project root directory.")
+	goat.PrintSuccess("By default, Goat expects that your app will have a config file.  If you don't have a config file you can tell Goat not to look for one by calling goat.ReadConfig(false) BEFORE calling goat.Init().")
+	goat.PrintSuccess("Calling goat.ReadConfig(false) after calling goat.Init() will have no affect.")
+	goat.PrintSuccess("If you're using a config, Goat expects that your config file will be named `config.yml`, and exist in your project root directory.")
 	goat.PrintSuccess("Goat will read your config using Viper.  Immediately after calling goat.Init() you can use viper to access your config values.")
 	demoConfig()
 	goat.PrintSuccess(`If you want to change the path to your config, you can call goat.SetConfigFile("path/to/config.ini")`)

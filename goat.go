@@ -8,8 +8,10 @@ func Init() []error {
 	errs := GetErrors()
 	if len(errs) == 0 {
 		initialized = true
+		return errs
 	}
-	return errs
+	errString := ErrorsToString(errs)
+	panic("failed to initialize goat: " + errString)
 }
 
 func mustBeInitialized() {
