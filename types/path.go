@@ -2,15 +2,15 @@ package types
 
 import (
 	"path/filepath"
-	"runtime"
 )
 
 type Path struct {
-	utils    GoatUtilsInterface
-	haveRoot bool
-	rootPath string
-	exePath  string
-	exeDir   string
+	callerFunc func(int) (uintptr, string, int, bool)
+	utils      GoatUtilsInterface
+	haveRoot   bool
+	rootPath   string
+	exePath    string
+	exeDir     string
 }
 
 type PathInterface interface {
@@ -21,13 +21,14 @@ type PathInterface interface {
 	CWD() string
 }
 
-func NewPath(u GoatUtilsInterface, exePath string, exeError error, rootPath string) *Path {
+func NewPath(u GoatUtilsInterface, exePath string, exeError error, rootPath string, cf func(int) (uintptr, string, int, bool)) *Path {
 	return &Path{
-		utils:    u,
-		haveRoot: exeError == nil,
-		rootPath: rootPath,
-		exePath:  exePath,
-		exeDir:   filepath.Dir(exePath),
+		callerFunc: cf,
+		utils:      u,
+		haveRoot:   exeError == nil,
+		rootPath:   rootPath,
+		exePath:    exePath,
+		exeDir:     filepath.Dir(exePath),
 	}
 }
 
@@ -63,10 +64,11 @@ func (p *Path) ExeDir() string {
 
 // Returns the path to the current working directory.
 func (p *Path) CWD() string {
-	_, b, _, ok := runtime.Caller(1)
+	_, b, _, ok := p.callerFunc(1)
 	if !ok {
 		// @TODO need an errors interface
 		//addError("failed to get current directory")
+		return ""
 	}
 	return filepath.Dir(b)
 }

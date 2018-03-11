@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 	"os"
 	"goat/types"
+	"runtime"
 )
 
 var (
@@ -22,7 +23,7 @@ func initPath(u types.GoatUtilsInterface) (types.PathInterface, error) {
 	if !haveRoot {
 		rootPath = exeDir
 	}
-	path := types.NewPath(u, exePath, exeErr, rootPath)
+	path := types.NewPath(u, exePath, exeErr, rootPath, runtime.Caller)
 	return path, exeErr
 }
 

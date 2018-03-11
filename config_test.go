@@ -29,7 +29,7 @@ func mockPath() (*types.GoatUtils, *types.Path) {
 	}
 	rootPath := filepath.Dir(b)
 	exePath := rootPath + "/mock"
-	p := types.NewPath(u, exePath, nil, rootPath)
+	p := types.NewPath(u, exePath, nil, rootPath, runtime.Caller)
 	return u, p
 }
 
