@@ -3,7 +3,7 @@ package goat
 import (
 	"path/filepath"
 	"os"
-	"runtime"
+	"goat/types"
 )
 
 var (
@@ -18,22 +18,18 @@ func executableClean() (string, error) {
 	return filepath.Clean(p), err
 }
 
-// Set the path to the running executable.
-func initPath() (bool, error) {
-	exeDir = filepath.Dir(exePath)
-	haveRoot = exeErr == nil
-	rootPath = exeDir
-	return exeErr == nil, exeErr
+func initPath(u types.GoatUtilsInterface) (types.PathInterface, error) {
+	if !haveRoot {
+		rootPath = exeDir
+	}
+	path := types.NewPath(u, exePath, exeErr, rootPath)
+	return path, exeErr
 }
 
 // Returns the path to the running executable.
 func Root() string {
 	mustHaveRoot()
 	return rootPath
-}
-
-func RootPath(path string) string {
-	return Root() + "/" + path
 }
 
 // Set the project root path manually, overriding the default, which is the path
@@ -43,28 +39,7 @@ func SetRoot(p string) {
 	haveRoot = true
 }
 
-// Returns the path to the running executable.
-// Will panic if goat has not been initialized.
-func ExePath() string {
-	return exePath
-}
-
-// Returns the path to the dir holding the running executable.
-// Will panic if goat has not been initialized.
-func ExeDir() string {
-	mustBeInitialized()
-	return exeDir
-}
-
-// Returns the path to the current working directory.
-func CWD() string {
-	_, b, _, ok := runtime.Caller(1)
-	if !ok {
-		addError("failed to get current directory")
-	}
-	return filepath.Dir(b)
-}
-
+// Panics if the root path has not been set.
 func mustHaveRoot() {
 	if !haveRoot {
 		panic("goat root not set")

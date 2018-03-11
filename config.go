@@ -10,7 +10,6 @@ const (
 )
 
 var (
-	config         *types.Config
 	configFileSet  bool
 	configFile     string
 	configPath     string
@@ -18,23 +17,25 @@ var (
 	readConfig     = true
 )
 
-func initConfig() (*types.Config, error) {
+func initConfig(u types.GoatUtilsInterface, p types.PathInterface) (*types.Config, error) {
 	switch configPathType {
 	case types.ConfigPathTypeDefault:
-		configPath = RootPath(configFileDefault)
+		configFile = configFileDefault
+		configPath = p.RootPath(configFileDefault)
 		break
 	case types.ConfigPathTypeRel:
-		configPath = RootPath(configFile)
+		configPath = p.RootPath(configFile)
 		break
 	case types.ConfigPathTypeAbs:
 		configPath = configFile
 		break
 	}
-	config = types.NewConfig(configFile, configPath)
-	viper.SetConfigFile(config.FilePath)
+	config := types.NewConfig(u, configFile, configPath)
+	viper.SetConfigFile(config.FilePath())
 	if err := viper.ReadInConfig(); err != nil {
 		return nil, addAndGetError("failed to load config: " + err.Error())
 	}
+	configFileSet = true
 	return config, nil
 }
 
@@ -56,11 +57,6 @@ func SetConfigFile(filename string) error {
 	configFile = filename
 	configFileSet = true
 	return nil
-}
-
-func GetConfig() (*types.Config, error) {
-	mustBeInitialized()
-	return config, nil
 }
 
 func ReadConfig(b bool) {
