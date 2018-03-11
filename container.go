@@ -16,7 +16,7 @@ func newContainer(u *types.GoatUtils, p types.PathInterface, useConfig bool) *Co
 
 	// Config
 	if useConfig {
-		config, err := initConfig(u, p)
+		config, err := initConfig(p)
 		panicIfError(err)
 		c.Config = config
 	}

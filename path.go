@@ -27,24 +27,9 @@ func initPath(u types.GoatUtilsInterface) (types.PathInterface, error) {
 	return path, exeErr
 }
 
-// Returns the path to the running executable.
-// @TODO remove
-func Root() string {
-	mustHaveRoot()
-	return rootPath
-}
-
 // Set the project root path manually, overriding the default, which is the path
 // to the running executable.
 func SetRoot(p string) {
 	rootPath = p
 	haveRoot = true
-}
-
-// Panics if the root path has not been set.
-// @TODO remove
-func mustHaveRoot() {
-	if !haveRoot {
-		panic("goat root not set")
-	}
 }

@@ -7,15 +7,13 @@ import (
 )
 
 func TestConfig_FileName(t *testing.T) {
-	u := NewGoatUtils()
 	file := fake.Word()
-	c := NewConfig(u, file, "")
+	c := NewConfig(file, "")
 	assert.Equal(t, file, c.FileName(), "failed to set file name")
 }
 
 func TestConfig_FilePath(t *testing.T) {
-	u := NewGoatUtils()
 	path := fake.Word()
-	c := NewConfig(u, "", path)
+	c := NewConfig("", path)
 	assert.Equal(t, path, c.FilePath(), "failed to set file name")
 }

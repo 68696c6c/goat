@@ -1,6 +1,8 @@
 package goat
 
-import "goat/types"
+import (
+	"goat/types"
+)
 
 var (
 	initialized bool
@@ -32,4 +34,38 @@ func panicIfError(err error) {
 	if err != nil {
 		panic("failed to initialize container: " + err.Error())
 	}
+}
+
+/**
+ * Alias functions
+ * Call underlying type functions.
+ * @TODO is this worth it/the best way?
+ */
+
+func Root() string {
+	return container.Path.Root()
+}
+
+func RootPath(path string) string {
+	return container.Path.RootPath(path)
+}
+
+func ExePath() string {
+	return container.Path.ExePath()
+}
+
+func ExeDir() string {
+	return container.Path.ExeDir()
+}
+
+func CWD() string {
+	return container.Path.CWD()
+}
+
+func ConfigFileName() string {
+	return container.Config.FileName()
+}
+
+func ConfigFilePath() string {
+	return container.Config.FilePath()
 }

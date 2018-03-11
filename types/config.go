@@ -9,7 +9,6 @@ const (
 )
 
 type Config struct {
-	utils    GoatUtilsInterface
 	fileName string
 	filePath string
 }
@@ -19,9 +18,8 @@ type ConfigInterface interface {
 	FilePath() string
 }
 
-func NewConfig(u GoatUtilsInterface, file string, filePath string) *Config {
+func NewConfig(file string, filePath string) *Config {
 	c := &Config{
-		utils:    u,
 		fileName: file,
 		filePath: filePath,
 	}
