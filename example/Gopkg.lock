@@ -5,7 +5,7 @@
   branch = "master"
   name = "github.com/68696c6c/goat"
   packages = ["."]
-  revision = "976ca1ced538a81747ebb283a1c8da19a6a346ca"
+  revision = "841105a3777121d6a286ffdb8058f76ae6712f6d"
 
 [[projects]]
   name = "github.com/Sirupsen/logrus"
@@ -72,14 +72,14 @@
 [[projects]]
   name = "github.com/jinzhu/gorm"
   packages = ["."]
-  revision = "5174cc5c242a728b435ea2be8a2f7f998e15429b"
-  version = "v1.0"
+  revision = "6ed508ec6a4ecb3531899a69cbc746ccf65a4166"
+  version = "v1.9.1"
 
 [[projects]]
   branch = "master"
   name = "github.com/jinzhu/inflection"
   packages = ["."]
-  revision = "1c35d901db3da928c72a72d8458480cc9ade058f"
+  revision = "04140366298a54a039076d798123ffa108fff46c"
 
 [[projects]]
   name = "github.com/magiconair/properties"
@@ -154,7 +154,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "beaf6a35706e5032ae4c3fcf342c663c069f44d2"
+  revision = "c7dcf104e3a7a1417abc0230cb0d5240d764159d"
 
 [[projects]]
   branch = "master"
@@ -163,7 +163,7 @@
     "unix",
     "windows"
   ]
-  revision = "f6cff0780e542efa0c8e864dc8fa522808f6a598"
+  revision = "7dca6fe1f43775aa6d1334576870ff63f978f539"
 
 [[projects]]
   name = "golang.org/x/text"

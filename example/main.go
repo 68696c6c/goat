@@ -36,16 +36,6 @@ func main() {
 
 	// Config demo
 	goat.PrintHeading("\nApp Configuration")
-	goat.PrintSuccess("By default, Goat expects that your app will have a config file.  If you don't have a config file you can tell Goat not to look for one by calling goat.ReadConfig(false) BEFORE calling goat.Init().")
-	goat.PrintSuccess("Calling goat.ReadConfig(false) after calling goat.Init() will have no affect.")
-	goat.PrintSuccess("If you're using a config, Goat expects that your config file will be named `config.yml`, and exist in your project root directory.")
-	goat.PrintSuccess("Goat will read your config using Viper.  Immediately after calling goat.Init() you can use viper to access your config values.")
-	demoConfig()
-	goat.PrintSuccess(`If you want to change the path to your config, you can call goat.SetConfigFile("path/to/config.ini")`)
-	goat.PrintSuccess("Note that unlike most other Goat functions, this function needs to be called BEFORE you call goat.Init().")
-	goat.PrintSuccess("Since goat.Init() tries to load your config, trying to override the config after it's been read will return an error.")
-	goat.PrintSuccess("Notice that if we call 'goat.SetConfigFile(`/path/to/config.ini`)' now, it will have no effect.")
-	goat.SetConfigFile("/path/to/config.ini")
 	demoConfig()
 
 	// CWD demo
@@ -56,15 +46,10 @@ func main() {
 
 	// Errors demo
 	goat.PrintHeading("\nErrors")
-	goat.PrintSuccess("If Goat encounters any non-fatal errors at runtime, it will add them to an internal error array.")
-	goat.PrintSuccess("Goat functions that return errors will also add to this array.")
-	goat.PrintSuccess("Earlier, in the config demo, we tried to set the config after the config had already been read.")
-	goat.PrintSuccess("We didn't capture the error then, but we should see it if we call goat.GetErrors() now:")
 	demoErrors()
 
 	// Logging demo
 	goat.PrintHeading("\nLogging")
-	goat.PrintSuccess("Goat uses Logrus to handling logging.")
 	demoLogging()
 
 	// Database demo
@@ -120,21 +105,51 @@ func demoCWD() {
 }
 
 func demoConfig() {
+	goat.PrintSuccess("By default, Goat expects that your app will have a config file.  If you don't have a config file you can tell Goat not to look for one by calling goat.ReadConfig(false) BEFORE calling goat.Init().")
+	goat.PrintSuccess("Calling goat.ReadConfig(false) after calling goat.Init() will have no affect.")
+	goat.ReadConfig(true)
+
+	goat.PrintSuccess("If you are using a config, Goat expects that your config file will be named `config.yml`, and exist in your project root directory.")
+
+	goat.PrintSuccess(`You can override the default config file name by calling goat.SetConfigFile("filename.yml").`)
+	goat.PrintSuccess("See Viper's documentation for supported config file types.")
+	_ = goat.SetConfigFile("conf.yaml")
+
+	goat.PrintSuccess(`If your config file is located somewhere other than your project's root directory, you can set the full path to the file by calling goat.SetConfigFilePath("/full/path/to/config.yml")`)
+	_ = goat.SetConfigFile("/path/to/file.conf")
+
+	goat.PrintSuccess("Note that unlike most other Goat functions, goat.ReadConfig(), goat.SetConfigFile(), and goat.SetConfigFilePath() need to be called BEFORE you call goat.Init().")
+	goat.PrintSuccess("Calling these functions after calling goat.Init() will have no effect and will add an error to Goat's error stack.  We will take a look at these errors later.")
+
+	goat.PrintSuccess("After calling goat.Init(), you can call goat.GetConfig() to get a struct containing some information about the config file that was used.")
+	c, _ := goat.GetConfig()
+	goat.PrintIndent("Goat config file: " + c.FileName)
+	goat.PrintIndent("Goat config path: " + c.FilePath)
+
+
+	goat.PrintSuccess("Goat will read your config using Viper.  Immediately after calling goat.Init() you can use viper to access your config values.")
 	f := viper.ConfigFileUsed()
-	goat.PrintIndent("Configuration read from " + f)
+	goat.PrintIndent("Viper Configuration read from " + f)
+
 	v := viper.GetString("key")
 	goat.PrintIndent("config.key: " + v)
 }
 
 func demoErrors() {
+	goat.PrintSuccess("If Goat encounters any non-fatal errors at runtime, it will add them to an internal error array.")
+	goat.PrintSuccess("Goat functions that return errors will also add to this array.")
+	goat.PrintSuccess("Earlier, in the config demo, we tried to call some config set up functions after the config had already been read.")
+	goat.PrintSuccess("We didn't capture those errors then, but we should see them if we call goat.GetErrors() now:")
 	errs := goat.GetErrors()
 	goat.PrintIndent(goat.ErrorsToString(errs))
 }
 
 func demoLogging() {
+	goat.PrintSuccess("Goat uses Logrus to handling logging.")
 	goat.PrintSuccess("Goat provides a default system log that will write to [project root]/logs/sys.log")
 	goat.PrintSuccess("You can change the destination of this log by adding a logs.sys entry to your app's config.yml.  Future versions of Goat will provide more configuration options.")
-	goat.PrintIndent("logs:\nsys: /path/to/logs/sys.log")
+	goat.PrintIndent("logs:")
+	goat.PrintIndent("\tsys: /path/to/logs/sys.log")
 	goat.PrintSuccess("You can get a pointer to the system logger by calling goat.NewLogger()")
 
 	_ = goat.NewLogger()
