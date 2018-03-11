@@ -4,7 +4,9 @@ var initialized bool
 
 func Init() []error {
 	initPath()
-	initConfig()
+	if readConfig {
+		initConfig()
+	}
 	errs := GetErrors()
 	if len(errs) == 0 {
 		initialized = true
@@ -16,6 +18,6 @@ func Init() []error {
 
 func mustBeInitialized() {
 	if !initialized {
-		panic("goat is not initialized! Call goat.Init() before calling any other goat functions.")
+		panic("goat is not initialized! Call goat.Init() before calling this function.")
 	}
 }

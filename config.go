@@ -15,6 +15,7 @@ var (
 	configFile     string
 	configPath     string
 	configPathType = types.ConfigPathTypeDefault
+	readConfig     = true
 )
 
 func initConfig() (*types.Config, error) {
@@ -58,8 +59,14 @@ func SetConfigFile(filename string) error {
 }
 
 func GetConfig() (*types.Config, error) {
-	if !configFileSet {
-		return nil, addAndGetError("config already set")
-	}
+	mustBeInitialized()
 	return config, nil
+}
+
+func ReadConfig(b bool) {
+	if !initialized {
+		readConfig = b
+		return
+	}
+	addError("goat.ReadConfig() called after initialization")
 }
