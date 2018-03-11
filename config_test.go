@@ -21,16 +21,15 @@ var (
 	configTestContainer *Container
 )
 
-func mockPath() (*types.GoatUtils, *types.Path) {
-	u := types.NewGoatUtils()
+func mockPath() *types.Path {
 	_, b, _, ok := runtime.Caller(1)
 	if !ok {
 		panic("failed to set config test root dir")
 	}
 	rootPath := filepath.Dir(b)
 	exePath := rootPath + "/mock"
-	p := types.NewPath(u, exePath, nil, rootPath, runtime.Caller)
-	return u, p
+	p := types.NewPath(exePath, nil, rootPath, runtime.Caller)
+	return p
 }
 
 // Reset config variables to simulate a fresh initialization.
@@ -47,8 +46,8 @@ func configTestReset() {
 
 // A config test analog of goat.Init().
 func configTestInit() {
-	u, p := mockPath()
-	configTestContainer = newContainer(u, p, readConfig)
+	p := mockPath()
+	configTestContainer = newContainer(p, readConfig)
 	errs := GetErrors()
 	if len(errs) == 0 {
 		configTestContainer.Utils.SetInitialized(true)

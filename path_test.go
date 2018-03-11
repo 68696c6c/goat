@@ -3,7 +3,6 @@ package goat
 import (
 	"testing"
 	"github.com/stretchr/testify/assert"
-	"goat/types"
 )
 
 const (
@@ -17,10 +16,9 @@ var (
 
 // A path test analog of goat.Init().
 func pathTestInit() {
-	u := types.NewGoatUtils()
-	p, _ := initPath(u)
+	p, _ := initPath()
 
-	pathTestContainer = newContainer(u, p, false)
+	pathTestContainer = newContainer(p, false)
 	errs := GetErrors()
 	if len(errs) == 0 {
 		pathTestContainer.Utils.SetInitialized(true)

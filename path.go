@@ -19,11 +19,11 @@ func executableClean() (string, error) {
 	return filepath.Clean(p), err
 }
 
-func initPath(u types.GoatUtilsInterface) (types.PathInterface, error) {
+func initPath() (types.PathInterface, error) {
 	if !haveRoot {
 		rootPath = exeDir
 	}
-	path := types.NewPath(u, exePath, exeErr, rootPath, runtime.Caller)
+	path := types.NewPath(exePath, exeErr, rootPath, runtime.Caller)
 	return path, exeErr
 }
 

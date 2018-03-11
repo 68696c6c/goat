@@ -9,9 +9,8 @@ import (
 )
 
 func setupPathTypeTest(root string) *Path {
-	u := NewGoatUtils()
 	exePath := fake.Word()
-	return NewPath(u, exePath, nil, root, runtime.Caller)
+	return NewPath(exePath, nil, root, runtime.Caller)
 }
 
 func TestPath_Root_Success(t *testing.T) {
@@ -40,22 +39,20 @@ func TestPath_RootPath(t *testing.T) {
 }
 
 func TestPath_ExePath(t *testing.T) {
-	u := NewGoatUtils()
 	root := fake.Word()
 	exePath := fake.Word()
-	p := NewPath(u, exePath, nil, root, runtime.Caller)
+	p := NewPath(exePath, nil, root, runtime.Caller)
 
 	assert.Equal(t, exePath, p.ExePath(), "ExePath() returned an unexpected value")
 }
 
 func TestPath_ExeDir(t *testing.T) {
-	u := NewGoatUtils()
-	u.SetInitialized(true)
 	root := fake.Word()
 	exePath := fake.Word()
 	exeDir := filepath.Dir(exePath)
-	p := NewPath(u, exePath, nil, root, runtime.Caller)
+	assert.NotEmpty(t, exeDir, "exeDir is empty")
 
+	p := NewPath(exePath, nil, root, runtime.Caller)
 	assert.Equal(t, exeDir, p.ExeDir(), "ExeDir() returned an unexpected value")
 }
 
@@ -66,7 +63,6 @@ func TestPath_CWD(t *testing.T) {
 }
 
 func TestPath_CWD_Fail(t *testing.T) {
-	u := NewGoatUtils()
 	root := fake.Word()
 	exePath := fake.Word()
 
@@ -74,7 +70,7 @@ func TestPath_CWD_Fail(t *testing.T) {
 		return 1, "", 0, false
 	}
 
-	p := NewPath(u, exePath, nil, root, f)
+	p := NewPath(exePath, nil, root, f)
 
 	assert.Empty(t, p.CWD(), "CWD() returned an unexpected value")
 }

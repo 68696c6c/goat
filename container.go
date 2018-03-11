@@ -8,9 +8,9 @@ type Container struct {
 	Path   types.PathInterface
 }
 
-func newContainer(u *types.GoatUtils, p types.PathInterface, useConfig bool) *Container {
+func newContainer(p types.PathInterface, useConfig bool) *Container {
 	c := &Container{
-		Utils: u,
+		Utils: types.NewGoatUtils(),
 		Path:  p,
 	}
 

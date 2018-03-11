@@ -21,10 +21,9 @@ type PathInterface interface {
 	CWD() string
 }
 
-func NewPath(u GoatUtilsInterface, exePath string, exeError error, rootPath string, cf func(int) (uintptr, string, int, bool)) *Path {
+func NewPath(exePath string, exeError error, rootPath string, cf func(int) (uintptr, string, int, bool)) *Path {
 	return &Path{
 		callerFunc: cf,
-		utils:      u,
 		haveRoot:   exeError == nil,
 		rootPath:   rootPath,
 		exePath:    exePath,
@@ -50,7 +49,6 @@ func (p *Path) RootPath(path string) string {
 }
 
 // Returns the path to the running executable.
-// Will panic if goat has not been initialized.
 func (p *Path) ExePath() string {
 	return p.exePath
 }
@@ -58,7 +56,6 @@ func (p *Path) ExePath() string {
 // Returns the path to the dir holding the running executable.
 // Will panic if goat has not been initialized.
 func (p *Path) ExeDir() string {
-	p.utils.MustBeInitialized()
 	return p.exeDir
 }
 

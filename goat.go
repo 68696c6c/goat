@@ -1,20 +1,15 @@
 package goat
 
-import (
-	"goat/types"
-)
-
 var (
 	initialized bool
 	container   *Container
 )
 
 func Init() []error {
-	u := types.NewGoatUtils()
-	p, err := initPath(u)
+	p, err := initPath()
 	panicIfError(err)
 
-	container = newContainer(u, p, readConfig)
+	container = newContainer(p, readConfig)
 	errs := GetErrors()
 	if len(errs) == 0 {
 		container.Utils.SetInitialized(true)
@@ -55,6 +50,7 @@ func ExePath() string {
 }
 
 func ExeDir() string {
+	container.Utils.MustBeInitialized()
 	return container.Path.ExeDir()
 }
 
