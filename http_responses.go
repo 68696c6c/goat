@@ -6,31 +6,52 @@ import (
 )
 
 type Response struct {
-	Message string   `json:"message,omitempty"`
-	Errors  []string `json:"errors,omitempty"`
+	Message string                 `json:"message"`
+	Errors  []string               `json:"errors,omitempty"`
+	Data    map[string]interface{} `json:"data,omitempty"`
 }
 
-func RespondServerError(c *gin.Context) {
-	c.JSON(http.StatusInternalServerError, Response{
-		Message: "Internal server error",
-		Errors:  nil,
-	})
+func RespondMessage(c *gin.Context, m string) {
+	c.JSON(http.StatusOK, Response{m, []string{}, nil})
+	c.Abort()
 }
 
-func RespondBadRequest(c *gin.Context, errs interface{}) {
-	c.JSON(http.StatusOK, Response{
-		Message: "Bad request",
-		Errors:  ErrorsToStrings(errs),
-	})
+func RespondData(c *gin.Context, data interface{}) {
+	c.JSON(http.StatusOK, data)
+	c.Abort()
 }
 
-func RespondCreated(c *gin.Context, i interface{}) {
-	c.JSON(http.StatusCreated, i)
+func RespondCreated(c *gin.Context, data interface{}) {
+	c.JSON(http.StatusCreated, data)
+	c.Abort()
 }
 
-func RespondOK(c *gin.Context, message string) {
-	c.JSON(http.StatusOK, Response{
-		Message: message,
-		Errors:  nil,
-	})
+func RespondNotFoundError(c *gin.Context, errs []error) {
+	c.JSON(http.StatusOK, Response{"Not found.", ErrorsToStrings(errs), nil})
+	c.Abort()
+}
+
+func RespondBadRequestError(c *gin.Context, errs []error) {
+	c.JSON(http.StatusBadRequest, Response{"Bad Request.", ErrorsToStrings(errs), nil})
+	c.Abort()
+}
+
+func RespondBadRequest(c *gin.Context, data interface{}) {
+	c.JSON(http.StatusBadRequest, data)
+	c.Abort()
+}
+
+func RespondUnauthorizedError(c *gin.Context, errs []error) {
+	c.JSON(http.StatusUnauthorized, Response{"Unauthorized.", ErrorsToStrings(errs), nil})
+	c.Abort()
+}
+
+func RespondAuthenticationError(c *gin.Context) {
+	c.JSON(http.StatusForbidden, Response{"Authentication error.", []string{}, nil})
+	c.Abort()
+}
+
+func RespondServerError(c *gin.Context, errs []error) {
+	c.JSON(http.StatusInternalServerError, Response{"Internal server error.", ErrorsToStrings(errs), nil})
+	c.Abort()
 }
