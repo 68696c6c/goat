@@ -73,6 +73,7 @@ func TestSetConfigFilePath_Success(t *testing.T) {
 	configTestInit()
 	assert.Equal(t, configTestFixtureConfigPath, configTestContainer.Config.FileName(), configTestMsgFileName)
 	assert.Equal(t, configTestFixtureConfigPath, configTestContainer.Config.FilePath(), configTestMsgFilePath)
+	assert.Equal(t, configFilePathType, configPathTypeAbs, configTestMsgFilePath)
 	assert.True(t, configFileSet, configTestMsgConfigFileSet)
 }
 
@@ -98,6 +99,7 @@ func TestSetConfigFile_Success(t *testing.T) {
 	configTestInit()
 	assert.Equal(t, configTestFixtureConfigFile, configTestContainer.Config.FileName(), configTestMsgFileName)
 	assert.Equal(t, configTestFixtureConfigPath, configTestContainer.Config.FilePath(), configTestMsgFilePath)
+	assert.Equal(t, configFilePathType, configPathTypeRel, configTestMsgFilePath)
 	assert.True(t, configFileSet, configTestMsgConfigFileSet)
 }
 
