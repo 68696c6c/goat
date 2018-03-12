@@ -2,12 +2,6 @@
 
 
 [[projects]]
-  branch = "master"
-  name = "github.com/68696c6c/goat"
-  packages = ["."]
-  revision = "36e74881c4d0ca074d154a4d0332a348e16d7071"
-
-[[projects]]
   name = "github.com/Sirupsen/logrus"
   packages = ["."]
   revision = "d682213848ed68c0a260ca37d6dd5ace8423f5ba"
@@ -229,6 +223,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "51c24cc6511abc6299b714f4935a05712214f98e553139f04a220d0b0f656766"
+  inputs-digest = "775ff5ad6ec5bddff91a3d4b17781856b67809c7bfd8ee8ce320ea2bfc19019d"
   solver-name = "gps-cdcl"
   solver-version = 1
