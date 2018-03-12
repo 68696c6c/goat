@@ -24,6 +24,8 @@
 #   go-tests = true
 #   unused-packages = true
 
+ignored = ["github.com/68696c6c/goat"]
+
 [[constraint]]
   name = "github.com/spf13/viper"
   version = "1.0.0"
