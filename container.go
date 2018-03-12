@@ -1,16 +1,14 @@
 package goat
 
-import "goat/types"
-
 type Container struct {
-	Utils  types.GoatUtilsInterface
-	Config types.ConfigInterface
-	Path   types.PathInterface
+	Utils  utilsInterface
+	Config configInterface
+	Path   pathInterface
 }
 
-func newContainer(p types.PathInterface, useConfig bool) *Container {
+func newContainer(p pathInterface, useConfig bool) *Container {
 	c := &Container{
-		Utils: types.NewGoatUtils(),
+		Utils: newUtils(),
 		Path:  p,
 	}
 

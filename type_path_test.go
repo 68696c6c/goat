@@ -1,4 +1,4 @@
-package types
+package goat
 
 import (
 	"testing"
@@ -8,9 +8,9 @@ import (
 	"runtime"
 )
 
-func setupPathTypeTest(root string) *Path {
+func setupPathTypeTest(root string) *path {
 	exePath := fake.Word()
-	return NewPath(exePath, nil, root, runtime.Caller)
+	return newPath(exePath, nil, root, runtime.Caller)
 }
 
 func TestPath_Root_Success(t *testing.T) {
@@ -25,7 +25,7 @@ func TestPath_RootDefault_Success(t *testing.T) {
 }
 
 func TestPath_Root_Panic(t *testing.T) {
-	p := Path{}
+	p := path{}
 	defer func() {
 		r := recover()
 		assert.NotNil(t, r, "Root() failed to panic when the root path wasn't set")
@@ -46,7 +46,7 @@ func TestPath_RootPath(t *testing.T) {
 func TestPath_ExePath(t *testing.T) {
 	root := fake.Word()
 	exePath := fake.Word()
-	p := NewPath(exePath, nil, root, runtime.Caller)
+	p := newPath(exePath, nil, root, runtime.Caller)
 
 	assert.Equal(t, exePath, p.ExePath(), "ExePath() returned an unexpected value")
 }
@@ -57,7 +57,7 @@ func TestPath_ExeDir(t *testing.T) {
 	exeDir := filepath.Dir(exePath)
 	assert.NotEmpty(t, exeDir, "exeDir is empty")
 
-	p := NewPath(exePath, nil, root, runtime.Caller)
+	p := newPath(exePath, nil, root, runtime.Caller)
 	assert.Equal(t, exeDir, p.ExeDir(), "ExeDir() returned an unexpected value")
 }
 
@@ -75,7 +75,7 @@ func TestPath_CWD_Fail(t *testing.T) {
 		return 1, "", 0, false
 	}
 
-	p := NewPath(exePath, nil, root, f)
+	p := newPath(exePath, nil, root, f)
 
 	assert.Empty(t, p.CWD(), "CWD() returned an unexpected value")
 }

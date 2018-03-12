@@ -1,9 +1,5 @@
 package goat
 
-import (
-	_ "goat/types"
-)
-
 var (
 	initialized bool
 	container   *Container

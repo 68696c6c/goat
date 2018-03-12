@@ -1,4 +1,4 @@
-package types
+package goat
 
 import (
 	"testing"
@@ -8,12 +8,12 @@ import (
 
 func TestConfig_FileName(t *testing.T) {
 	file := fake.Word()
-	c := NewConfig(file, "")
+	c := newConfig(file, "")
 	assert.Equal(t, file, c.FileName(), "failed to set file name")
 }
 
 func TestConfig_FilePath(t *testing.T) {
 	path := fake.Word()
-	c := NewConfig("", path)
+	c := newConfig("", path)
 	assert.Equal(t, path, c.FilePath(), "failed to set file name")
 }

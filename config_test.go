@@ -5,7 +5,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"runtime"
 	"path/filepath"
-	"goat/types"
 )
 
 const (
@@ -21,14 +20,14 @@ var (
 	configTestContainer *Container
 )
 
-func mockPath() *types.Path {
+func mockPath() *path {
 	_, b, _, ok := runtime.Caller(1)
 	if !ok {
 		panic("failed to set config test root dir")
 	}
 	rootPath := filepath.Dir(b)
 	exePath := rootPath + "/mock"
-	p := types.NewPath(exePath, nil, rootPath, runtime.Caller)
+	p := newPath(exePath, nil, rootPath, runtime.Caller)
 	return p
 }
 
@@ -40,7 +39,7 @@ func configTestReset() {
 	configFileSet = false
 	configFile = ""
 	configPath = ""
-	configPathType = types.ConfigPathTypeDefault
+	configFilePathType = configPathTypeDefault
 	readConfig = true
 }
 

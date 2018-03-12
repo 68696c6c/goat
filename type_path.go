@@ -1,10 +1,10 @@
-package types
+package goat
 
 import (
 	"path/filepath"
 )
 
-type Path struct {
+type path struct {
 	callerFunc func(int) (uintptr, string, int, bool)
 	haveRoot   bool
 	rootPath   string
@@ -12,7 +12,7 @@ type Path struct {
 	exeDir     string
 }
 
-type PathInterface interface {
+type pathInterface interface {
 	Root() string
 	RootPath(string) string
 	ExePath() string
@@ -20,12 +20,12 @@ type PathInterface interface {
 	CWD() string
 }
 
-func NewPath(exePath string, exeError error, rootPath string, cf func(int) (uintptr, string, int, bool)) *Path {
+func newPath(exePath string, exeError error, rootPath string, cf func(int) (uintptr, string, int, bool)) *path {
 	exeDir := filepath.Dir(exePath)
 	if rootPath == "" {
 		rootPath = exeDir
 	}
-	return &Path{
+	return &path{
 		callerFunc: cf,
 		haveRoot:   exeError == nil,
 		rootPath:   rootPath,
@@ -34,36 +34,36 @@ func NewPath(exePath string, exeError error, rootPath string, cf func(int) (uint
 	}
 }
 
-func (p *Path) mustHaveRoot() {
+func (p *path) mustHaveRoot() {
 	if !p.haveRoot {
 		panic("goat root not set")
 	}
 }
 
 // Returns the root path.
-func (p *Path) Root() string {
+func (p *path) Root() string {
 	p.mustHaveRoot()
 	return p.rootPath
 }
 
 // Returns the provided path appended to the root path.
-func (p *Path) RootPath(path string) string {
+func (p *path) RootPath(path string) string {
 	return p.Root() + "/" + path
 }
 
 // Returns the path to the running executable.
-func (p *Path) ExePath() string {
+func (p *path) ExePath() string {
 	return p.exePath
 }
 
 // Returns the path to the dir holding the running executable.
 // Will panic if goat has not been initialized.
-func (p *Path) ExeDir() string {
+func (p *path) ExeDir() string {
 	return p.exeDir
 }
 
 // Returns the path to the current working directory.
-func (p *Path) CWD() string {
+func (p *path) CWD() string {
 	_, b, _, ok := p.callerFunc(2)
 	if !ok {
 		// @TODO need an errors interface

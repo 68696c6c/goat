@@ -1,31 +1,31 @@
-package types
+package goat
 
-type GoatUtils struct {
+type utils struct {
 	initialized bool
 }
 
-type GoatUtilsInterface interface {
+type utilsInterface interface {
 	SetInitialized(bool)
 	MustBeInitialized()
 	IsInitialized() bool
 }
 
-func NewGoatUtils() *GoatUtils {
-	return &GoatUtils{
+func newUtils() *utils {
+	return &utils{
 		initialized: false,
 	}
 }
 
-func (u *GoatUtils) SetInitialized(b bool) {
+func (u *utils) SetInitialized(b bool) {
 	u.initialized = b
 }
 
-func (u *GoatUtils) MustBeInitialized() {
+func (u *utils) MustBeInitialized() {
 	if !u.initialized {
 		panic("goat is not initialized! Call goat.Init() before calling this function.")
 	}
 }
 
-func (u *GoatUtils) IsInitialized() bool {
+func (u *utils) IsInitialized() bool {
 	return u.initialized
 }

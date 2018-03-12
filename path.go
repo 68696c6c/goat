@@ -3,7 +3,6 @@ package goat
 import (
 	"path/filepath"
 	"os"
-	"goat/types"
 	"runtime"
 )
 
@@ -17,8 +16,8 @@ func executableClean() (string, error) {
 	return filepath.Clean(p), err
 }
 
-func initPath() (types.PathInterface, error) {
-	path := types.NewPath(exePath, exeErr, rootPath, runtime.Caller)
+func initPath() (pathInterface, error) {
+	path := newPath(exePath, exeErr, rootPath, runtime.Caller)
 	return path, exeErr
 }
 

@@ -1,4 +1,4 @@
-package types
+package goat
 
 import (
 	"testing"
@@ -6,12 +6,12 @@ import (
 )
 
 func TestGoatUtils_Initialization(t *testing.T) {
-	u := NewGoatUtils()
+	u := newUtils()
 	assert.False(t, u.IsInitialized(), "unexpected initial initialized value")
 }
 
 func TestGoatUtils_SetInitialized(t *testing.T) {
-	u := NewGoatUtils()
+	u := newUtils()
 	u.SetInitialized(true)
 	defer func() {
 		r := recover()
@@ -21,7 +21,7 @@ func TestGoatUtils_SetInitialized(t *testing.T) {
 }
 
 func TestGoatUtils_MustBeInitialized(t *testing.T) {
-	u := NewGoatUtils()
+	u := newUtils()
 	defer func() {
 		r := recover()
 		assert.NotNil(t, r, "SetInitialized didn't panic")
