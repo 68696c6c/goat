@@ -1,0 +1,2 @@
+env: release
+listen-port: 8080
