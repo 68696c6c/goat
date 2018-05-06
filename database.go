@@ -14,12 +14,13 @@ var (
 )
 
 type DBConfig struct {
-	Host     string
-	Port     int
-	Database string
-	Username string
-	Password string
-	Debug    bool
+	Host            string
+	Port            int
+	Database        string
+	Username        string
+	Password        string
+	Debug           bool
+	MultiStatements bool
 }
 
 func (d *DBConfig) String() string {
