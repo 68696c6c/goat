@@ -34,6 +34,7 @@ func mockPath() *path {
 // Reset config variables to simulate a fresh initialization.
 func configTestReset() {
 	configTestContainer = nil
+	container = nil
 	initialized = false
 	errs = []error{}
 	configFileSet = false
@@ -45,22 +46,24 @@ func configTestReset() {
 
 // A config test analog of goat.Init().
 func configTestInit() {
-	p := mockPath()
-	configTestContainer = newContainer(p, readConfig)
-	errs := GetErrors()
-	if len(errs) == 0 {
-		configTestContainer.Utils.SetInitialized(true)
-		return
-	}
-	errString := ErrorsToString(errs)
-	panic("failed to initialize config test: " + errString)
+	//p := mockPath()
+	//configTestContainer = newContainer(p, readConfig)
+	//errs := GetErrors()
+	//if len(errs) == 0 {
+	//	configTestContainer.Utils.SetInitialized(true)
+	//	return
+	//}
+	//errString := ErrorsToString(errs)
+	//panic("failed to initialize config test: " + errString)
+	errs := Init()
+	panicIfErrors(errs)
 }
 
 func TestInitConfig_Default(t *testing.T) {
 	configTestReset()
 	configTestInit()
-	assert.NotEmpty(t, configTestContainer.Config.FileName(), configTestMsgFileName)
-	assert.NotEmpty(t, configTestContainer.Config.FilePath(), configTestMsgFilePath)
+	assert.NotEmpty(t, ConfigFileName(), configTestMsgFileName)
+	assert.NotEmpty(t, ConfigFilePath(), configTestMsgFilePath)
 	assert.True(t, configFileSet, configTestMsgConfigFileSet)
 }
 
@@ -71,8 +74,8 @@ func TestSetConfigFilePath_Success(t *testing.T) {
 	assert.Nil(t, err, configTestMsgSetConfigPath)
 
 	configTestInit()
-	assert.Equal(t, configTestFixtureConfigPath, configTestContainer.Config.FileName(), configTestMsgFileName)
-	assert.Equal(t, configTestFixtureConfigPath, configTestContainer.Config.FilePath(), configTestMsgFilePath)
+	assert.Equal(t, configTestFixtureConfigPath, ConfigFileName(), configTestMsgFileName)
+	assert.Equal(t, configTestFixtureConfigPath, ConfigFilePath(), configTestMsgFilePath)
 	assert.Equal(t, configFilePathType, configPathTypeAbs, configTestMsgFilePath)
 	assert.True(t, configFileSet, configTestMsgConfigFileSet)
 }
@@ -85,8 +88,8 @@ func TestSetConfigFilePath_Error(t *testing.T) {
 	assert.NotNil(t, err, configTestMsgSetConfigPath)
 
 	p := configTestContainer.Path.RootPath(configFileDefault)
-	assert.Equal(t, configFileDefault, configTestContainer.Config.FileName(), configTestMsgFileName)
-	assert.Equal(t, p, configTestContainer.Config.FilePath(), configTestMsgFilePath)
+	assert.Equal(t, configFileDefault, ConfigFileName(), configTestMsgFileName)
+	assert.Equal(t, p, ConfigFilePath(), configTestMsgFilePath)
 	assert.True(t, configFileSet, configTestMsgConfigFileSet)
 }
 
@@ -97,8 +100,8 @@ func TestSetConfigFile_Success(t *testing.T) {
 	assert.Nil(t, err, configTestMsgSetConfigPath)
 
 	configTestInit()
-	assert.Equal(t, configTestFixtureConfigFile, configTestContainer.Config.FileName(), configTestMsgFileName)
-	assert.Equal(t, configTestFixtureConfigPath, configTestContainer.Config.FilePath(), configTestMsgFilePath)
+	assert.Equal(t, configTestFixtureConfigFile, ConfigFileName(), configTestMsgFileName)
+	assert.Equal(t, configTestFixtureConfigPath, ConfigFilePath(), configTestMsgFilePath)
 	assert.Equal(t, configFilePathType, configPathTypeRel, configTestMsgFilePath)
 	assert.True(t, configFileSet, configTestMsgConfigFileSet)
 }
@@ -111,8 +114,8 @@ func TestSetConfigFile_Error(t *testing.T) {
 	assert.NotNil(t, err, configTestMsgSetConfigPath)
 
 	p := configTestContainer.Path.RootPath(configFileDefault)
-	assert.Equal(t, configFileDefault, configTestContainer.Config.FileName(), configTestMsgFileName)
-	assert.Equal(t, p, configTestContainer.Config.FilePath(), configTestMsgFilePath)
+	assert.Equal(t, configFileDefault, ConfigFileName(), configTestMsgFileName)
+	assert.Equal(t, p, ConfigFilePath(), configTestMsgFilePath)
 	assert.True(t, configFileSet, configTestMsgConfigFileSet)
 }
 
@@ -122,8 +125,8 @@ func TestReadConfig_True(t *testing.T) {
 	ReadConfig(true)
 
 	configTestInit()
-	assert.NotEmpty(t, configTestContainer.Config.FileName(), configTestMsgFileName)
-	assert.NotEmpty(t, configTestContainer.Config.FilePath(), configTestMsgFilePath)
+	assert.NotEmpty(t, ConfigFileName(), configTestMsgFileName)
+	assert.NotEmpty(t, ConfigFilePath(), configTestMsgFilePath)
 	assert.True(t, configFileSet, configTestMsgConfigFileSet)
 }
 
@@ -133,6 +136,6 @@ func TestReadConfig_False(t *testing.T) {
 	ReadConfig(false)
 
 	configTestInit()
-	assert.Nil(t, configTestContainer.Config, "config was read when it shouldn't have been")
+	assert.Empty(t, ConfigFileName, "config was read when it shouldn't have been")
 	assert.False(t, configFileSet, configTestMsgConfigFileSet)
 }

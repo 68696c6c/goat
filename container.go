@@ -1,9 +1,8 @@
 package goat
 
 type Container struct {
-	Utils  utilsInterface
-	Config configInterface
-	Path   pathInterface
+	Utils utilsInterface
+	Path  pathInterface
 }
 
 func newContainer(p pathInterface, useConfig bool) *Container {
@@ -11,13 +10,5 @@ func newContainer(p pathInterface, useConfig bool) *Container {
 		Utils: newUtils(),
 		Path:  p,
 	}
-
-	// Config
-	if useConfig {
-		config, err := initConfig(p)
-		panicIfError(err)
-		c.Config = config
-	}
-
 	return c
 }

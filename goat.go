@@ -9,6 +9,9 @@ func Init() []error {
 	p, err := initPath()
 	panicIfError(err)
 
+	err = initConfig(p)
+	panicIfError(err)
+
 	container = newContainer(p, readConfig)
 	errs := GetErrors()
 	if len(errs) == 0 {
@@ -18,6 +21,11 @@ func Init() []error {
 	}
 	errString := ErrorsToString(errs)
 	panic("failed to initialize goat: " + errString)
+}
+
+func InitRoot(path string) {
+	SetRoot(path)
+	Init()
 }
 
 // @TODO refactor out
@@ -30,6 +38,12 @@ func mustBeInitialized() {
 func panicIfError(err error) {
 	if err != nil {
 		panic("failed to initialize container: " + err.Error())
+	}
+}
+
+func panicIfErrors(errs []error) {
+	if len(errs) > 0 {
+		panic("failed to initialize container: " + ErrorsToString(errs))
 	}
 }
 
@@ -58,12 +72,4 @@ func ExeDir() string {
 
 func CWD() string {
 	return container.Path.CWD()
-}
-
-func ConfigFileName() string {
-	return container.Config.FileName()
-}
-
-func ConfigFilePath() string {
-	return container.Config.FilePath()
 }

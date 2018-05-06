@@ -6,6 +6,7 @@ import (
 )
 
 var (
+	// @TODO rename this
 	errs       []error
 	haveErrors bool
 )
