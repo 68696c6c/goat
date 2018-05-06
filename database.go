@@ -82,3 +82,14 @@ func RecordNotFound(errs []error) bool {
 	}
 	return false
 }
+
+// Returns true if there are any errors in the provided array that are NOT a 'record not found' error
+func ErrorsBesidesRecordNotFound(errs []error) bool {
+	for _, e := range errs {
+		if e != gorm.ErrRecordNotFound {
+			return true
+		}
+	}
+
+	return false
+}
