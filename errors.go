@@ -30,22 +30,27 @@ func GetErrors() []error {
 	return errs
 }
 
-func ErrorsToStrings(i interface{}) []string {
-	if errs, ok := i.([]error); ok {
-		var s []string
-		for _, e := range errs {
-			s = append(s, e.Error())
-		}
-		return s
+func ErrorsToStrings(errs []error) []string {
+	var s []string
+	for _, err := range errs {
+		s = append(s, err.Error())
 	}
-	if err, ok := i.(error); ok {
-		return []string{err.Error()}
-	}
-	addError("failed to cast error or []error to []string")
-	return []string{}
+	return s
 }
 
-func ErrorsToString(i interface{}) string {
-	s := ErrorsToStrings(i)
+func ErrorsToString(errs []error) string {
+	s := ErrorsToStrings(errs)
 	return strings.Join(s, ", ")
+}
+
+func PrependErrors(errs []error, err error) []error {
+	return append([]error{err}, errs...)
+}
+
+func ErrorsToError(errs []error) error {
+	msg := make([]string, len(errs))
+	for _, err := range errs {
+		msg = append(msg, err.Error())
+	}
+	return errors.New(strings.Join(msg, ", "))
 }
