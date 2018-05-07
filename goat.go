@@ -1,5 +1,10 @@
 package goat
 
+import (
+	"strings"
+	"github.com/google/uuid"
+)
+
 var (
 	initialized bool
 	container   *Container
@@ -66,4 +71,10 @@ func ConfigFileName() string {
 
 func ConfigFilePath() string {
 	return container.Config.FilePath()
+}
+
+// Returns a random string that can be used as a token.
+func GenerateToken() string {
+	u := uuid.New().String()
+	return strings.Replace(u, "-", "", -1)
 }
