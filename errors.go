@@ -48,7 +48,7 @@ func PrependErrors(errs []error, err error) []error {
 }
 
 func ErrorsToError(errs []error) error {
-	msg := make([]string, len(errs))
+	var msg []string
 	for _, err := range errs {
 		msg = append(msg, err.Error())
 	}
