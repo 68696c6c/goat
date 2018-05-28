@@ -1,9 +1,9 @@
 package goat
 
 import (
+	"errors"
 	"reflect"
 	"strings"
-	"errors"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/fatih/structtag"
@@ -14,6 +14,14 @@ var (
 	jsonTagExcludedStructs []string
 	jsonTagPath            []reflect.StructField
 )
+
+type RequestValidator struct {
+	*validator.Validate
+}
+
+func (v *RequestValidator) ValidateStruct(i interface{}) error {
+	return v.Struct(i)
+}
 
 // Set structs that will be skipped while traversing structs to find field json
 // names. Do this to avoid needlessly traversing struct fields.
