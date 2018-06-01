@@ -11,27 +11,21 @@ import (
 // A generic response.
 // swagger:response Response
 type Response struct {
-	// in:body
-	Message string `json:"message"`
-	// in:body
-	Errors []string `json:"errors,omitempty"`
-	// in:body
-	Data map[string]interface{} `json:"data,omitempty"`
+	Message string                 `json:"message"`
+	Errors  []string               `json:"errors,omitempty"`
+	Data    map[string]interface{} `json:"data,omitempty"`
 }
 
 // A validation error response.
 // swagger:response ValidationResponse
 type ValidationResponse struct {
-	// in:body
-	Message string `json:"message"`
-	// in:body
-	Errors map[string]string `json:"errors,omitempty"`
+	Message string            `json:"message"`
+	Errors  map[string]string `json:"errors,omitempty"`
 }
 
 // A boolean response.
 // swagger:response BoolResponse
 type BoolResponse struct {
-	// in:body
 	Valid bool `json:"valid"`
 }
 
