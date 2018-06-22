@@ -1,11 +1,12 @@
 package goat
 
 import (
-	"github.com/gin-gonic/gin"
 	"io"
 	"os"
-	"gopkg.in/gin-contrib/cors.v1"
+
+	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"gopkg.in/gin-contrib/cors.v1"
 )
 
 type Router struct {
@@ -62,6 +63,7 @@ func (r *Router) initRouter() *Router {
 	// Configure CORS.
 	config := cors.DefaultConfig()
 	config.AllowMethods = append(config.AllowMethods, "DELETE")
+	config.AllowHeaders = append(config.AllowHeaders, "Authorization")
 	config.AllowAllOrigins = true
 	r.Engine.Use(cors.New(config), r.initRegistry())
 
