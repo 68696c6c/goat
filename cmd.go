@@ -51,6 +51,13 @@ func ExitWithError(err error) {
 	os.Exit(1)
 }
 
+func ExitWithErrors(errs []error) {
+	for _, e := range errs {
+		fmt.Fprintf(os.Stderr, e.Error()+"\n")
+	}
+	os.Exit(1)
+}
+
 func ExitSuccess() {
 	os.Exit(0)
 }
