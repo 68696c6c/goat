@@ -16,7 +16,7 @@ func OpenCSV(path string) (reader *csv.Reader, err error) {
 	return
 }
 
-func HandleCSVRows(path string, skipHeaderRow bool, callback func(line []string) error) error {
+func HandleCSVRows(path string, skipHeaderRow bool, breakOnEOF bool, callback func(line []string) error) error {
 	reader, err := OpenCSV(path)
 	if err != nil {
 		return err
@@ -26,7 +26,7 @@ func HandleCSVRows(path string, skipHeaderRow bool, callback func(line []string)
 		if skipHeaderRow && i == 0 {
 			continue
 		}
-		if err == io.EOF {
+		if breakOnEOF && err == io.EOF {
 			break
 		} else if err != nil {
 			return err
