@@ -16,11 +16,12 @@ func OpenCSV(path string) (reader *csv.Reader, err error) {
 	return
 }
 
-func HandleCSVRows(path string, skipHeaderRow bool, breakOnEOF bool, callback func(line []string) error) error {
+func HandleCSVRows(path string, skipHeaderRow bool, breakOnEOF bool, callback func(line []string, eof bool) error) error {
 	reader, err := OpenCSV(path)
 	if err != nil {
 		return err
 	}
+	eof := false
 	for i := 0; true; i++ {
 		line, err := reader.Read()
 		if skipHeaderRow && i == 0 {
@@ -29,11 +30,13 @@ func HandleCSVRows(path string, skipHeaderRow bool, breakOnEOF bool, callback fu
 		if err == io.EOF {
 			if breakOnEOF {
 				break
+			} else {
+				eof = true
 			}
 		} else if err != nil {
 			return err
 		}
-		err = callback(line)
+		err = callback(line, eof)
 		if err != nil {
 			return err
 		}
