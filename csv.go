@@ -26,8 +26,10 @@ func HandleCSVRows(path string, skipHeaderRow bool, breakOnEOF bool, callback fu
 		if skipHeaderRow && i == 0 {
 			continue
 		}
-		if breakOnEOF && err == io.EOF {
-			break
+		if err == io.EOF {
+			if breakOnEOF {
+				break
+			}
 		} else if err != nil {
 			return err
 		}
