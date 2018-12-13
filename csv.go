@@ -40,6 +40,9 @@ func HandleCSVRows(path string, skipHeaderRow bool, breakOnEOF bool, callback fu
 		if err != nil {
 			return err
 		}
+		if eof {
+			break
+		}
 	}
 	return nil
 }
