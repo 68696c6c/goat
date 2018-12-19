@@ -1,6 +1,7 @@
 package goat
 
 import (
+	"math"
 	"math/rand"
 	"time"
 
@@ -12,16 +13,32 @@ func RandomBool() bool {
 	return n == 1
 }
 
-func RandomInt(min, max int64) int64 {
+func RandomInt(min, max int) int {
+	rand.Seed(time.Now().UnixNano())
+	return rand.Intn(max-min) + min
+}
+
+func RandomInt32(min, max int32) int32 {
+	rand.Seed(time.Now().UnixNano())
+	return rand.Int31n(max-min) + min
+}
+
+func RandomInt64(min, max int64) int64 {
 	rand.Seed(time.Now().UnixNano())
 	return rand.Int63n(max-min) + min
 }
 
 func RandomDecimal(min, max int64) decimal.Decimal {
-	f := RandomInt(min*1000, max*1000)
-	return decimal.New(f, -3)
+	exp := RandomInt32(math.MinInt32, math.MaxInt32)
+	f := RandomInt64(min*1000, max*1000)
+	return decimal.New(f, exp)
+}
+
+func RandomDecimalExp(min, max int64, exp int32) decimal.Decimal {
+	f := RandomInt64(min*1000, max*1000)
+	return decimal.New(f, exp)
 }
 
 func RandomIndex(length int) int {
-	return int(RandomInt(0, int64(length)))
+	return RandomInt(0, length)
 }
