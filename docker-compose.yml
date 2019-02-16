@@ -17,3 +17,5 @@ services:
     volumes:
       - ./:/go/src/goat
     working_dir: /go/src/goat
+    environment:
+      APP_BASE: /go/src/goat
