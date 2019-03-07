@@ -2,6 +2,7 @@ package goat
 
 import (
 	"strings"
+
 	"github.com/google/uuid"
 )
 
