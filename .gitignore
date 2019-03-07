@@ -4,3 +4,5 @@ demo/vendor/*
 demo/example
 demo/logs/*
 !demo/logs/.gitkeep
+logs/*
+logs/.gitkeep

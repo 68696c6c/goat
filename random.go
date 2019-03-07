@@ -1,7 +1,6 @@
 package goat
 
 import (
-	"math"
 	"math/rand"
 	"time"
 
@@ -29,7 +28,7 @@ func RandomInt64(min, max int64) int64 {
 }
 
 func RandomDecimal(min, max int64) decimal.Decimal {
-	exp := RandomInt32(math.MinInt32, math.MaxInt32)
+	exp := RandomInt32(-10, 10)
 	f := RandomInt64(min*1000, max*1000)
 	return decimal.New(f, exp)
 }

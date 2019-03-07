@@ -1,15 +1,16 @@
 package goat
 
 import (
-	"testing"
-	"github.com/stretchr/testify/assert"
-	"runtime"
 	"path/filepath"
+	"runtime"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 const (
 	configTestFixtureConfigFile = "fixtures/config.yml"
-	configTestFixtureConfigPath = "/Users/aaron/Code/Go/src/goat/" + configTestFixtureConfigFile
+	configTestFixtureConfigPath = "/go/src/goat/" + configTestFixtureConfigFile
 	configTestMsgFileName       = "config.fileName not set correctly"
 	configTestMsgFilePath       = "config.filePath not set correctly"
 	configTestMsgConfigFileSet  = "configFileSet not set correctly"

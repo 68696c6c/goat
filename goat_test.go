@@ -1,8 +1,9 @@
 package goat
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
+	"os"
+	"testing"
 )
 
 func TestInit(t *testing.T) {
@@ -15,6 +16,7 @@ func TestInit(t *testing.T) {
 		}
 		assert.Len(t, GetErrors(), 0, "Init() created errors")
 	}()
+	SetRoot(os.Getenv("APP_BASE"))
 	Init()
 	assert.NotEmpty(t, Root(), "failed to set root")
 }
