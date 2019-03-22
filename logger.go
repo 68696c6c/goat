@@ -1,14 +1,16 @@
 package goat
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
-	"fmt"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
+// @TODO not using this, so could you fucking not
 var loggers = map[string]*logrus.Logger{}
 
 // System Logger constructor. Returns a new logger instance writing to
@@ -19,6 +21,11 @@ var loggers = map[string]*logrus.Logger{}
 func NewLogger() *logrus.Logger {
 	mustBeInitialized()
 	return NewCustomLogger("sys")
+}
+
+// Return a new std out logger.
+func NewSTDOutLogger() *logrus.Logger {
+	return logrus.New()
 }
 
 // Returns an arbitrarily named logger instance. If not configured directly in
