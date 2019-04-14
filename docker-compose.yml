@@ -5,17 +5,10 @@ volumes:
 
 services:
 
-  goat:
-    build: .
+  app:
+    image: goat:latest
     volumes:
-      - ./:/go/src/goat
-    working_dir: /go/src/goat
-
-  test:
-    command: go test . -cover
-    build: .
-    volumes:
-      - ./:/go/src/goat
-    working_dir: /go/src/goat
+      - ./:/go/goat
+    working_dir: /go/goat
     environment:
-      APP_BASE: /go/src/goat
+      APP_BASE: /go/goat
