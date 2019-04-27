@@ -18,11 +18,16 @@ const (
 	loggerLevel = logrus.InfoLevel
 )
 
-// Default logging is done to standard out for ease of use with Docker.
-// Custom loggers can be created using log files if needed.
-type LoggerService interface {
+// Default logging is done to standard out.
+// Custom loggers can be created using log files if needed, but Goat is
+// optimized for using a single logger writing to standard out for ease of use
+// with Docker and Amazon ECS.
+type Service interface {
 	NewLogger() *logrus.Logger
 	NewFileLogger(path string) (*logrus.Logger, error)
+	GetLogPath() string
+	GetLogExt() string
+	GetLogLevel() string
 }
 
 type LoggerConfig struct {
@@ -31,19 +36,19 @@ type LoggerConfig struct {
 	Level string
 }
 
-type LoggerServiceLogrus struct {
+type ServiceLogrus struct {
 	logPath    string
 	logFileExt string
 	level      logrus.Level
 }
 
-func NewLoggerServiceLogrus(c LoggerConfig) LoggerServiceLogrus {
+func NewServiceLogrus(c LoggerConfig) ServiceLogrus {
 	// If an invalid log level is provided, fallback to the default.
 	level, err := logrus.ParseLevel(c.Level)
 	if err != nil {
 		level = loggerLevel
 	}
-	return LoggerServiceLogrus{
+	return ServiceLogrus{
 		logPath:    utils.ArgStringD(c.Path, loggerPath),
 		logFileExt: utils.ArgStringD(c.Ext, loggerExt),
 		level:      level,
@@ -51,22 +56,22 @@ func NewLoggerServiceLogrus(c LoggerConfig) LoggerServiceLogrus {
 }
 
 // Returns the configured log file path.
-func (s LoggerServiceLogrus) GetLogPath() string {
+func (s ServiceLogrus) GetLogPath() string {
 	return s.logPath
 }
 
 // Returns the configured log file extension.
-func (s LoggerServiceLogrus) GetLogExt() string {
+func (s ServiceLogrus) GetLogExt() string {
 	return s.logFileExt
 }
 
 // Returns the configured default log level.
-func (s LoggerServiceLogrus) GetLogLevel() string {
+func (s ServiceLogrus) GetLogLevel() string {
 	return s.level.String()
 }
 
 // Returns a new standard out logger.
-func (s LoggerServiceLogrus) NewLogger() *logrus.Logger {
+func (s ServiceLogrus) NewLogger() *logrus.Logger {
 	l := logrus.New()
 	l.SetLevel(s.level)
 	return l
@@ -75,7 +80,7 @@ func (s LoggerServiceLogrus) NewLogger() *logrus.Logger {
 // Returns a new logger that writes to the specified file, relative to the
 // configured log path using the configured log file extension.
 // If a file name is not specified a default name is used.
-func (s LoggerServiceLogrus) NewFileLogger(name string) (*logrus.Logger, error) {
+func (s ServiceLogrus) NewFileLogger(name string) (*logrus.Logger, error) {
 	logger := logrus.New()
 
 	if name == "" {

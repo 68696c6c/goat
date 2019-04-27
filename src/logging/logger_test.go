@@ -18,48 +18,48 @@ func getLoggerConfig() LoggerConfig {
 	}
 }
 
-func TestLogger_NewLoggerServiceLogrus_Config(t *testing.T) {
+func TestNewServiceLogrus_Config(t *testing.T) {
 	c := getLoggerConfig()
 	c.Level = "info"
-	s := NewLoggerServiceLogrus(c)
+	s := NewServiceLogrus(c)
 
 	assert.Equal(t, c.Path, s.GetLogPath(), "unexpected log path")
 	assert.Equal(t, c.Ext, s.GetLogExt(), "unexpected log file extension")
 	assert.Equal(t, c.Level, s.GetLogLevel(), "unexpected log level")
 }
 
-func TestLogger_NewLoggerServiceLogrus_Defaults(t *testing.T) {
-	s := NewLoggerServiceLogrus(LoggerConfig{})
+func TestNewServiceLogrus_Defaults(t *testing.T) {
+	s := NewServiceLogrus(LoggerConfig{})
 
 	assert.Equal(t, loggerPath, s.GetLogPath(), "unexpected default log path")
 	assert.Equal(t, loggerExt, s.GetLogExt(), "unexpected default log file extension")
 	assert.Equal(t, loggerLevel.String(), s.GetLogLevel(), "unexpected default log level")
 }
 
-func TestLogger_LoggerServiceLogrus_NewLogger(t *testing.T) {
+func TestServiceLogrus_NewLogger(t *testing.T) {
 	c := getLoggerConfig()
-	s := NewLoggerServiceLogrus(c)
+	s := NewServiceLogrus(c)
 	l := s.NewLogger()
 
 	assert.Equal(t, os.Stderr, l.Out, "unexpected default logger out")
 	assert.Equal(t, loggerLevel.String(), l.Level.String(), "unexpected default logger level")
 }
 
-func TestLogger_LoggerServiceLogrus_NewLogger_LogLevel(t *testing.T) {
+func TestServiceLogrus_NewLogger_LogLevel(t *testing.T) {
 	c := getLoggerConfig()
 	c.Level = "error"
-	s := NewLoggerServiceLogrus(c)
+	s := NewServiceLogrus(c)
 	l := s.NewLogger()
 
 	assert.Equal(t, c.Level, l.Level.String(), "unexpected logger level")
 }
 
-func TestLogger_LoggerServiceLogrus_NewFileLogger_FileCreated(t *testing.T) {
+func TestServiceLogrus_NewFileLogger_FileCreated(t *testing.T) {
 	c := LoggerConfig{
 		Path: "test",
 		Ext:  "ext",
 	}
-	s := NewLoggerServiceLogrus(c)
+	s := NewServiceLogrus(c)
 	f := fake.Word()
 	l, err := s.NewFileLogger(f)
 	require.Nil(t, err, "unexpected error returned")

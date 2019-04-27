@@ -2,94 +2,84 @@ package database
 
 import (
 	"fmt"
+
+	"github.com/68696c6c/goat/src/utils"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
-	"github.com/spf13/viper"
-	"net/url"
+	"github.com/pkg/errors"
 )
 
-var (
-	dbConnectionTemplate    = "%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=true"
-	panicOnFailedConnection = true
+const (
+	mainDBNameDefault    = "db"
+	dbConnectionTemplate = "%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=true"
 )
 
-type DBConfig struct {
-	Host            string
-	Port            int
-	Database        string
-	Username        string
-	Password        string
-	Debug           bool
-	MultiStatements bool
+// Goat assumes a primary database connection, but an arbitrary number of
+// database connections if needed.  Only MySQL is directly supported, but since
+// Goat uses GORM, any database supported by GORM can theoretically be used.
+type Service interface {
+	GetMainDBName() string
+	GetMainDB() (*gorm.DB, error)
+	GetCustomDB(key string) (*gorm.DB, error)
 }
 
-func (d *DBConfig) String() string {
-	return fmt.Sprintf("Host: %v, Port: %v, Username: %v, Password: %v, Database: %v, Debug: %v", d.Host, d.Port, d.Username, d.Password, d.Database, d.Debug)
+type ServiceGORM struct {
+	mainDBName string
 }
 
-func GetDefaultDBConfig() DBConfig {
-	mustBeInitialized()
-	return DBConfig{
-		Host:     viper.GetString("db.host"),
-		Port:     viper.GetInt("db.port"),
-		Database: viper.GetString("db.database"),
-		Username: viper.GetString("db.username"),
-		Password: url.QueryEscape(viper.GetString("db.password")),
-		Debug:    viper.GetBool("db.debug"),
+func NewServiceGORM(mainDBName string) ServiceGORM {
+	n := utils.ArgStringD(mainDBName, mainDBNameDefault)
+	return ServiceGORM{
+		mainDBName: n,
 	}
 }
 
-// Set whether or not to panic if a database connection fails.  Default is true.
-// Will panic if goat has not been initialized.
-func SetDBPanicMode(b bool) {
-	mustBeInitialized()
-	panicOnFailedConnection = b
-}
-
-// Database connection constructor.  Will attempt to connect to a database using
-// connection info from the app config.  Will panic if goat has not been
-// initialized and add an error to the error stack if the connection fails.
-func NewDB() (*gorm.DB, error) {
-	dbConfig := GetDefaultDBConfig()
-	return NewCustomDB(dbConfig)
-}
-
-// Returns a new database connection using the provided connection info.
-// Will panic if goat has not been initialized and add an error to the error
-// stack if the connection fails.
-func NewCustomDB(c DBConfig) (*gorm.DB, error) {
-	mustBeInitialized()
+// Returns a database connection using the provided configuration.
+func (s ServiceGORM) getConnection(c ConnectionConfig) (*gorm.DB, error) {
 	cs := fmt.Sprintf(dbConnectionTemplate, c.Username, c.Password, c.Host, c.Port, c.Database)
 	connection, err := gorm.Open("mysql", cs)
 	if err != nil {
-		msg := "failed to connect to database: " + err.Error()
-		if panicOnFailedConnection {
-			panic(msg)
-		} else {
-			err := addAndGetError(msg)
-			return nil, err
-		}
+		return nil, err
 	}
 	connection.LogMode(c.Debug)
+
+	// Don't set the updated_at column on create.
+	connection.Callback().Create().Replace("gorm:update_time_stamp", func(scope *gorm.Scope) {
+		if !scope.HasError() {
+			scope.SetColumn("CreatedAt", gorm.NowFunc())
+		}
+	})
 	return connection, nil
 }
 
-func RecordNotFound(errs []error) bool {
-	for _, err := range errs {
-		if err == gorm.ErrRecordNotFound {
-			return true
-		}
-	}
-	return false
+// Returns the name of the default connection, e.g. the configuration key that
+// the main connection credentials are stored under.
+func (s ServiceGORM) GetMainDBName() string {
+	return s.mainDBName
 }
 
-// Returns true if there are any errors in the provided array that are NOT a 'record not found' error
-func ErrorsBesidesRecordNotFound(errs []error) bool {
-	for _, e := range errs {
-		if e != gorm.ErrRecordNotFound {
-			return true
-		}
+// Returns a new database connection using the configured defaults.
+func (s ServiceGORM) GetMainDB() (*gorm.DB, error) {
+	c := GetDBConfig(s.mainDBName)
+	connection, err := s.getConnection(c)
+	if err != nil {
+		t := "failed to connect to default database '%s' using credentials: %s"
+		msg := fmt.Sprintf(t, s.mainDBName, c.String())
+		return nil, errors.Wrap(err, msg)
 	}
+	return connection, nil
+}
 
-	return false
+// Returns a new database connection using DB env variables with the provided
+// config key.
+func (s ServiceGORM) GetCustomDB(key string) (*gorm.DB, error) {
+	c := GetDBConfig(key)
+	connection, err := s.getConnection(c)
+	if err != nil {
+		t := "failed to connect to custom database '%s' using credentials: %s"
+		msg := fmt.Sprintf(t, key, c.String())
+		return nil, errors.Wrap(err, msg)
+	}
+	return connection, nil
 }

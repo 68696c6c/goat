@@ -3,77 +3,59 @@ package goat
 import (
 	"strings"
 
+	"github.com/68696c6c/goat/src/logging"
 	"github.com/68696c6c/goat/src/sys"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/google/uuid"
+	"github.com/jinzhu/gorm"
+	"github.com/spf13/viper"
 )
 
-var (
-	initialized bool
-	container   *sys.Container
-)
+var container sys.Container
 
-func Init() []error {
-	p, err := initPath()
-	panicIfError(err)
-
-	container = sys.NewContainer(p, readConfig)
-	errs := GetErrors()
-	if len(errs) == 0 {
-		container.Utils.SetInitialized(true)
-		initialized = true
-		return errs
+func Init() {
+	if container != (sys.Container{}) {
+		return
 	}
-	errString := ErrorsToString(errs)
-	panic("failed to initialize goat: " + errString)
-}
 
-// @TODO refactor out
-func mustBeInitialized() {
-	if !initialized {
-		panic("goat is not initialized! Call goat.Init() before calling this function.")
+	// Support both config files and env configuration using Viper.
+	// Goat uses env configuration by default.
+	// To use a config file you will need to tell Viper where to look, e.g:
+	// viper.SetDefault("cfgFile", "./config.yml")
+	// RootCommand.PersistentFlags().StringVar(&configFile, "config", "./config.yml", "config file (default is ./config.yml)")
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	viper.AutomaticEnv()
+
+	// Read database, logger, and router config from the env using Viper.
+	// @TODO it would be preferable to read the db connection from Viper here rather than in the database package...
+	mode := viper.GetString("mode")
+	dbName := "db"
+	loggerConfig := logging.LoggerConfig{
+		Path:  viper.GetString("log.path"),
+		Ext:   viper.GetString("log.ext"),
+		Level: viper.GetString("log.level"),
 	}
+
+	container = sys.NewContainer(mode, dbName, loggerConfig)
 }
 
-func panicIfError(err error) {
-	if err != nil {
-		panic("failed to initialize container: " + err.Error())
-	}
+// Global functions for calling encapsulated services.
+
+func GetMainDB() (*gorm.DB, error) {
+	return container.DatabaseService.GetMainDB()
 }
 
-/**
- * Alias functions
- * Call underlying type functions.
- * @TODO is this worth it/the best way?
- */
-
-func Root() string {
-	return container.Path.Root()
+func GetCustomDB(key string) (*gorm.DB, error) {
+	return container.DatabaseService.GetCustomDB(key)
 }
 
-func RootPath(path string) string {
-	return container.Path.RootPath(path)
+func GetLogger() *logrus.Logger {
+	return container.LoggerService.NewLogger()
 }
 
-func ExePath() string {
-	return container.Path.ExePath()
-}
-
-func ExeDir() string {
-	container.Utils.MustBeInitialized()
-	return container.Path.ExeDir()
-}
-
-func CWD() string {
-	return container.Path.CWD()
-}
-
-func ConfigFileName() string {
-	return container.Config.FileName()
-}
-
-func ConfigFilePath() string {
-	return container.Config.FilePath()
+func GetFileLogger(name string) (*logrus.Logger, error) {
+	return container.LoggerService.NewFileLogger(name)
 }
 
 // Returns a random string that can be used as a token.

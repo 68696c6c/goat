@@ -1,25 +1,19 @@
 package sys
 
-import "github.com/68696c6c/goat/src/logging"
+import (
+	"github.com/68696c6c/goat/src/database"
+	"github.com/68696c6c/goat/src/logging"
+)
 
 type Container struct {
-	Config        configInterface
-	Path          pathInterface
-	LoggerService logging.LoggerService
+	DatabaseService database.Service
+	LoggerService   logging.Service
 }
 
-func NewContainer(p pathInterface, useConfig bool) *Container {
+func NewContainer(mode, mainDBName string, l logging.LoggerConfig) Container {
 	c := &Container{
-		Utils: newUtils(),
-		Path:  p,
+		DatabaseService: database.NewServiceGORM(mainDBName),
+		LoggerService:   logging.NewServiceLogrus(l),
 	}
-
-	// Config
-	if useConfig {
-		config, err := initConfig(p)
-		panicIfError(err)
-		c.Config = config
-	}
-
 	return c
 }

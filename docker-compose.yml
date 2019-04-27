@@ -2,13 +2,33 @@ version: "3.3"
 
 volumes:
   pkg:
+  db-volume:
 
 services:
 
   app:
     image: goat:latest
+    depends_on:
+      - db
     volumes:
       - ./:/go/goat
     working_dir: /go/goat
     environment:
       APP_BASE: /go/goat
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USERNAME: root
+      DB_PASSWORD: secret
+      DB_DATABASE: goat
+      DB_DEBUG: 1
+      DB_MULTI_STATEMENTS: 1
+
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: goat
+    ports:
+      - "${HOST_DB_PORT:-3366}:3306"
+    volumes:
+      - db-volume:/var/lib/mysql
