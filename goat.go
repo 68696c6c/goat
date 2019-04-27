@@ -3,19 +3,21 @@ package goat
 import (
 	"strings"
 
+	"github.com/68696c6c/goat/src/sys"
+
 	"github.com/google/uuid"
 )
 
 var (
 	initialized bool
-	container   *Container
+	container   *sys.Container
 )
 
 func Init() []error {
 	p, err := initPath()
 	panicIfError(err)
 
-	container = newContainer(p, readConfig)
+	container = sys.NewContainer(p, readConfig)
 	errs := GetErrors()
 	if len(errs) == 0 {
 		container.Utils.SetInitialized(true)

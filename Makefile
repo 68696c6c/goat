@@ -7,12 +7,12 @@ APP_PATH = /go/goat
 .DEFAULT:
 	@echo 'Invalid target.'
 	@echo
-	@echo '    image           			build app image'
-	@echo '    build           			build app image and compile the app'
-	@echo '    dep            			install dependancies'
-	@echo '    local          			spin up local environment'
-	@echo '    local-down     			tear down local environment'
-	@echo '    test           			run unit tests'
+	@echo '    image         build app image'
+	@echo '    build         build app image and compile the app'
+	@echo '    deps          install dependancies'
+	@echo '    local         spin up local environment'
+	@echo '    local-down    tear down local environment'
+	@echo '    test          run unit tests'
 	@echo
 
 default: .DEFAULT
@@ -23,8 +23,9 @@ image:
 build: image
 	docker-compose run --rm app go build -i -o app
 
-dep:
-	docker-compose run --rm app dep ensure
+deps:
+	docker-compose run --rm app go mod tidy
+	docker-compose run --rm app go mod vendor
 
 local:
 	docker-compose up

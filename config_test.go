@@ -5,6 +5,8 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/68696c6c/goat/src/sys"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,9 +19,7 @@ const (
 	configTestMsgSetConfigPath  = "calling SetConfigPath returned an unexpected value"
 )
 
-var (
-	configTestContainer *Container
-)
+var configTestContainer *sys.Container
 
 func mockPath() *path {
 	_, b, _, ok := runtime.Caller(1)
@@ -47,7 +47,7 @@ func configTestReset() {
 // A config test analog of goat.Init().
 func configTestInit() {
 	p := mockPath()
-	configTestContainer = newContainer(p, readConfig)
+	configTestContainer = sys.NewContainer(p, readConfig)
 	errs := GetErrors()
 	if len(errs) == 0 {
 		configTestContainer.Utils.SetInitialized(true)
