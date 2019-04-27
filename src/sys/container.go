@@ -11,7 +11,7 @@ type Container struct {
 }
 
 func NewContainer(mode, mainDBName string, l logging.LoggerConfig) Container {
-	c := &Container{
+	c := Container{
 		DatabaseService: database.NewServiceGORM(mainDBName),
 		LoggerService:   logging.NewServiceLogrus(l),
 	}
