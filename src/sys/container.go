@@ -1,7 +1,7 @@
 package sys
 
 import (
-	"github.com/68696c6c/goat/src/database"
+	"github.com/68696c6c/goat/database"
 	"github.com/68696c6c/goat/src/http"
 	"github.com/68696c6c/goat/src/logging"
 )
