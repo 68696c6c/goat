@@ -61,11 +61,11 @@ func GetRouter(setRoutes func(http.Router)) http.Router {
 }
 
 func GetLogger() *logrus.Logger {
-	return container.LoggerService.NewLogger()
+	return container.LoggingService.NewLogger()
 }
 
 func GetFileLogger(name string) (*logrus.Logger, error) {
-	return container.LoggerService.NewFileLogger(name)
+	return container.LoggingService.NewFileLogger(name)
 }
 
 // Returns a random string that can be used as a token.
