@@ -1,8 +1,6 @@
 package cmd
 
-import (
-	"github.com/fatih/color"
-)
+import "github.com/fatih/color"
 
 func PrintSuccess(s string) {
 	color.Green(s)
