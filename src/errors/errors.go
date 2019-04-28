@@ -5,31 +5,6 @@ import (
 	"strings"
 )
 
-var (
-	errs       []error
-	haveErrors bool
-)
-
-func addError(s string) {
-	haveErrors = true
-	errs = append(errs, errors.New(s))
-}
-
-func addAndGetError(s string) error {
-	err := errors.New(s)
-	haveErrors = true
-	errs = append(errs, err)
-	return err
-}
-
-func HasErrors() bool {
-	return haveErrors
-}
-
-func GetErrors() []error {
-	return errs
-}
-
 func ErrorsToStrings(errs []error) []string {
 	var s []string
 	for _, err := range errs {
