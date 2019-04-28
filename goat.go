@@ -15,6 +15,9 @@ import (
 
 var container sys.Container
 
+// Goat has three primary concerns: database connections and schema management,
+// request handling, and logging.  These concerns are encapsulated inside of
+// services that are bootstrapped when goat.Init() is called.
 func Init() {
 	if container != (sys.Container{}) {
 		return
@@ -68,7 +71,7 @@ func GetFileLogger(name string) (*logrus.Logger, error) {
 	return container.LoggingService.NewFileLogger(name)
 }
 
-// Returns a random string that can be used as a token.
+// Returns a random string that can be used as a Basic Auth token.
 func GenerateToken() string {
 	u := uuid.New().String()
 	return strings.Replace(u, "-", "", -1)
