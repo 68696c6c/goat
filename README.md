@@ -12,7 +12,7 @@ Planned features include:
 - A global CLI tool for for scaffolding projects (including out-of-the-box Docker support and Makefiles)
 - Full migration suite
 - Generator scripts for Cobra commands, repositories, models, handlers, migrations, etc.
-- Out-of-the-box AWS including Cloudformation support via generated templates and bootstrapping scripts, including Parameter Store management of secrets and ECS clusters.
+- Out-of-the-box AWS Cloudformation support via generated templates and bootstrapping scripts, including Parameter Store management of secrets and ECS clusters.
 - Oauth support
 - Out-of-the-box Cobra utility commands 
 - Support for more additional database engines (currently only supports MySQL-compatible databases)
