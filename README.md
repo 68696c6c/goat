@@ -3,7 +3,7 @@ Goat is a toolkit for creating JSON-speaking RESTful APIs in Go.
 
 Goat aims to streamline development by offering a tightly focused feature set, convention-over-configuration philosophies, and out-of-the-box devops tooling.
 
-Goat is *not* made for building traditional webapps with a front-end.  Instead, it focuses on helping developers creaete headless webservices that can be used as the backend for server-side rendered static sites or mobile-apps.
+Goat is *not* made for building traditional webapps with a front-end.  Instead, it focuses on helping developers create headless webservices that can be used as the backend for server-side rendered static sites or mobile-apps.
 
 # Roadmap
 
