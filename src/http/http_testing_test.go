@@ -24,9 +24,9 @@ type responseList struct {
 	Data []httpTestModel `json:"data"`
 }
 
-var testRouter *Router
+var testRouter *RouterGin
 
-func getTestRouter() *Router {
+func getTestRouter() *RouterGin {
 	if !initialized {
 		ReadConfig(false)
 		SetRoot(os.Getenv("APP_BASE"))
@@ -38,7 +38,7 @@ func getTestRouter() *Router {
 	return testRouter
 }
 
-func setTestRoutes(r *Router) {
+func setTestRoutes(r *RouterGin) {
 	r.Engine.GET("/ping", func(c *gin.Context) {
 		RespondMessage(c, "pong")
 	})

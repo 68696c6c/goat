@@ -3,6 +3,7 @@ package goat
 import (
 	"strings"
 
+	"github.com/68696c6c/goat/src/http"
 	"github.com/68696c6c/goat/src/logging"
 	"github.com/68696c6c/goat/src/sys"
 
@@ -29,15 +30,20 @@ func Init() {
 
 	// Read database, logger, and router config from the env using Viper.
 	// @TODO it would be preferable to read the db connection from Viper here rather than in the database package...
-	mode := viper.GetString("mode")
 	dbName := "db"
+	// @TODO how to allow configuration of boolean http settings?
+	httpConfig := http.Config{
+		Mode:     viper.GetString("mode"),
+		Port:     viper.GetString("listen_port"),
+		AuthType: viper.GetString("auth_type"),
+	}
 	loggerConfig := logging.LoggerConfig{
 		Path:  viper.GetString("log.path"),
 		Ext:   viper.GetString("log.ext"),
 		Level: viper.GetString("log.level"),
 	}
 
-	container = sys.NewContainer(mode, dbName, loggerConfig)
+	container = sys.NewContainer(dbName, httpConfig, loggerConfig)
 }
 
 // Global functions for calling encapsulated services.
@@ -48,6 +54,10 @@ func GetMainDB() (*gorm.DB, error) {
 
 func GetCustomDB(key string) (*gorm.DB, error) {
 	return container.DatabaseService.GetCustomDB(key)
+}
+
+func GetRouter(setRoutes func(http.Router)) http.Router {
+	return container.HTTPService.NewRouter(setRoutes)
 }
 
 func GetLogger() *logrus.Logger {
