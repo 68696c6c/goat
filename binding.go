@@ -1,4 +1,4 @@
-package http
+package goat
 
 import (
 	"errors"
@@ -29,8 +29,9 @@ func SetJSONTagExcludedStructs(s []string) {
 	jsonTagExcludedStructs = s
 }
 
+// @TODO clean this up
 func GetStructFieldValidationMeta(strct reflect.Type, e *validator.FieldError) (string, string, error) {
-	logger := NewCustomLogger("reflection")
+	logger, _ := GetFileLogger("reflection")
 	logger.Level = logrus.DebugLevel
 
 	logger.Debug("------------------")

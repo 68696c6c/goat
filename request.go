@@ -1,4 +1,4 @@
-package http
+package goat
 
 import (
 	"errors"

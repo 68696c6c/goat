@@ -34,4 +34,4 @@ local-down:
 	docker-compose down
 
 test:
-	docker-compose run --rm app go test . -cover
+	docker-compose run --rm app go test ./... -cover
