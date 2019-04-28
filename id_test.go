@@ -1,4 +1,4 @@
-package models
+package goat
 
 import (
 	"encoding/json"

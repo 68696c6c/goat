@@ -3,9 +3,9 @@ package goat
 import (
 	"strings"
 
-	"github.com/68696c6c/goat/src/http"
-	"github.com/68696c6c/goat/src/logging"
-	"github.com/68696c6c/goat/src/sys"
+	"github.com/68696c6c/goat/http"
+	"github.com/68696c6c/goat/logging"
+	"github.com/68696c6c/goat/sys"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/google/uuid"

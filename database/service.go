@@ -3,7 +3,7 @@ package database
 import (
 	"fmt"
 
-	"github.com/68696c6c/goat/src/utils"
+	"github.com/68696c6c/goat/utils"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"

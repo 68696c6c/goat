@@ -1,4 +1,4 @@
-package cmd
+package goat
 
 import "github.com/fatih/color"
 

@@ -2,8 +2,8 @@ package sys
 
 import (
 	"github.com/68696c6c/goat/database"
-	"github.com/68696c6c/goat/src/http"
-	"github.com/68696c6c/goat/src/logging"
+	"github.com/68696c6c/goat/http"
+	"github.com/68696c6c/goat/logging"
 )
 
 type Container struct {

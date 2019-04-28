@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/68696c6c/goat/src/utils"
+	"github.com/68696c6c/goat/utils"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/pkg/errors"

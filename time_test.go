@@ -1,4 +1,4 @@
-package date
+package goat
 
 import (
 	"testing"

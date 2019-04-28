@@ -4,7 +4,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/68696c6c/goat/src/utils"
+	"github.com/68696c6c/goat/utils"
 
 	"github.com/gin-gonic/gin"
 	"gopkg.in/gin-contrib/cors.v1"

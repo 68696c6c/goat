@@ -1,4 +1,4 @@
-package models
+package goat
 
 import (
 	"github.com/jinzhu/gorm"
