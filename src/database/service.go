@@ -28,8 +28,8 @@ type ServiceGORM struct {
 	mainDBName string
 }
 
-func NewServiceGORM(mainDBName string) ServiceGORM {
-	n := utils.ArgStringD(mainDBName, mainDBNameDefault)
+func NewServiceGORM(c Config) ServiceGORM {
+	n := utils.ArgStringD(c.EnvKey, mainDBNameDefault)
 	return ServiceGORM{
 		mainDBName: n,
 	}

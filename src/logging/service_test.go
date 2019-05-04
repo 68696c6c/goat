@@ -10,8 +10,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func getLoggerConfig() LoggerConfig {
-	return LoggerConfig{
+func getLoggerConfig() Config {
+	return Config{
 		Path:  fake.Word(),
 		Ext:   fake.Word(),
 		Level: fake.Word(),
@@ -29,7 +29,7 @@ func TestNewServiceLogrus_Config(t *testing.T) {
 }
 
 func TestNewServiceLogrus_Defaults(t *testing.T) {
-	s := NewServiceLogrus(LoggerConfig{})
+	s := NewServiceLogrus(Config{})
 
 	assert.Equal(t, loggerPath, s.GetLogPath(), "unexpected default log path")
 	assert.Equal(t, loggerExt, s.GetLogExt(), "unexpected default log file extension")
@@ -55,7 +55,7 @@ func TestServiceLogrus_NewLogger_LogLevel(t *testing.T) {
 }
 
 func TestServiceLogrus_NewFileLogger_FileCreated(t *testing.T) {
-	c := LoggerConfig{
+	c := Config{
 		Path: "test",
 		Ext:  "ext",
 	}

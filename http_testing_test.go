@@ -1,4 +1,4 @@
-package goat
+package main
 
 import (
 	"net/http"

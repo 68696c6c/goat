@@ -1,37 +1,37 @@
 IMAGE_NAME = goat
 BUILD_TAG ?= latest
 APP_PATH = /go/goat
+CMD ?= default
 
-.PHONY: image dep local local-down test migrate
+.PHONY: image dep cli local-down test migrate
 
 .DEFAULT:
 	@echo 'Invalid target.'
 	@echo
-	@echo '    image         build app image'
-	@echo '    build         build app image and compile the app'
+	@echo '    image         build Docker image'
 	@echo '    deps          install dependancies'
-	@echo '    local         spin up local environment'
-	@echo '    local-down    tear down local environment'
+	@echo '    build         build the CLI for the current machine'
 	@echo '    test          run unit tests'
+	@echo '    gen-test      generate a test project'
 	@echo
 
 default: .DEFAULT
 
 image:
-	docker build . -f Dockerfile -t $(IMAGE_NAME):$(BUILD_TAG)
-
-build: image
-	docker-compose run --rm app go build -i -o app
+	docker build . -f docker/Dockerfile -t $(IMAGE_NAME):$(BUILD_TAG)
 
 deps:
 	docker-compose run --rm app go mod tidy
 	docker-compose run --rm app go mod vendor
 
-local:
-	docker-compose up
+build:
+	 go build -o /usr/local/bin/goat-cli
 
-local-down:
+cli-down:
 	docker-compose down
 
 test:
 	docker-compose run --rm app go test ./... -cover
+
+gen-test: build
+	goat-cli gen:project goat-test goat-test.yml

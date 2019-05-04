@@ -1,4 +1,4 @@
-package goat
+package main
 
 import (
 	"bytes"
@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	ghttp "github.com/68696c6c/goat/http"
+	ghttp "github.com/68696c6c/goat/src/http"
 
 	"github.com/gin-gonic/gin"
 )

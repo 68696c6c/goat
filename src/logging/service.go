@@ -30,7 +30,7 @@ type Service interface {
 	GetLogLevel() string
 }
 
-type LoggerConfig struct {
+type Config struct {
 	Path  string
 	Ext   string
 	Level string
@@ -42,7 +42,7 @@ type ServiceLogrus struct {
 	level      logrus.Level
 }
 
-func NewServiceLogrus(c LoggerConfig) ServiceLogrus {
+func NewServiceLogrus(c Config) ServiceLogrus {
 	// If an invalid log level is provided, fallback to the default.
 	level, err := logrus.ParseLevel(c.Level)
 	if err != nil {
