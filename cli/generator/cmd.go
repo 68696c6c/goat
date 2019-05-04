@@ -75,19 +75,19 @@ var serverCommand = &cobra.Command{
 `
 
 func CreateCMD(config *ProjectConfig) error {
-	err := CreateDir(config.CMDPath)
+	err := CreateDir(config.Paths.CMD)
 	if err != nil {
-		return errors.Wrapf(err, "failed to create cmd directory '%s'", config.CMDPath)
+		return errors.Wrapf(err, "failed to create cmd directory '%s'", config.Paths.CMD)
 	}
 
 	// Create root command.
-	err = GenerateFile(config.CMDPath, "root", rootTemplate, config)
+	err = GenerateFile(config.Paths.CMD, "root", rootTemplate, config)
 	if err != nil {
 		return errors.Wrap(err, "failed to create root command")
 	}
 
 	// Create server command.
-	err = GenerateFile(config.CMDPath, "server", serverTemplate, config)
+	err = GenerateFile(config.Paths.CMD, "server", serverTemplate, config)
 	if err != nil {
 		return errors.Wrap(err, "failed to create server command")
 	}

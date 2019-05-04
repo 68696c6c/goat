@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var modelTemplate = `
+const modelTemplate = `
 package models
 
 import "github.com/68696c6c/goat"
@@ -40,9 +40,9 @@ type Model struct {
 }
 
 func CreateModels(config *ProjectConfig) error {
-	err := CreateDir(config.ModelsPath)
+	err := CreateDir(config.Paths.Models)
 	if err != nil {
-		return errors.Wrapf(err, "failed to create models directory '%s'", config.ModelsPath)
+		return errors.Wrapf(err, "failed to create models directory '%s'", config.Paths.Models)
 	}
 
 	// Create models.
@@ -88,7 +88,7 @@ func CreateModels(config *ProjectConfig) error {
 			f.Tag = fmt.Sprintf(`json:"%s"%s`, f.Name, extra)
 		}
 
-		err = GenerateFile(config.ModelsPath, m.Name, modelTemplate, *m)
+		err = GenerateFile(config.Paths.Models, m.Name, modelTemplate, *m)
 		if err != nil {
 			return errors.Wrap(err, "failed to generate model")
 		}

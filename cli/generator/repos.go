@@ -5,7 +5,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var repoTemplate = `
+const repoTemplate = `
 package repos
 
 import (
@@ -40,8 +40,8 @@ func New{{.StructName}}(d *gorm.DB) {{.StructName}} {
 
 `
 
-var repoInterfaceSaveTemplate = `Save(model *models.{{.ModelStructName}}) (errs []error)`
-var repoSaveTemplate = `
+const repoInterfaceSaveTemplate = `Save(model *models.{{.ModelStructName}}) (errs []error)`
+const repoSaveTemplate = `
 func (r {{.StructName}}) Save(model *models.{{.ModelStructName}}) (errs []error) {
 	if model.Model.ID.Valid() {
 		errs = r.db.Save(model).GetErrors()
@@ -52,8 +52,8 @@ func (r {{.StructName}}) Save(model *models.{{.ModelStructName}}) (errs []error)
 }
 `
 
-var repoInterfaceGetTemplate = `GetByID(id goat.ID) (*models.{{.ModelStructName}}, []error)`
-var repoGetByIDTemplate = `
+const repoInterfaceGetTemplate = `GetByID(id goat.ID) (*models.{{.ModelStructName}}, []error)`
+const repoGetByIDTemplate = `
 func (r {{.StructName}}) GetByID(id goat.ID) (*models.{{.ModelStructName}}, []error) {
 	m := &models.{{.ModelStructName}}{}
 	errs := r.db.First(m, "id = ?", id).GetErrors()
@@ -61,8 +61,8 @@ func (r {{.StructName}}) GetByID(id goat.ID) (*models.{{.ModelStructName}}, []er
 }
 `
 
-var repoInterfaceListTemplate = `List() ([]*models.{{.ModelStructName}}, []error)`
-var repoListTemplate = `
+const repoInterfaceListTemplate = `List() ([]*models.{{.ModelStructName}}, []error)`
+const repoListTemplate = `
 func (r {{.StructName}}) List() ([]*models.{{.ModelStructName}}, []error) {
 	var m []*models.{{.ModelStructName}}
 	errs := r.db.Find(&m).GetErrors()
@@ -70,8 +70,8 @@ func (r {{.StructName}}) List() ([]*models.{{.ModelStructName}}, []error) {
 }
 `
 
-var repoInterfaceDeleteTemplate = `Delete(model *models.{{.ModelStructName}}) []error`
-var repoDeleteTemplate = `
+const repoInterfaceDeleteTemplate = `Delete(model *models.{{.ModelStructName}}) []error`
+const repoDeleteTemplate = `
 func (r {{.StructName}}) Delete(model *models.{{.ModelStructName}}) []error {
 	n := time.Now()
 	model.DeletedAt = &n
@@ -79,7 +79,7 @@ func (r {{.StructName}}) Delete(model *models.{{.ModelStructName}}) []error {
 }
 `
 
-var repoTestTemplate = `
+const repoTestTemplate = `
 `
 
 type Repo struct {
@@ -95,9 +95,9 @@ type Repo struct {
 }
 
 func CreateRepos(config *ProjectConfig) error {
-	err := CreateDir(config.ReposPath)
+	err := CreateDir(config.Paths.Repos)
 	if err != nil {
-		return errors.Wrapf(err, "failed to create repos directory '%s'", config.ReposPath)
+		return errors.Wrapf(err, "failed to create repos directory '%s'", config.Paths.Repos)
 	}
 
 	for _, r := range config.Repos {
@@ -108,7 +108,7 @@ func CreateRepos(config *ProjectConfig) error {
 		r.Name = inflection.Plural(r.Model) + "_repo"
 		r.InterfaceName = plural + "Repo"
 		r.StructName = plural + "RepoGORM"
-		r.ModelsImportPath = config.ModelsPath
+		r.ModelsImportPath = config.Imports.Models
 		r.ModelStructName = model
 
 		// If no methods were specified, default to all.
@@ -178,7 +178,7 @@ func CreateRepos(config *ProjectConfig) error {
 			}
 		}
 
-		err = GenerateFile(config.ReposPath, r.Name, repoTemplate, *r)
+		err = GenerateFile(config.Paths.Repos, r.Name, repoTemplate, *r)
 		if err != nil {
 			return errors.Wrap(err, "failed to generate repo")
 		}

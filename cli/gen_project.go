@@ -2,10 +2,11 @@ package cli
 
 import (
 	"fmt"
+	"go/build"
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"strings"
+	"path/filepath"
 
 	"github.com/68696c6c/goat/cli/generator"
 
@@ -30,7 +31,7 @@ var genProject = &cobra.Command{
 
 		println(fmt.Sprintf("creating project %s from config %s", config.DirName, configFile))
 
-		err := generator.CreateDir(config.Module)
+		err := generator.CreateProject(config)
 		handleError(err)
 
 		err = generator.CreateApp(config)
@@ -59,13 +60,24 @@ func parseConfig(configPath string) {
 	err = yaml.Unmarshal(yamlFile, config)
 	handleError(errors.Wrap(err, "failed parse project spec"))
 
-	d := strings.Split(config.Module, "/")
-	config.DirName = d[:len(d)-1][0]
-	config.SRCPath = config.Module + "/src"
-	config.AppPath = config.SRCPath + "/app"
-	config.CMDPath = config.SRCPath + "/cmd"
-	config.ModelsPath = config.SRCPath + "/models"
-	config.ReposPath = config.SRCPath + "/repos"
+	// Get the absolute path to the project (e.g. within $GOPATH)
+	goPath := os.Getenv("GOPATH")
+	if goPath == "" {
+		goPath = build.Default.GOPATH
+	}
+	path := fmt.Sprintf("%s/src/%s", goPath, config.Module)
+	rootPath, err := filepath.Abs(path)
+	handleError(errors.Wrap(err, "failed determine absolute project path"))
+	println("root path", rootPath)
+	config.RootPath = rootPath
+
+	// Get the project directory name from the Module.
+	dir := filepath.Base(config.Module)
+	println("project dir name", dir)
+	config.DirName = dir
+
+	// Setup project paths.
+	config.SetPaths()
 }
 
 func fmtProject() {

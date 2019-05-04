@@ -39,13 +39,13 @@ func GetApp(l *logrus.Logger) (ServiceContainer, error) {
 `
 
 func CreateApp(config *ProjectConfig) error {
-	err := CreateDir(config.AppPath)
+	err := CreateDir(config.Paths.App)
 	if err != nil {
-		return errors.Wrapf(err, "failed to create app directory '%s'", config.AppPath)
+		return errors.Wrapf(err, "failed to create app directory '%s'", config.Paths.App)
 	}
 
 	// Create a service container.
-	err = GenerateFile(config.AppPath, "container", containerTemplate, config)
+	err = GenerateFile(config.Paths.App, "container", containerTemplate, config)
 	if err != nil {
 		return errors.Wrap(err, "failed to create container")
 	}
