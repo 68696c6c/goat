@@ -1,4 +1,9 @@
-package cli
+package generator
+
+import (
+	"github.com/pkg/errors"
+	"os"
+)
 
 const rootTemplate = `
 package cmd
@@ -71,3 +76,29 @@ var serverCommand = &cobra.Command{
 }
 
 `
+
+func CreateCMD(config *ProjectConfig) error {
+	path := config.SRCPath + "/cmd"
+	err := os.MkdirAll(path, os.ModePerm)
+	if err != nil {
+		return errors.Wrapf(err, "failed to create cmd directory '%s'", path)
+	}
+
+	// Create root command.
+	err = GenerateFile(path, "root", rootTemplate, config)
+	if err != nil {
+		return errors.Wrap(err, "failed to create root command")
+	}
+
+	// Create server command.
+	err = GenerateFile(path, "server", serverTemplate, config)
+	if err != nil {
+		return errors.Wrap(err, "failed to create server command")
+	}
+
+	// Create migrate command.
+
+	// Create make:migration command.
+
+	return nil
+}

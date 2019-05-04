@@ -1,11 +1,28 @@
-package cli
+package generator
 
 import (
 	"fmt"
 	"os"
 
 	"github.com/jinzhu/inflection"
+	"github.com/pkg/errors"
 )
+
+var modelTemplate = `
+package models
+
+import "github.com/68696c6c/goat"
+
+// swagger:model {{.StructName}}
+{{ $tick := "` + "`" + `" }}
+type {{.StructName}} struct {
+	goat.Model
+	{{- range $key, $value := .Fields }}
+	{{ $value.FieldName }} {{ $value.Type }} {{ $tick }}{{ $value.Tag }}{{ $tick }}
+	{{- end }}
+}
+
+`
 
 type field struct {
 	Name      string
@@ -15,7 +32,7 @@ type field struct {
 	Tag       string
 }
 
-type model struct {
+type Model struct {
 	Name       string
 	StructName string
 	Fields     []*field
@@ -23,10 +40,12 @@ type model struct {
 	HasMany    []string `yaml:"has_many"`
 }
 
-func createModels() {
-	cmdPath := config.SRCPath + "/models"
-	err := os.MkdirAll(cmdPath, os.ModePerm)
-	handleError(err)
+func CreateModels(config *ProjectConfig) error {
+	path := config.SRCPath + "/models"
+	err := os.MkdirAll(path, os.ModePerm)
+	if err != nil {
+		return errors.Wrapf(err, "failed to create models directory '%s'", path)
+	}
 
 	// Create models.
 	for _, m := range config.Models {
@@ -70,22 +89,11 @@ func createModels() {
 			}
 			f.Tag = fmt.Sprintf(`json:"%s"%s`, f.Name, extra)
 		}
-		generateModel(cmdPath, m.Name, modelTemplate, *m)
+		err = GenerateFile(path, m.Name, modelTemplate, *m)
+		if err != nil {
+			return errors.Wrap(err, "failed to generate model")
+		}
 	}
+
+	return nil
 }
-
-var modelTemplate = `
-package models
-
-import "github.com/68696c6c/goat"
-
-// swagger:model {{.StructName}}
-{{ $tick := "` + "`" + `" }}
-type {{.StructName}} struct {
-	goat.Model
-	{{- range $key, $value := .Fields }}
-	{{ $value.FieldName }} {{ $value.Type }} {{ $tick }}{{ $value.Tag }}{{ $tick }}
-	{{- end }}
-}
-
-`
