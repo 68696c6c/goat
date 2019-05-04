@@ -81,7 +81,7 @@ func parseConfig(configPath string) {
 }
 
 func fmtProject() {
-	err := os.Chdir(config.Module)
+	err := os.Chdir(config.RootPath)
 	handleError(errors.Wrap(err, "failed change into project dir"))
 
 	cmd := exec.Command("go", "fmt", "./...")
