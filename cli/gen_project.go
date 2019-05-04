@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/68696c6c/goat/cli/generator"
 
@@ -20,23 +21,25 @@ func init() {
 }
 
 var genProject = &cobra.Command{
-	Use:   "gen:project name config",
+	Use:   "gen:project config",
 	Short: "Creates a new Goat project.",
-	Args:  cobra.ExactArgs(2),
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		project := args[0]
-		configFile := args[1]
-		parseConfig(project, configFile)
+		configFile := args[0]
+		parseConfig(configFile)
 
-		println(fmt.Sprintf("creating project %s from config %s", project, configFile))
+		println(fmt.Sprintf("creating project %s from config %s", config.DirName, configFile))
 
-		err := os.MkdirAll(project, os.ModePerm)
+		err := generator.CreateDir(config.Module)
 		handleError(err)
 
 		err = generator.CreateApp(config)
 		handleError(err)
 
 		err = generator.CreateCMD(config)
+		handleError(err)
+
+		err = generator.CreateRepos(config)
 		handleError(err)
 
 		err = generator.CreateModels(config)
@@ -48,7 +51,7 @@ var genProject = &cobra.Command{
 	},
 }
 
-func parseConfig(projectPath, configPath string) {
+func parseConfig(configPath string) {
 	yamlFile, err := ioutil.ReadFile(configPath)
 	handleError(errors.Wrap(err, "failed read yml spec"))
 
@@ -56,12 +59,17 @@ func parseConfig(projectPath, configPath string) {
 	err = yaml.Unmarshal(yamlFile, config)
 	handleError(errors.Wrap(err, "failed parse project spec"))
 
-	config.Path = projectPath
-	config.SRCPath = projectPath + "/src"
+	d := strings.Split(config.Module, "/")
+	config.DirName = d[:len(d)-1][0]
+	config.SRCPath = config.Module + "/src"
+	config.AppPath = config.SRCPath + "/app"
+	config.CMDPath = config.SRCPath + "/cmd"
+	config.ModelsPath = config.SRCPath + "/models"
+	config.ReposPath = config.SRCPath + "/repos"
 }
 
 func fmtProject() {
-	err := os.Chdir(config.Path)
+	err := os.Chdir(config.Module)
 	handleError(errors.Wrap(err, "failed change into project dir"))
 
 	cmd := exec.Command("go", "fmt", "./...")

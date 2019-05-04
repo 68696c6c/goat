@@ -6,10 +6,18 @@ type AuthorConfig struct {
 }
 
 type ProjectConfig struct {
-	Path    string
-	SRCPath string
 	Name    string
 	License string
 	Author  AuthorConfig
-	Models  []*Model
+
+	Module     string
+	DirName    string
+	SRCPath    string
+	AppPath    string
+	CMDPath    string
+	ModelsPath string
+	ReposPath  string
+
+	Models []*Model
+	Repos  []*Repo
 }

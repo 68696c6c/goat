@@ -1,10 +1,6 @@
 package generator
 
-import (
-	"os"
-
-	"github.com/pkg/errors"
-)
+import "github.com/pkg/errors"
 
 const containerTemplate = `
 package app
@@ -43,14 +39,13 @@ func GetApp(l *logrus.Logger) (ServiceContainer, error) {
 `
 
 func CreateApp(config *ProjectConfig) error {
-	path := config.SRCPath + "/app"
-	err := os.MkdirAll(path, os.ModePerm)
+	err := CreateDir(config.AppPath)
 	if err != nil {
-		return errors.Wrapf(err, "failed to create app directory '%s'", path)
+		return errors.Wrapf(err, "failed to create app directory '%s'", config.AppPath)
 	}
 
 	// Create a service container.
-	err = GenerateFile(path, "container", containerTemplate, config)
+	err = GenerateFile(config.AppPath, "container", containerTemplate, config)
 	if err != nil {
 		return errors.Wrap(err, "failed to create container")
 	}

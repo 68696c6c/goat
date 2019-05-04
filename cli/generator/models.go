@@ -2,7 +2,6 @@ package generator
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/jinzhu/inflection"
 	"github.com/pkg/errors"
@@ -41,10 +40,9 @@ type Model struct {
 }
 
 func CreateModels(config *ProjectConfig) error {
-	path := config.SRCPath + "/models"
-	err := os.MkdirAll(path, os.ModePerm)
+	err := CreateDir(config.ModelsPath)
 	if err != nil {
-		return errors.Wrapf(err, "failed to create models directory '%s'", path)
+		return errors.Wrapf(err, "failed to create models directory '%s'", config.ModelsPath)
 	}
 
 	// Create models.
@@ -89,7 +87,8 @@ func CreateModels(config *ProjectConfig) error {
 			}
 			f.Tag = fmt.Sprintf(`json:"%s"%s`, f.Name, extra)
 		}
-		err = GenerateFile(path, m.Name, modelTemplate, *m)
+
+		err = GenerateFile(config.ModelsPath, m.Name, modelTemplate, *m)
 		if err != nil {
 			return errors.Wrap(err, "failed to generate model")
 		}

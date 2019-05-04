@@ -1,6 +1,7 @@
 package generator
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"strings"
@@ -31,6 +32,14 @@ func snakeToCamel(input string) string {
 	return output
 }
 
+func CreateDir(path string) error {
+	err := os.MkdirAll(path, os.ModePerm)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func GenerateFile(basePath, fileName, fileTemplate string, data interface{}) error {
 	t := template.Must(template.New(fileName).Parse(fileTemplate))
 
@@ -51,4 +60,14 @@ func GenerateFile(basePath, fileName, fileTemplate string, data interface{}) err
 	}
 
 	return nil
+}
+
+func parseTemplateToString(name, temp string, data interface{}) (string, error) {
+	var tpl bytes.Buffer
+	t := template.Must(template.New(name).Parse(temp))
+	err := t.Execute(&tpl, data)
+	if err != nil {
+		return "", errors.Wrapf(err, "failed parse template '%s'", name)
+	}
+	return tpl.String(), nil
 }

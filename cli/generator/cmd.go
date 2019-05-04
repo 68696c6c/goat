@@ -1,9 +1,6 @@
 package generator
 
-import (
-	"github.com/pkg/errors"
-	"os"
-)
+import "github.com/pkg/errors"
 
 const rootTemplate = `
 package cmd
@@ -16,7 +13,7 @@ import (
 )
 
 var Root = &cobra.Command{
-	Use:   "{{.Path}}",
+	Use:   "{{.DirName}}",
 	Short: "Root command for {{.Name}}",
 }
 
@@ -78,20 +75,19 @@ var serverCommand = &cobra.Command{
 `
 
 func CreateCMD(config *ProjectConfig) error {
-	path := config.SRCPath + "/cmd"
-	err := os.MkdirAll(path, os.ModePerm)
+	err := CreateDir(config.CMDPath)
 	if err != nil {
-		return errors.Wrapf(err, "failed to create cmd directory '%s'", path)
+		return errors.Wrapf(err, "failed to create cmd directory '%s'", config.CMDPath)
 	}
 
 	// Create root command.
-	err = GenerateFile(path, "root", rootTemplate, config)
+	err = GenerateFile(config.CMDPath, "root", rootTemplate, config)
 	if err != nil {
 		return errors.Wrap(err, "failed to create root command")
 	}
 
 	// Create server command.
-	err = GenerateFile(path, "server", serverTemplate, config)
+	err = GenerateFile(config.CMDPath, "server", serverTemplate, config)
 	if err != nil {
 		return errors.Wrap(err, "failed to create server command")
 	}

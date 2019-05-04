@@ -1,4 +1,5 @@
 name: "Goat Test"
+module: "github.com/68696c6c/goat-test"
 license: "MIT"
 author:
   name: Aaron Hill
@@ -27,3 +28,9 @@ models:
       - name: website
         type: string
         required: false
+repos:
+  - model: organization
+  - model: user
+    methods:
+      - save
+      - list

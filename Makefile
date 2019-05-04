@@ -34,4 +34,4 @@ test:
 	docker-compose run --rm app go test ./... -cover
 
 gen-test: build
-	goat-cli gen:project goat-test goat-test.yml
+	goat-cli gen:project goat-test.yml
