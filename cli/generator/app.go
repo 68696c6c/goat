@@ -2,6 +2,8 @@ package generator
 
 import "github.com/pkg/errors"
 
+const packageApp = "app"
+
 const containerTemplate = `
 package app
 

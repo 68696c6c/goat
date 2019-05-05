@@ -7,14 +7,16 @@ import (
 	"github.com/pkg/errors"
 )
 
+const packageModels = "models"
+
 const modelTemplate = `
 package models
 
 import "github.com/68696c6c/goat"
 
-// swagger:model {{.StructName}}
 {{ $tick := "` + "`" + `" }}
-type {{.StructName}} struct {
+// swagger:model {{ .StructName }}
+type {{ .StructName }} struct {
 	goat.Model
 	{{- range $key, $value := .Fields }}
 	{{ $value.FieldName }} {{ $value.Type }} {{ $tick }}{{ $value.Tag }}{{ $tick }}

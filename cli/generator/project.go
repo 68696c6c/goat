@@ -1,13 +1,25 @@
 package generator
 
-import "github.com/pkg/errors"
+import (
+	"github.com/pkg/errors"
+	"go/build"
+	"os"
+	"path/filepath"
+)
+
+const packageSRC = "src"
 
 type AuthorConfig struct {
 	Name  string
 	Email string
 }
 
-type PathsConfig struct {
+type Path struct {
+	Abs string
+	Rel string
+}
+
+type Packages struct {
 	App      string
 	CMD      string
 	Handlers string
@@ -15,54 +27,73 @@ type PathsConfig struct {
 	Repos    string
 }
 
-type ProjectConfig struct {
-	Name    string
-	License string
-	Author  AuthorConfig
+type Paths struct {
+	Root string
+	Packages
+}
 
-	Module   string
-	RootPath string
-	DirName  string
-	SRCPath  string
+type Imports struct {
+	Packages
+}
+
+type ProjectConfig struct {
+	Name       string
+	Module     string
+	ModuleName string
+	License    string
+	Author     AuthorConfig
+
+	Paths   Paths
+	Imports Imports
 
 	Models []*Model
 	Repos  []*Repo
-
-	Paths   PathsConfig
-	Imports PathsConfig
 }
 
-func (c *ProjectConfig) SetPaths() {
-	srcPathRel := "/src"
-	appPathRel := srcPathRel + "/app"
-	cmdPathRel := srcPathRel + "/cmd"
-	handlersPathRel := srcPathRel + "/handlers"
-	modelsPathRel := srcPathRel + "/models"
-	reposPathRel := srcPathRel + "/repos"
+func newPackages(base string) Packages {
+	srcPath := joinPath(base, packageSRC)
+	return Packages{
+		App:      joinPath(srcPath, packageApp),
+		CMD:      joinPath(srcPath, packageCMD),
+		Handlers: joinPath(srcPath, packageHandlers),
+		Models:   joinPath(srcPath, packageModels),
+		Repos:    joinPath(srcPath, packageRepos),
+	}
+}
 
-	c.SRCPath = c.RootPath + srcPathRel
+func (c *ProjectConfig) SetPaths() error {
 
-	c.Paths = PathsConfig{
-		App:      c.RootPath + appPathRel,
-		CMD:      c.RootPath + cmdPathRel,
-		Handlers: c.RootPath + handlersPathRel,
-		Models:   c.RootPath + modelsPathRel,
-		Repos:    c.RootPath + reposPathRel,
+	c.ModuleName = filepath.Base(c.Module)
+
+	// Get the absolute path to the project (e.g. within $GOPATH)
+	goPath := os.Getenv("GOPATH")
+	if goPath == "" {
+		goPath = build.Default.GOPATH
+	}
+	path := joinPath(goPath, "src")
+	rootPath, err := filepath.Abs(path)
+	if err != nil {
+		return errors.Wrap(err, "failed determine absolute project path")
+	}
+	projectPath := joinPath(rootPath, c.Module)
+	println("project path: ", projectPath)
+
+	c.Paths = Paths{
+		Root:     projectPath,
+		Packages: newPackages(projectPath),
 	}
 
-	c.Imports = PathsConfig{
-		App:      c.Module + appPathRel,
-		CMD:      c.Module + cmdPathRel,
-		Handlers: c.Module + handlersPathRel,
-		Models:   c.Module + modelsPathRel,
-		Repos:    c.Module + reposPathRel,
+	c.Imports = Imports{
+		Packages: newPackages(c.Module),
 	}
+
+	return nil
 }
 
 func CreateProject(config *ProjectConfig) error {
-	err := CreateDir(config.RootPath)
+	err := CreateDir(config.Paths.Root)
 	if err != nil {
-		return errors.Wrapf(err, "failed to create project directory '%s'", config.RootPath)
+		return errors.Wrapf(err, "failed to create project directory '%s'", config.Paths.Root)
 	}
 
 	return nil

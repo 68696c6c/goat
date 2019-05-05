@@ -2,6 +2,8 @@ package generator
 
 import "github.com/pkg/errors"
 
+const packageCMD = "cmd"
+
 const rootTemplate = `
 package cmd
 
@@ -13,7 +15,7 @@ import (
 )
 
 var Root = &cobra.Command{
-	Use:   "{{.DirName}}",
+	Use:   "{{.ModuleName}}",
 	Short: "Root command for {{.Name}}",
 }
 

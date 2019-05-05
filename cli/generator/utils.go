@@ -71,3 +71,7 @@ func parseTemplateToString(name, temp string, data interface{}) (string, error) 
 	}
 	return tpl.String(), nil
 }
+
+func joinPath(parts ...string) string {
+	return strings.Join(parts, "/")
+}

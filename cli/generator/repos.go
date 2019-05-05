@@ -5,6 +5,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+const packageRepos = "repos"
+
 const repoTemplate = `
 package repos
 
