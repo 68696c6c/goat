@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/68696c6c/goat/src/http"
@@ -43,6 +44,17 @@ func GetLogger() *logrus.Logger {
 
 func GetFileLogger(name string) (*logrus.Logger, error) {
 	return g.Log.NewFileLogger(name)
+}
+
+func GetEnv() sys.Environment {
+	return g.Env
+}
+
+func ErrorIfProd() error {
+	if g.Env == sys.EnvironmentProd {
+		return fmt.Errorf("app environment is set to '%s'", sys.EnvironmentProd.String())
+	}
+	return nil
 }
 
 // Returns a random string that can be used as a Basic Auth token.

@@ -9,6 +9,7 @@ import (
 
 type Goat struct {
 	config Config
+	Env    Environment
 	CMD    cmd.Service
 	DB     db.Service
 	HTTP   http.Service
@@ -16,9 +17,10 @@ type Goat struct {
 }
 
 func Init() Goat {
-	ReadConfig()
+	mustReadConfig()
 	return Goat{
 		config: config,
+		Env:    config.Env,
 		CMD:    cmd.NewServiceCobra(config.CMD),
 		DB:     db.NewServiceGORM(config.DB),
 		HTTP:   http.NewServiceGin(config.HTTP),
