@@ -13,14 +13,14 @@ func EnvString(s string, defaultValue string) string {
 	return val
 }
 
-func MustEnvInt(s string, defaultValue int) int {
+func EnvInt(s string, defaultValue int) int {
 	val, ok := os.LookupEnv(s)
 	if !ok {
 		return defaultValue
 	}
 	i, err := strconv.ParseInt(val, 10, 32)
 	if err != nil {
-		panic(err)
+		return defaultValue
 	}
 	return int(i)
 }
