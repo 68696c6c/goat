@@ -17,7 +17,7 @@ require (
 	github.com/icrowley/fake v0.0.0-20180203215853-4178557ae428
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/jinzhu/gorm v0.0.0-20160404144928-5174cc5c242a
-	github.com/jinzhu/inflection v0.0.0-20170102125226-1c35d901db3d // indirect
+	github.com/jinzhu/inflection v0.0.0-20170102125226-1c35d901db3d
 	github.com/jinzhu/now v1.0.0 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/lib/pq v1.0.0 // indirect
@@ -45,4 +45,5 @@ require (
 	gopkg.in/gin-contrib/cors.v1 v1.0.0-20170318125340-cf4846e6a636
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/validator.v8 v8.18.2
+	gopkg.in/yaml.v2 v2.2.2
 )

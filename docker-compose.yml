@@ -6,7 +6,7 @@ volumes:
 
 services:
 
-  cli:
+  app:
     image: goat:latest
     depends_on:
       - db
