@@ -1,6 +1,9 @@
 package http
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
+)
 
 type Router interface {
 	Run() error
@@ -22,6 +25,9 @@ func NewRouterGin(port string) RouterGin {
 
 // Run the Gin engine.
 func (r RouterGin) Run() error {
+	if err := validPort(r.port); err != nil {
+		return errors.Wrap(err, "failed to start router")
+	}
 	return r.Engine.Run(r.port)
 }
 

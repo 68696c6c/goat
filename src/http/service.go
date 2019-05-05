@@ -43,7 +43,6 @@ type ServiceGin struct {
 }
 
 func NewServiceGin(c Config) ServiceGin {
-	// @TODO validate port
 	return ServiceGin{
 		mode:              utils.ArgStringD(c.Mode, htttpMode),
 		port:              utils.ArgStringD(c.Port, httpPort),

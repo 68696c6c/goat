@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"net"
 	"os"
 	"strconv"
 
@@ -17,23 +16,6 @@ func ExitIfProduction() {
 		err := errors.New("this command cannot be run in production")
 		ExitWithError(err)
 	}
-}
-
-// Determines whether the provided value is a valid port that can be listened on.
-func ValidPort(port string) (valid bool, message string) {
-
-	// Must be numeric.
-	if _, err := strconv.Atoi(port); err != nil {
-		return false, "Not a valid port."
-	}
-
-	// Try and listen to see if the port is available.
-	if ln, err := net.Listen("tcp", ":"+port); err == nil {
-		_ = ln.Close()
-		return true, ""
-	}
-
-	return false, "Port is already in use."
 }
 
 func GetCountArg(countArg string) (int, error) {
