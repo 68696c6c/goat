@@ -15,11 +15,11 @@ import (
 var config *generator.ProjectConfig
 
 func init() {
-	Goat.AddCommand(genProject)
+	Goat.AddCommand(newProject)
 }
 
-var genProject = &cobra.Command{
-	Use:   "gen:project config",
+var newProject = &cobra.Command{
+	Use:   "new config",
 	Short: "Creates a new Goat project.",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -59,7 +59,6 @@ func parseConfig(configPath string) {
 	err = yaml.Unmarshal(yamlFile, config)
 	handleError(errors.Wrap(err, "failed parse project spec"))
 
-	// Setup project paths.
 	err = config.SetPaths()
 	handleError(errors.Wrap(err, "failed set project paths"))
 }

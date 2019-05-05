@@ -7,6 +7,8 @@ import (
 	"os"
 )
 
+type CSVCallback func(line []string, eof bool) error
+
 func OpenCSV(path string) (reader *csv.Reader, err error) {
 	csvFile, err := os.Open(path)
 	if err != nil {
@@ -16,7 +18,7 @@ func OpenCSV(path string) (reader *csv.Reader, err error) {
 	return
 }
 
-func HandleCSVRows(path string, skipHeaderRow bool, breakOnEOF bool, callback func(line []string, eof bool) error) error {
+func HandleCSVRows(path string, skipHeaderRow bool, breakOnEOF bool, callback CSVCallback) error {
 	reader, err := OpenCSV(path)
 	if err != nil {
 		return err

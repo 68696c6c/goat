@@ -12,7 +12,7 @@ CMD ?= default
 	@echo '    deps          install dependancies'
 	@echo '    build         build the CLI for the current machine'
 	@echo '    test          run unit tests'
-	@echo '    gen-test      generate a test project'
+	@echo '    new           generate a new Goat project'
 	@echo
 
 default: .DEFAULT
@@ -33,5 +33,5 @@ cli-down:
 test:
 	docker-compose run --rm app go test ./... -cover
 
-gen-test: build
-	goat-cli gen:project goat-test.yml
+new: build
+	goat-cli new goat-test.yml
