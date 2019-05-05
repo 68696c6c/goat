@@ -12,7 +12,7 @@ import (
 // swagger:response Response
 type Response struct {
 	Message string                 `json:"message"`
-	Errors  []string               `json:"errors,omitempty"`
+	Errors  []error                `json:"errors,omitempty"`
 	Data    map[string]interface{} `json:"data,omitempty"`
 }
 
@@ -38,7 +38,7 @@ func RespondInvalid(c *gin.Context) {
 }
 
 func RespondMessage(c *gin.Context, m string) {
-	c.JSON(http.StatusOK, Response{m, []string{}, nil})
+	c.JSON(http.StatusOK, Response{m, []error{}, nil})
 	c.Abort()
 }
 
@@ -53,22 +53,22 @@ func RespondCreated(c *gin.Context, data interface{}) {
 }
 
 func RespondNotFoundError(c *gin.Context, err error) {
-	c.JSON(http.StatusNotFound, Response{"Not found.", []string{err.Error()}, nil})
+	c.JSON(http.StatusNotFound, Response{"Not found.", []error{err}, nil})
 	c.Abort()
 }
 
 func RespondNotFoundErrors(c *gin.Context, errs []error) {
-	c.JSON(http.StatusNotFound, Response{"Not found.", ErrorsToStrings(errs), nil})
+	c.JSON(http.StatusNotFound, Response{"Not found.", errs, nil})
 	c.Abort()
 }
 
 func RespondBadRequestErrors(c *gin.Context, errs []error) {
-	c.JSON(http.StatusBadRequest, Response{"Bad Request.", ErrorsToStrings(errs), nil})
+	c.JSON(http.StatusBadRequest, Response{"Bad Request.", errs, nil})
 	c.Abort()
 }
 
 func RespondBadRequestError(c *gin.Context, err error) {
-	c.JSON(http.StatusBadRequest, Response{"Bad Request.", []string{err.Error()}, nil})
+	c.JSON(http.StatusBadRequest, Response{"Bad Request.", []error{err}, nil})
 	c.Abort()
 }
 
@@ -88,10 +88,9 @@ func RespondValidationError(c *gin.Context, errs map[string]error) {
 
 func RespondRequestValidationError(c *gin.Context, err error, t reflect.Type) {
 	msgs := make(map[string]string)
-
 	ve, ok := err.(validator.ValidationErrors)
 	if !ok {
-		c.JSON(http.StatusBadRequest, Response{"Invalid Request.", []string{}, nil})
+		c.JSON(http.StatusBadRequest, Response{"Invalid Request.", []error{}, nil})
 		c.Abort()
 		return
 	}
@@ -101,7 +100,6 @@ func RespondRequestValidationError(c *gin.Context, err error, t reflect.Type) {
 			jsonName = e.Field
 			label = e.Name
 		}
-
 		msgs[jsonName] = label + " is required"
 	}
 	c.JSON(http.StatusBadRequest, ValidationResponse{"Invalid Request.", msgs})
@@ -109,12 +107,12 @@ func RespondRequestValidationError(c *gin.Context, err error, t reflect.Type) {
 }
 
 func RespondUnauthorizedError(c *gin.Context) {
-	c.JSON(http.StatusUnauthorized, Response{"Unauthorized.", []string{}, nil})
+	c.JSON(http.StatusUnauthorized, Response{"Unauthorized.", []error{}, nil})
 	c.Abort()
 }
 
 func RespondAuthenticationError(c *gin.Context) {
-	c.JSON(http.StatusForbidden, Response{"Authentication error.", []string{}, nil})
+	c.JSON(http.StatusForbidden, Response{"Authentication error.", []error{}, nil})
 	c.Abort()
 }
 
@@ -123,7 +121,7 @@ func RespondServerErrors(c *gin.Context, errs []error) {
 	if gin.Mode() != gin.DebugMode {
 		errs = []error{}
 	}
-	c.JSON(http.StatusInternalServerError, Response{"Internal server error.", ErrorsToStrings(errs), nil})
+	c.JSON(http.StatusInternalServerError, Response{"Internal server error.", errs, nil})
 	c.Abort()
 }
 
@@ -132,6 +130,6 @@ func RespondServerError(c *gin.Context, err error) {
 	if gin.Mode() != gin.DebugMode {
 		err = nil
 	}
-	c.JSON(http.StatusInternalServerError, Response{"Internal server error.", []string{err.Error()}, nil})
+	c.JSON(http.StatusInternalServerError, Response{"Internal server error.", []error{err}, nil})
 	c.Abort()
 }

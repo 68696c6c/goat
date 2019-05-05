@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/68696c6c/goat/src/http"
@@ -10,6 +9,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
+	"github.com/pkg/errors"
 )
 
 var g sys.Goat
@@ -52,7 +52,7 @@ func GetEnv() sys.Environment {
 
 func ErrorIfProd() error {
 	if g.Env == sys.EnvironmentProd {
-		return fmt.Errorf("app environment is set to '%s'", sys.EnvironmentProd.String())
+		return errors.Errorf("app environment is set to '%s'", sys.EnvironmentProd.String())
 	}
 	return nil
 }

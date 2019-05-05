@@ -2,6 +2,8 @@ package main
 
 import (
 	"errors"
+	"log"
+	"os"
 	"strings"
 )
 
@@ -28,4 +30,22 @@ func ErrorsToError(errs []error) error {
 		msg = append(msg, err.Error())
 	}
 	return errors.New(strings.Join(msg, ", "))
+}
+
+func ExitError(err error) {
+	l := log.New(os.Stderr, "", 0)
+	l.Println(err)
+	os.Exit(1)
+}
+
+func ExitErrors(errs []error) {
+	l := log.New(os.Stderr, "", 0)
+	for _, e := range errs {
+		l.Println(e)
+	}
+	os.Exit(1)
+}
+
+func ExitSuccess() {
+	os.Exit(0)
 }
