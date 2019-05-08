@@ -7,6 +7,7 @@ import (
 	"github.com/68696c6c/goat/src/sys"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
@@ -55,6 +56,10 @@ func ErrorIfProd() error {
 
 func DebugEnabled() bool {
 	return g.HTTP.DebugEnabled()
+}
+
+func BindMiddleware(r interface{}) gin.HandlerFunc {
+	return g.HTTP.BindMiddleware(r)
 }
 
 // Returns a random string that can be used as a Basic Auth token.

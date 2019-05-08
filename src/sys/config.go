@@ -51,9 +51,10 @@ func mustReadConfig() {
 			EnvKey: "db",
 		},
 		HTTP: http.Config{
-			Mode:     viper.GetString("mode"),
-			Port:     viper.GetString("port"),
-			AuthType: viper.GetString("auth_type"),
+			Mode:            viper.GetString("mode"),
+			Port:            viper.GetString("port"),
+			AuthType:        viper.GetString("auth_type"),
+			ExcludedStructs: viper.GetString("binding_excluded_structs"),
 		},
 		Log: log.Config{
 			Path:  viper.GetString("log.path"),
