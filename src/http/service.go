@@ -23,6 +23,7 @@ const (
 // By default, all origins are allows for CORS.
 // @TODO add support for more auth types.
 type Service interface {
+	DebugEnabled() bool
 	NewRouter(setRoutes func(Router)) Router
 }
 
@@ -50,6 +51,10 @@ func NewServiceGin(c Config) ServiceGin {
 		disableAllOrigins: c.DisableCORSAllOrigins,
 		disableDelete:     c.DisableDeleteMethod,
 	}
+}
+
+func (s ServiceGin) DebugEnabled() bool {
+	return s.mode == gin.DebugMode
 }
 
 func (s ServiceGin) NewRouter(setRoutes func(Router)) Router {

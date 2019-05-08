@@ -46,15 +46,15 @@ func GetFileLogger(name string) (*logrus.Logger, error) {
 	return g.Log.NewFileLogger(name)
 }
 
-func GetEnv() sys.Environment {
-	return g.Env
-}
-
 func ErrorIfProd() error {
 	if g.Env == sys.EnvironmentProd {
 		return errors.Errorf("app environment is set to '%s'", sys.EnvironmentProd.String())
 	}
 	return nil
+}
+
+func DebugEnabled() bool {
+	return g.HTTP.DebugEnabled()
 }
 
 // Returns a random string that can be used as a Basic Auth token.
