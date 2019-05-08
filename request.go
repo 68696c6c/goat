@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"reflect"
 
 	"github.com/gin-gonic/gin"
@@ -44,16 +43,7 @@ func BindRequestMiddleware(req interface{}) gin.HandlerFunc {
 		typ := value.Type()
 		obj := reflect.New(typ).Interface()
 		if err := c.ShouldBindWith(obj, binding.JSON); err != nil {
-
-			// If no request body was sent at all, Gin will try to return 'EOF'
-			// Show the user something more helpful instead.
-			if err.Error() == "EOF" {
-				RespondBadRequestError(c, errors.New("a request body is required"))
-				return
-			}
-
-			// If binding failed due to missing fields, return a validation error.
-			RespondRequestValidationError(c, err, typ)
+			//respondRequestValidationError(c, err, typ)
 			return
 		}
 		c.Set(contextKeyRequest, obj)
