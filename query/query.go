@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"bitbucket.org/clearlink/loom-build/src/query/filter"
+	"github.com/68696c6c/goat/query/filter"
 
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
