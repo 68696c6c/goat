@@ -103,7 +103,9 @@ func (q *Query) ApplyToGorm(g *gorm.DB) (*gorm.DB, error) {
 	page := q.Pagination.Page
 	size := q.Pagination.PageSize
 
-	g = g.Limit(int(size)).Offset(int((page - 1) * size))
+	if size > 0 {
+		g = g.Limit(int(size)).Offset(int((page - 1) * size))
+	}
 
 	for _, p := range q.Preload {
 		g = g.Preload(p)
