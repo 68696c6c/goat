@@ -14,6 +14,7 @@ type Builder interface {
 	String() string
 	Order(field string, dir SortDir)
 	Page(page, size, total uint)
+	GetPagination() Pagination
 	ApplyToGorm(g *gorm.DB) (*gorm.DB, error)
 
 	WhereEq(field string, value interface{})
@@ -36,7 +37,7 @@ type Builder interface {
 }
 
 type Query struct {
-	Pagination *Pagination
+	Pagination Pagination
 	Filter     filter.Filter
 	Sort       []Sort
 	Preload    []string
@@ -53,7 +54,6 @@ func (q *Query) sortString() string {
 	if len(q.Sort) == 0 {
 		return ""
 	}
-
 	var ss []string
 	for _, s := range q.Sort {
 		ss = append(ss, fmt.Sprintf("%s %s", s.Field, s.Dir))
@@ -87,6 +87,10 @@ func (q *Query) Order(field string, dir SortDir) {
 	})
 }
 
+func (q *Query) GetPagination() Pagination {
+	return q.Pagination
+}
+
 func (q *Query) ApplyToGorm(g *gorm.DB) (*gorm.DB, error) {
 	if q.Filter != nil {
 		where, params, err := q.Filter.Apply()
@@ -114,16 +118,6 @@ func (q *Query) ApplyToGorm(g *gorm.DB) (*gorm.DB, error) {
 
 	return g, nil
 }
-
-//func (q *Query) WhereFilter(f filter.Applyable) error {
-//	q.Filter.Where(f, filter.LogicAnd)
-//	return nil
-//}
-//
-//func (q *Query) Where(field string, op filter.Operator, value interface{}) error {
-//	q.Filter.WhereField(field, op, value)
-//	return nil
-//}
 
 // AND Filters
 
