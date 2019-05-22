@@ -1,6 +1,11 @@
 package query
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
+)
 
 const (
 	defaultPage     = 1
@@ -8,10 +13,18 @@ const (
 	defaultTotal    = 0
 )
 
-func NewPagination() Pagination {
+func NewPagination(c *gin.Context) Pagination {
+	page, err := strconv.ParseUint(c.Query("page"), 10, 32)
+	if err != nil {
+		page = defaultPage
+	}
+	pageSize, err := strconv.ParseUint(c.Query("page_size"), 10, 32)
+	if err != nil {
+		pageSize = defaultPageSize
+	}
 	return Pagination{
-		Page:     defaultPage,
-		PageSize: defaultPageSize,
+		Page:     uint(page),
+		PageSize: uint(pageSize),
 		Total:    defaultTotal,
 	}
 }

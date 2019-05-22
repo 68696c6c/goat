@@ -6,6 +6,7 @@ import (
 
 	"github.com/68696c6c/goat/query/filter"
 
+	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 )
@@ -13,9 +14,8 @@ import (
 type Builder interface {
 	String() string
 	Order(field string, dir SortDir)
-	Page(page, size, total uint)
-	GetPagination() Pagination
 	ApplyToGorm(g *gorm.DB) (*gorm.DB, error)
+	ApplyToGormCount(g *gorm.DB) (*gorm.DB, error)
 
 	WhereEq(field string, value interface{})
 	WhereLike(field string, value interface{})
@@ -43,10 +43,11 @@ type Query struct {
 	Preload    []string
 }
 
-func NewQueryBuilder() Builder {
+func NewQueryBuilder(c *gin.Context) *Query {
 	return &Query{
-		Pagination: NewPagination(),
+		Pagination: NewPagination(c),
 		Filter:     filter.NewFilter(),
+		Sort:       NewSort(c),
 	}
 }
 
@@ -76,19 +77,11 @@ func (q *Query) String() string {
 	return fmt.Sprintf("paginator: %v\n filter: %v\n sort: %v\n preload: %v\n", pString, fString, sString, prString)
 }
 
-func (q *Query) Page(page, size, total uint) {
-	q.Pagination.Paginate(page, size, total)
-}
-
 func (q *Query) Order(field string, dir SortDir) {
 	q.Sort = append(q.Sort, Sort{
 		Field: field,
 		Dir:   dir,
 	})
-}
-
-func (q *Query) GetPagination() Pagination {
-	return q.Pagination
 }
 
 func (q *Query) ApplyToGorm(g *gorm.DB) (*gorm.DB, error) {
@@ -117,6 +110,21 @@ func (q *Query) ApplyToGorm(g *gorm.DB) (*gorm.DB, error) {
 	}
 
 	return g, nil
+}
+
+// Copies the query, removing the pagination and applies it to the provided Gorm
+// instance.  Can be used to get the unpaginated total count of rows for use in
+// pagination.
+func (q *Query) ApplyToGormCount(g *gorm.DB) (*gorm.DB, error) {
+	c := &Query{
+		Filter:  q.Filter,
+		Preload: q.Preload,
+	}
+	cg, err := c.ApplyToGorm(g)
+	if err != nil {
+		return nil, err
+	}
+	return cg, nil
 }
 
 // AND Filters
