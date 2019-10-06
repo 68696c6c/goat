@@ -14,6 +14,13 @@ const (
 )
 
 func NewPagination(c *gin.Context) Pagination {
+	if c == nil {
+		return Pagination{
+			Page:     uint(defaultPage),
+			PageSize: uint(defaultPageSize),
+			Total:    defaultTotal,
+		}
+	}
 	page, err := strconv.ParseUint(c.Query("page"), 10, 32)
 	if err != nil {
 		page = defaultPage
