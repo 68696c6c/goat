@@ -12,6 +12,7 @@ type ContextResponder func(c *gin.Context)
 type ErrorResponder func(c *gin.Context, e error)
 
 type ErrorHandler interface {
+	HandleContext(c *gin.Context, m string, responder ContextResponder)
 	HandleMessage(c *gin.Context, m string, responder ErrorResponder)
 	HandleError(c *gin.Context, err error, responder ErrorResponder)
 	HandleErrorM(c *gin.Context, err error, m string, responder ErrorResponder)
