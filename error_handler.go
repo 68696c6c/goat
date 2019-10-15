@@ -8,6 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type ContextResponder func(c *gin.Context)
 type ErrorResponder func(c *gin.Context, e error)
 
 type ErrorHandler interface {
@@ -26,6 +27,13 @@ func NewErrorHandler(l *logrus.Logger) ErrorHandler {
 	return ErrorHandlerGin{
 		logger: l,
 	}
+}
+
+func (h ErrorHandlerGin) HandleContext(c *gin.Context, m string, responder ContextResponder) {
+	err := errors.New(m)
+	h.logger.Error(fmt.Sprintf("%s | %s", c.HandlerName(), err))
+	responder(c)
+	return
 }
 
 func (h ErrorHandlerGin) HandleMessage(c *gin.Context, m string, responder ErrorResponder) {
