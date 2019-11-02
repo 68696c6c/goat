@@ -20,11 +20,11 @@ type Path struct {
 }
 
 type Packages struct {
-	App      string
-	CMD      string
-	Handlers string
-	Models   string
-	Repos    string
+	App    string
+	CMD    string
+	HTTP   string
+	Models string
+	Repos  string
 }
 
 type Paths struct {
@@ -53,11 +53,11 @@ type ProjectConfig struct {
 func newPackages(base string) Packages {
 	srcPath := joinPath(base, packageSRC)
 	return Packages{
-		App:      joinPath(srcPath, packageApp),
-		CMD:      joinPath(srcPath, packageCMD),
-		Handlers: joinPath(srcPath, packageHandlers),
-		Models:   joinPath(srcPath, packageModels),
-		Repos:    joinPath(srcPath, packageRepos),
+		App:    joinPath(srcPath, packageApp),
+		CMD:    joinPath(srcPath, packageCMD),
+		HTTP:   joinPath(srcPath, packageHandlers),
+		Models: joinPath(srcPath, packageModels),
+		Repos:  joinPath(srcPath, packageRepos),
 	}
 }
 
