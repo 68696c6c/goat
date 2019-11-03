@@ -20,11 +20,21 @@ type ServiceContainer struct {
 	Logger *logrus.Logger
 }
 
+func (a ServiceContainer) GetDB() *gorm.DB {
+	return a.DB
+}
+
+func (a ServiceContainer) GetLogger() *logrus.Logger {
+	return a.Logger
+}
+
 // Initializes the service container if it hasn't been already.
-func GetApp(l *logrus.Logger) (ServiceContainer, error) {
+func GetApp() (goat.App, error) {
 	if container != (ServiceContainer{}) {
 		return container, nil
 	}
+
+	logger := goat.NewSTDOutLogger()
 
 	db, err := goat.GetMainDB()
 	if err != nil {
@@ -33,8 +43,9 @@ func GetApp(l *logrus.Logger) (ServiceContainer, error) {
 
 	container = ServiceContainer{
 		DB:     db,
-		Logger: l,
+		Logger: logger,
 	}
+
 	return container, nil
 }
 

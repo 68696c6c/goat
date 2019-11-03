@@ -32,6 +32,8 @@ const serverTemplate = `
 package cmd
 
 import (
+	"{{.Imports.Packages.App}}"
+
 	"github.com/68696c6c/goat"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -49,22 +51,9 @@ var serverCommand = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		g := goat.Init()
-		logger := g.GetLogger()
-
-		// Initialize service container.
-		app, err := app.GetApp(logger)
-		if err != nil {
-			goat.ExitWithError(err)
-		}
 
 		// Initialize router.
-		router := goat.NewRouter(handlers.InitRoutes)
-
-		// Add the service container to the Gin registry.
-		c := map[string]interface{}{
-			"app": app,
-		}
-		router.SetRegistry(c)
+		router := goat.NewRouter(handlers.InitRoutes, app.GetApp)
 
 		// Run the server.
 		err = router.Run(port)

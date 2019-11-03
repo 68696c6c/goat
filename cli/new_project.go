@@ -2,10 +2,11 @@ package cli
 
 import (
 	"fmt"
-	"github.com/68696c6c/goat/cli/generator"
 	"io/ioutil"
 	"os"
 	"os/exec"
+
+	"github.com/68696c6c/goat/cli/generator"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -41,6 +42,9 @@ var newProject = &cobra.Command{
 		handleError(err)
 
 		err = generator.CreateModels(config)
+		handleError(err)
+
+		err = generator.CreateHTTP(config)
 		handleError(err)
 
 		fmtProject()

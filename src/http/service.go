@@ -6,9 +6,10 @@ import (
 	"os"
 	"reflect"
 
+	"github.com/68696c6c/goat/src/app"
+	"github.com/68696c6c/goat/src/types"
 	"github.com/68696c6c/goat/utils"
 
-	"github.com/68696c6c/goat/src/types"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/pkg/errors"
@@ -21,6 +22,8 @@ const (
 	httpPort     = "80"
 	httpAuthType = "basic"
 )
+
+type RouterInitializer func(Router, app.Initializer)
 
 // Goat writes all request logging to standard out and always enables CORS.
 // Since Goat is intended to be used to build RESTful APIs, it is assumed that
@@ -37,7 +40,7 @@ const (
 // to provide custom labels for use in validation error messages.
 //
 // For example:
-//	type userRequest struct {
+// 	type userRequest struct {
 // 		Name string `json:"name" binding:"required" label:"Username"`
 // 	}
 //
@@ -49,9 +52,9 @@ const (
 // check the field's own fields for required annotations as well.
 //
 // For example:
-//	type orderRequest struct {
-//		Items []*Item `binding:"required,dive,required"`
-//	}
+// 	type orderRequest struct {
+// 		Items []*Item `binding:"required,dive,required"`
+// 	}
 //
 //
 // If a required field is not provided, or a request body is not sent, the
@@ -72,7 +75,7 @@ const (
 // should exclude these types from the error message building to avoid
 // unnecessary recursion.  For example:
 //
-//	BINDING_EXCLUDED_STRUCTS="goat.ID,time.Time"
+// 	BINDING_EXCLUDED_STRUCTS="goat.ID,time.Time"
 //
 //
 // Since the binding service will return an error response if an error occurs,
@@ -82,7 +85,7 @@ const (
 // @TODO add support for more auth types.
 type Service interface {
 	DebugEnabled() bool
-	NewRouter(setRoutes func(Router)) Router
+	NewRouter(setRoutes RouterInitializer, getApp app.Initializer) Router
 	BindMiddleware(r interface{}) gin.HandlerFunc
 }
 
@@ -119,7 +122,7 @@ func (s ServiceGin) DebugEnabled() bool {
 	return s.mode == gin.DebugMode
 }
 
-func (s ServiceGin) NewRouter(setRoutes func(Router)) Router {
+func (s ServiceGin) NewRouter(setRoutes RouterInitializer, getApp app.Initializer) Router {
 	r := NewRouterGin(s.port)
 
 	gin.SetMode(s.mode)
@@ -144,7 +147,7 @@ func (s ServiceGin) NewRouter(setRoutes func(Router)) Router {
 	r.Engine.Use(cors.New(config), r.InitRegistry())
 
 	// Setup routes.
-	setRoutes(&r)
+	setRoutes(&r, getApp)
 
 	return r
 }

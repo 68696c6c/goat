@@ -1,15 +1,10 @@
 package generator
 
-import (
-	"fmt"
+import "github.com/pkg/errors"
 
-	"github.com/jinzhu/inflection"
-	"github.com/pkg/errors"
-)
+const packageHTTP = "http"
 
-const packageModels = "models"
-
-const modelTemplate = `
+const httpTemplate = `
 package models
 
 import "github.com/68696c6c/goat"
@@ -25,6 +20,9 @@ type {{ .StructName }} struct {
 
 `
 
+const controllerTemplate = `
+`
+
 type middleware struct {
 	name string
 }
@@ -38,59 +36,39 @@ type handler struct {
 type controller struct {
 	name       string
 	structName string
-	handlers   []*handler
+	handlers   []handler
 }
 
-func CreateHandlers(config *ProjectConfig) error {
+type HTTP struct {
+	controllers []controller
+	handlers    []handler
+}
+
+func CreateHTTP(config *ProjectConfig) error {
 	err := CreateDir(config.Paths.HTTP)
 	if err != nil {
 		return errors.Wrapf(err, "failed to create http directory '%s'", config.Paths.Models)
 	}
 
+	createHandlers := func(handlers []handler) []handler {
+		var result []handler
+		for _, h := range handlers {
+			result = append(result, handler{
+				name:         h.name,
+				dependencies: h.dependencies,
+				middlewares:  h.middlewares,
+			})
+		}
+		return result
+	}
+
 	// Check for controllers first.
-	for _, m := range config.Controllers {
-		m.StructName = snakeToCamel(m.Name)
+	for _, c := range config.HTTP.controllers {
+		c.structName = snakeToCamel(c.name)
 
-		// Build relations.
-		if len(m.BelongsTo) > 0 {
-			println("model belongs to: ")
-			for _, r := range m.BelongsTo {
-				println("relation: ", r)
-				f := &field{
-					Name:      fmt.Sprintf("%s_id", r),
-					FieldName: fmt.Sprintf("%sID", snakeToCamel(r)),
-					Type:      "goat.ID",
-				}
-				m.Fields = append([]*field{f}, m.Fields...)
-			}
-		}
-		if len(m.HasMany) > 0 {
-			println("model has many: ")
-			for _, r := range m.HasMany {
-				println(r)
-				t := inflection.Singular(r)
-				f := &field{
-					Name:      r,
-					FieldName: snakeToCamel(r),
-					Type:      fmt.Sprintf("[]*%s", snakeToCamel(t)),
-				}
-				m.Fields = append(m.Fields, f)
-			}
-		}
+		c.handlers = createHandlers(c.handlers)
 
-		// Set field names and annotations.
-		for _, f := range m.Fields {
-			if f.FieldName == "" {
-				f.FieldName = snakeToCamel(f.Name)
-			}
-			var extra string
-			if f.Required {
-				extra = ` binding:"required"`
-			}
-			f.Tag = fmt.Sprintf(`json:"%s"%s`, f.Name, extra)
-		}
-
-		err = GenerateFile(config.Paths.Models, m.Name, modelTemplate, *m)
+		err = GenerateFile(config.Paths.Models, c.name, controllerTemplate, c)
 		if err != nil {
 			return errors.Wrap(err, "failed to generate model")
 		}

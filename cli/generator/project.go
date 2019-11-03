@@ -48,6 +48,7 @@ type ProjectConfig struct {
 
 	Models []*Model
 	Repos  []*Repo
+	HTTP   HTTP
 }
 
 func newPackages(base string) Packages {
@@ -55,7 +56,7 @@ func newPackages(base string) Packages {
 	return Packages{
 		App:    joinPath(srcPath, packageApp),
 		CMD:    joinPath(srcPath, packageCMD),
-		HTTP:   joinPath(srcPath, packageHandlers),
+		HTTP:   joinPath(srcPath, packageHTTP),
 		Models: joinPath(srcPath, packageModels),
 		Repos:  joinPath(srcPath, packageRepos),
 	}

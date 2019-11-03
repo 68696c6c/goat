@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/68696c6c/goat/src/app"
 	"strings"
 
 	"github.com/68696c6c/goat/src/http"
@@ -35,8 +36,8 @@ func GetDB(key string) (*gorm.DB, error) {
 	return g.DB.GetCustomDB(key)
 }
 
-func GetRouter(setRoutes func(http.Router)) http.Router {
-	return g.HTTP.NewRouter(setRoutes)
+func GetRouter(setRoutes http.RouterInitializer, getApp app.Initializer) http.Router {
+	return g.HTTP.NewRouter(setRoutes, getApp)
 }
 
 func GetLogger() *logrus.Logger {
