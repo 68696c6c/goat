@@ -1,4 +1,4 @@
-package main
+package goat
 
 import (
 	"github.com/68696c6c/goat/src/app"
