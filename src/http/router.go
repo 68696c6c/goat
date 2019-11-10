@@ -9,6 +9,7 @@ type Router interface {
 	Run() error
 	SetRegistry(d map[string]interface{})
 	InitRegistry() gin.HandlerFunc
+	GetEngine() *gin.Engine
 }
 
 type RouterGin struct {
