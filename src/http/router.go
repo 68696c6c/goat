@@ -17,6 +17,10 @@ func NewRouterGin(port string) RouterGin {
 	}
 }
 
+func (r RouterGin) GetEngine() *gin.Engine {
+	return r.Engine
+}
+
 // Run the Gin engine.
 func (r RouterGin) Run() error {
 	if err := validPort(r.port); err != nil {
