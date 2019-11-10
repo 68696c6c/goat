@@ -17,7 +17,7 @@ type Goat struct {
 }
 
 func Init() Goat {
-	mustReadConfig()
+	config := mustGetConfig()
 	return Goat{
 		config: config,
 		Env:    config.Env,

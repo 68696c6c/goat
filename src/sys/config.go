@@ -12,8 +12,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-var config Config
-
 type Config struct {
 	Env  Environment
 	CMD  cmd.Config
@@ -22,10 +20,7 @@ type Config struct {
 	Log  log.Config
 }
 
-func mustReadConfig() {
-	if config != (Config{}) {
-		return
-	}
+func mustGetConfig() Config {
 
 	// Support both config files and env configuration using Viper.
 	// Goat uses env configuration by default.
@@ -42,17 +37,25 @@ func mustReadConfig() {
 		panic(errors.Wrapf(err, "failed to determine app environment"))
 	}
 
+	// If a Gin log mode was not specified, assume one based on the environment.
+	httpDebug := false
+	if hd := viper.GetString("http_debug"); hd == "" {
+		httpDebug = DebugFromEnvironment(env)
+	} else if hd == "1" {
+		httpDebug = true
+	}
+
 	// Read database, logger, and router config from the env using Viper.
-	// @TODO it would be preferable to read the db connection from Viper here rather than in the database package...
-	config = Config{
+	return Config{
 		Env: env,
 		CMD: cmd.Config{},
 		DB: db.Config{
-			EnvKey: "db",
+			MainConnectionConfig: db.GetMainDBConfig(),
 		},
 		HTTP: http.Config{
-			Mode:            viper.GetString("mode"),
-			Port:            viper.GetString("port"),
+			Debug:           httpDebug,
+			Host:            viper.GetString("http_host"),
+			Port:            viper.GetString("http_port"),
 			AuthType:        viper.GetString("auth_type"),
 			ExcludedStructs: viper.GetString("binding_excluded_structs"),
 		},

@@ -56,10 +56,6 @@ func ErrorIfProd() error {
 	return nil
 }
 
-func DebugEnabled() bool {
-	return g.HTTP.DebugEnabled()
-}
-
 func BindMiddleware(r interface{}) gin.HandlerFunc {
 	return g.HTTP.BindMiddleware(r)
 }

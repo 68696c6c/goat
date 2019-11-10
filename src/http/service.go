@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	htttpMode    = gin.DebugMode
+	httpHost     = ""
 	httpPort     = "80"
 	httpAuthType = "basic"
 )
@@ -81,13 +81,13 @@ const (
 //
 // @TODO add support for more auth types.
 type Service interface {
-	DebugEnabled() bool
 	NewRouter() Router
 	BindMiddleware(r interface{}) gin.HandlerFunc
 }
 
 type Config struct {
-	Mode                  string
+	Debug                 bool
+	Host                  string
 	Port                  string
 	AuthType              string
 	DisableCORSAllOrigins bool
@@ -97,6 +97,7 @@ type Config struct {
 
 type ServiceGin struct {
 	mode              string
+	host              string
 	port              string
 	authType          string
 	disableAllOrigins bool
@@ -105,8 +106,13 @@ type ServiceGin struct {
 }
 
 func NewServiceGin(c Config) ServiceGin {
+	mode := gin.ReleaseMode
+	if c.Debug {
+		mode = gin.DebugMode
+	}
 	return ServiceGin{
-		mode:              utils.ArgStringD(c.Mode, htttpMode),
+		mode:              mode,
+		host:              utils.ArgStringD(c.Host, httpHost),
 		port:              utils.ArgStringD(c.Port, httpPort),
 		authType:          utils.ArgStringD(c.AuthType, httpAuthType),
 		disableAllOrigins: c.DisableCORSAllOrigins,
@@ -115,12 +121,8 @@ func NewServiceGin(c Config) ServiceGin {
 	}
 }
 
-func (s ServiceGin) DebugEnabled() bool {
-	return s.mode == gin.DebugMode
-}
-
 func (s ServiceGin) NewRouter() Router {
-	r := NewRouterGin(s.port)
+	r := NewRouterGin(s.host, s.port)
 
 	gin.SetMode(s.mode)
 	r.Engine = gin.New()

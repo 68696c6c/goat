@@ -8,12 +8,12 @@ import (
 )
 
 type ConnectionConfig struct {
+	Debug           bool
 	Host            string
 	Port            int
 	Database        string
 	Username        string
 	Password        string
-	Debug           bool
 	MultiStatements bool
 }
 
@@ -22,15 +22,20 @@ func (c ConnectionConfig) String() string {
 	return fmt.Sprintf(t, c.Host, c.Port, c.Database, c.Username, c.Password, c.Debug, c.MultiStatements)
 }
 
+// Returns the default database connection.
+func GetMainDBConfig() ConnectionConfig {
+	return getDBConfig(dbMainConnectionKey)
+}
+
 // Returns a database connection config struct using app config values.
-func GetDBConfig(name string) ConnectionConfig {
+func getDBConfig(name string) ConnectionConfig {
 	return ConnectionConfig{
+		Debug:           viper.GetBool(name + ".debug"),
 		Host:            viper.GetString(name + ".host"),
 		Port:            viper.GetInt(name + ".port"),
 		Database:        viper.GetString(name + ".database"),
 		Username:        viper.GetString(name + ".username"),
 		Password:        url.QueryEscape(viper.GetString(name + ".password")),
-		Debug:           viper.GetBool(name + ".debug"),
 		MultiStatements: viper.GetBool(name + ".multi_statements"),
 	}
 }
