@@ -3,7 +3,7 @@ package goat
 import (
 	"strings"
 
-	"github.com/68696c6c/goat/app"
+	"github.com/68696c6c/goat/src/http"
 	"github.com/68696c6c/goat/src/sys"
 
 	"github.com/gin-gonic/gin"
@@ -35,7 +35,7 @@ func GetDB(key string) (*gorm.DB, error) {
 	return g.DB.GetCustomDB(key)
 }
 
-func GetRouter() app.Router {
+func GetRouter() http.Router {
 	return g.HTTP.NewRouter()
 }
 

@@ -6,7 +6,6 @@ import (
 	"os"
 	"reflect"
 
-	"github.com/68696c6c/goat/app"
 	"github.com/68696c6c/goat/src/types"
 	"github.com/68696c6c/goat/utils"
 
