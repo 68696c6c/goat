@@ -7,8 +7,8 @@ import (
 
 	"github.com/68696c6c/goat/utils"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 const (

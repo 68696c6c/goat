@@ -7,11 +7,11 @@ import (
 	"github.com/68696c6c/goat/src/http"
 	"github.com/68696c6c/goat/src/sys"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 var g sys.Goat

@@ -1,8 +1,8 @@
 package app
 
 import (
-	"github.com/Sirupsen/logrus"
 	"github.com/jinzhu/gorm"
+	"github.com/sirupsen/logrus"
 )
 
 type App interface {
