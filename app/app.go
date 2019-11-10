@@ -18,5 +18,3 @@ type Router interface {
 	SetRegistry(d map[string]interface{})
 	InitRegistry() gin.HandlerFunc
 }
-
-type RouterInitializer func(Router, Initializer)

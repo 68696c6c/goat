@@ -83,7 +83,7 @@ const (
 // @TODO add support for more auth types.
 type Service interface {
 	DebugEnabled() bool
-	NewRouter(setRoutes app.RouterInitializer, getApp app.Initializer) app.Router
+	NewRouter() app.Router
 	BindMiddleware(r interface{}) gin.HandlerFunc
 }
 
@@ -120,7 +120,7 @@ func (s ServiceGin) DebugEnabled() bool {
 	return s.mode == gin.DebugMode
 }
 
-func (s ServiceGin) NewRouter(setRoutes app.RouterInitializer, getApp app.Initializer) Router {
+func (s ServiceGin) NewRouter() app.Router {
 	r := NewRouterGin(s.port)
 
 	gin.SetMode(s.mode)
@@ -143,9 +143,6 @@ func (s ServiceGin) NewRouter(setRoutes app.RouterInitializer, getApp app.Initia
 		config.AllowAllOrigins = true
 	}
 	r.Engine.Use(cors.New(config), r.InitRegistry())
-
-	// Setup routes.
-	setRoutes(&r, getApp)
 
 	return r
 }
