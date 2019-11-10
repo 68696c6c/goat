@@ -120,7 +120,7 @@ func (s ServiceGin) DebugEnabled() bool {
 	return s.mode == gin.DebugMode
 }
 
-func (s ServiceGin) NewRouter() app.Router {
+func (s ServiceGin) NewRouter() Router {
 	r := NewRouterGin(s.port)
 
 	gin.SetMode(s.mode)
