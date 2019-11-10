@@ -6,7 +6,7 @@ import (
 	"os"
 	"reflect"
 
-	"github.com/68696c6c/goat/src/app"
+	"github.com/68696c6c/goat/app"
 	"github.com/68696c6c/goat/src/types"
 	"github.com/68696c6c/goat/utils"
 
@@ -22,8 +22,6 @@ const (
 	httpPort     = "80"
 	httpAuthType = "basic"
 )
-
-type RouterInitializer func(Router, app.Initializer)
 
 // Goat writes all request logging to standard out and always enables CORS.
 // Since Goat is intended to be used to build RESTful APIs, it is assumed that
@@ -85,7 +83,7 @@ type RouterInitializer func(Router, app.Initializer)
 // @TODO add support for more auth types.
 type Service interface {
 	DebugEnabled() bool
-	NewRouter(setRoutes RouterInitializer, getApp app.Initializer) Router
+	NewRouter(setRoutes app.RouterInitializer, getApp app.Initializer) app.Router
 	BindMiddleware(r interface{}) gin.HandlerFunc
 }
 
@@ -122,7 +120,7 @@ func (s ServiceGin) DebugEnabled() bool {
 	return s.mode == gin.DebugMode
 }
 
-func (s ServiceGin) NewRouter(setRoutes RouterInitializer, getApp app.Initializer) Router {
+func (s ServiceGin) NewRouter(setRoutes app.RouterInitializer, getApp app.Initializer) Router {
 	r := NewRouterGin(s.port)
 
 	gin.SetMode(s.mode)

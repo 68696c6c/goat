@@ -1,9 +1,9 @@
 package goat
 
 import (
-	"github.com/68696c6c/goat/src/app"
 	"strings"
 
+	"github.com/68696c6c/goat/app"
 	"github.com/68696c6c/goat/src/http"
 	"github.com/68696c6c/goat/src/sys"
 
@@ -36,7 +36,7 @@ func GetDB(key string) (*gorm.DB, error) {
 	return g.DB.GetCustomDB(key)
 }
 
-func GetRouter(setRoutes http.RouterInitializer, getApp Initializer) http.Router {
+func GetRouter(setRoutes app.RouterInitializer, getApp app.Initializer) app.Router {
 	return g.HTTP.NewRouter(setRoutes, getApp)
 }
 
