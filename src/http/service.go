@@ -81,6 +81,7 @@ const (
 //
 // @TODO add support for more auth types.
 type Service interface {
+	DebugEnabled() bool
 	NewRouter() Router
 	BindMiddleware(r interface{}) gin.HandlerFunc
 }
@@ -119,6 +120,10 @@ func NewServiceGin(c Config) ServiceGin {
 		disableDelete:     c.DisableDeleteMethod,
 		structMetaService: newStructMetaService(c.ExcludedStructs),
 	}
+}
+
+func (s ServiceGin) DebugEnabled() bool {
+	return s.mode == gin.DebugMode
 }
 
 func (s ServiceGin) NewRouter() Router {

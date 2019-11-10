@@ -30,9 +30,9 @@ func (r *HandlerTestResponse) Map(m interface{}) error {
 	return err
 }
 
-func NewHandlerTest(r *ghttp.RouterGin) *HandlerTest {
+func NewHandlerTest(r ghttp.Router) *HandlerTest {
 	return &HandlerTest{
-		router:     r.Engine,
+		router:     r.GetEngine(),
 		remoteAddr: "127.0.0.1",
 	}
 }
