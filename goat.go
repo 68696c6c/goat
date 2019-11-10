@@ -36,7 +36,7 @@ func GetDB(key string) (*gorm.DB, error) {
 	return g.DB.GetCustomDB(key)
 }
 
-func GetRouter(setRoutes http.RouterInitializer, getApp app.Initializer) http.Router {
+func GetRouter(setRoutes http.RouterInitializer, getApp Initializer) http.Router {
 	return g.HTTP.NewRouter(setRoutes, getApp)
 }
 
