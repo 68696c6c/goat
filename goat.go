@@ -1,8 +1,6 @@
 package goat
 
 import (
-	"fmt"
-	"os"
 	"strings"
 
 	"github.com/68696c6c/goat/app"
@@ -54,22 +52,6 @@ func ErrorIfProd() error {
 		return errors.Errorf("app environment is set to '%s'", sys.EnvironmentProd.String())
 	}
 	return nil
-}
-
-func ExitWithError(err error) {
-	fmt.Fprintf(os.Stderr, err.Error()+"\n")
-	os.Exit(1)
-}
-
-func ExitWithErrors(errs []error) {
-	for _, e := range errs {
-		fmt.Fprintf(os.Stderr, e.Error()+"\n")
-	}
-	os.Exit(1)
-}
-
-func ExitSuccess() {
-	os.Exit(0)
 }
 
 func DebugEnabled() bool {
