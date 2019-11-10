@@ -5,6 +5,12 @@ import (
 	"github.com/pkg/errors"
 )
 
+type Router interface {
+	Run() error
+	SetRegistry(d map[string]interface{})
+	InitRegistry() gin.HandlerFunc
+}
+
 type RouterGin struct {
 	Engine *gin.Engine
 	port   string
