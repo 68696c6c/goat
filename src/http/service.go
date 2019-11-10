@@ -83,7 +83,7 @@ const (
 // @TODO add support for more auth types.
 type Service interface {
 	DebugEnabled() bool
-	NewRouter() app.Router
+	NewRouter() Router
 	BindMiddleware(r interface{}) gin.HandlerFunc
 }
 
