@@ -15,9 +15,11 @@ import (
 
 var g sys.Goat
 
-// Goat has three primary concerns: database connections and schema management,
-// request handling, and logging.  These concerns are encapsulated inside of
-// services that are bootstrapped when goat.Init() is called.
+// Goat has three primary concerns:
+// - database connections and schema management,
+// - request handling
+// - logging
+// These concerns are encapsulated inside of services that are bootstrapped when goat.Init() is called.
 func Init() {
 	if g != (sys.Goat{}) {
 		return

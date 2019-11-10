@@ -6,6 +6,7 @@ type Environment string
 
 const (
 	typeNameEnvironment string      = "environment"
+	EnvironmentLocal    Environment = "local"
 	EnvironmentDev      Environment = "dev"
 	EnvironmentTest     Environment = "test"
 	EnvironmentStaging  Environment = "staging"
@@ -13,7 +14,8 @@ const (
 )
 
 func EnvironmentFromString(s string) (Environment, error) {
-	if s == string(EnvironmentDev) ||
+	if s == string(EnvironmentLocal) ||
+		s == string(EnvironmentDev) ||
 		s == string(EnvironmentTest) ||
 		s == string(EnvironmentStaging) ||
 		s == string(EnvironmentProd) {
