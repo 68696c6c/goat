@@ -1,12 +1,12 @@
 package goat
 
 import (
-	"goose"
 	"strings"
 
 	"github.com/68696c6c/goat/src/http"
 	"github.com/68696c6c/goat/src/sys"
 
+	"github.com/68696c6c/goose"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
