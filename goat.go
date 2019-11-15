@@ -1,6 +1,7 @@
 package goat
 
 import (
+	"goose"
 	"strings"
 
 	"github.com/68696c6c/goat/src/http"
@@ -33,8 +34,16 @@ func GetMainDB() (*gorm.DB, error) {
 	return g.DB.GetMainDB()
 }
 
+func GetMigrationDB() (*gorm.DB, error) {
+	return g.DB.GetMigrationDB()
+}
+
 func GetDB(key string) (*gorm.DB, error) {
 	return g.DB.GetCustomDB(key)
+}
+
+func GetSchema(connection *gorm.DB) (goose.SchemaInterface, error) {
+	return g.DB.GetSchema(connection)
 }
 
 func GetRouter() http.Router {

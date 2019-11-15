@@ -45,12 +45,19 @@ func mustGetConfig() Config {
 		httpDebug = true
 	}
 
+	// In order to avoid relying on hacky 'base path' assumptions, require the user to provide a path.
+	migrationPath := viper.GetString("migration_path")
+	if migrationPath == "" {
+		panic(errors.Wrapf(err, "failed to determine path to migration files"))
+	}
+
 	// Read database, logger, and router config from the env using Viper.
 	return Config{
 		Env: env,
 		CMD: cmd.Config{},
 		DB: db.Config{
 			MainConnectionConfig: db.GetMainDBConfig(),
+			MigrationPath:        migrationPath,
 		},
 		HTTP: http.Config{
 			Debug:           httpDebug,

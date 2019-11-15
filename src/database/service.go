@@ -2,6 +2,8 @@ package database
 
 import (
 	"fmt"
+
+	"github.com/68696c6c/goose"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
@@ -17,15 +19,19 @@ const (
 // Goat uses GORM, any database supported by GORM can theoretically be used.
 type Service interface {
 	GetMainDB() (*gorm.DB, error)
+	GetMigrationDB() (*gorm.DB, error)
 	GetCustomDB(key string) (*gorm.DB, error)
+	GetSchema(connection *gorm.DB) (goose.SchemaInterface, error)
 }
 
 type Config struct {
 	MainConnectionConfig ConnectionConfig
+	MigrationPath        string
 }
 
 type ServiceGORM struct {
-	connections map[string]ConnectionConfig
+	connections   map[string]ConnectionConfig
+	migrationPath string
 }
 
 func NewServiceGORM(c Config) ServiceGORM {
@@ -33,6 +39,7 @@ func NewServiceGORM(c Config) ServiceGORM {
 		connections: map[string]ConnectionConfig{
 			dbMainConnectionKey: c.MainConnectionConfig,
 		},
+		migrationPath: c.MigrationPath,
 	}
 }
 
@@ -42,6 +49,19 @@ func (s ServiceGORM) GetMainDB() (*gorm.DB, error) {
 	connection, err := s.getConnection(c)
 	if err != nil {
 		t := "failed to connect to default database using credentials: %s"
+		return nil, errors.Wrap(err, fmt.Sprintf(t, c.String()))
+	}
+	return connection, nil
+}
+
+// Returns a new database connection using the configured defaults, but supporting multi-statements for running migrations.
+func (s ServiceGORM) GetMigrationDB() (*gorm.DB, error) {
+	c := s.connections[dbMainConnectionKey]
+	c.MultiStatements = true
+	c.Debug = true
+	connection, err := s.getConnection(c)
+	if err != nil {
+		t := "failed to connect to default migration database using credentials: %s"
 		return nil, errors.Wrap(err, fmt.Sprintf(t, c.String()))
 	}
 	return connection, nil
@@ -61,6 +81,15 @@ func (s ServiceGORM) GetCustomDB(key string) (*gorm.DB, error) {
 		return nil, errors.Wrap(err, fmt.Sprintf(t, key, c.String()))
 	}
 	return connection, nil
+}
+
+func (s ServiceGORM) GetSchema(connection *gorm.DB) (goose.SchemaInterface, error) {
+	// @TODO handle logging better?
+	schema, err := goose.NewSchema(connection, s.migrationPath, nil)
+	if err != nil {
+		return nil, err
+	}
+	return schema, nil
 }
 
 // Returns a database connection using the provided configuration.

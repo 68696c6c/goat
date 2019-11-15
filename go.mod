@@ -3,6 +3,7 @@ module github.com/68696c6c/goat
 go 1.12
 
 require (
+	github.com/68696c6c/goose v0.0.0-20190423171016-1d1f9c9c4114
 	github.com/corpix/uarand v0.0.0-20170903190822-2b8494104d86 // indirect
 	github.com/denisenkom/go-mssqldb v0.0.0-20190412130859-3b1d194e553a // indirect
 	github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 // indirect
