@@ -34,7 +34,7 @@ func mustGetConfig() Config {
 	e := viper.GetString("env")
 	env, err := EnvironmentFromString(e)
 	if err != nil {
-		panic(errors.Wrapf(err, "failed to determine app environment"))
+		panic(errors.Wrap(err, "failed to determine app environment"))
 	}
 
 	// If a Gin log mode was not specified, assume one based on the environment.
@@ -48,7 +48,7 @@ func mustGetConfig() Config {
 	// In order to avoid relying on hacky 'base path' assumptions, require the user to provide a path.
 	migrationPath := viper.GetString("migration_path")
 	if migrationPath == "" {
-		panic(errors.Wrapf(err, "failed to determine path to migration files"))
+		panic(errors.Wrap(err, "failed to determine path to migration files"))
 	}
 
 	// Read database, logger, and router config from the env using Viper.
