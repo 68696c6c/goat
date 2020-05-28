@@ -33,6 +33,9 @@ func getTestRouter(t *testing.T) ghttp.Router {
 		err := os.Setenv("ENV", "test")
 		require.Nil(t, err, "failed to set env variable 'ENV'")
 
+		err = os.Setenv("MIGRATION_PATH", "src/database")
+		require.Nil(t, err, "failed to set env variable 'MIGRATION_PATH'")
+
 		Init()
 		initialized = true
 	}
