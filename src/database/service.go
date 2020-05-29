@@ -22,6 +22,7 @@ type Service interface {
 	GetMigrationDB() (*gorm.DB, error)
 	GetCustomDB(key string) (*gorm.DB, error)
 	GetSchema(connection *gorm.DB) (goose.SchemaInterface, error)
+	GetConnection(c ConnectionConfig) (*gorm.DB, error)
 }
 
 type Config struct {
@@ -46,7 +47,7 @@ func NewServiceGORM(c Config) ServiceGORM {
 // Returns a new database connection using the configured defaults.
 func (s ServiceGORM) GetMainDB() (*gorm.DB, error) {
 	c := s.connections[dbMainConnectionKey]
-	connection, err := s.getConnection(c)
+	connection, err := s.GetConnection(c)
 	if err != nil {
 		t := "failed to connect to default database using credentials: %s"
 		return nil, errors.Wrap(err, fmt.Sprintf(t, c.String()))
@@ -59,7 +60,7 @@ func (s ServiceGORM) GetMigrationDB() (*gorm.DB, error) {
 	c := s.connections[dbMainConnectionKey]
 	c.MultiStatements = true
 	c.Debug = true
-	connection, err := s.getConnection(c)
+	connection, err := s.GetConnection(c)
 	if err != nil {
 		t := "failed to connect to default migration database using credentials: %s"
 		return nil, errors.Wrap(err, fmt.Sprintf(t, c.String()))
@@ -75,7 +76,7 @@ func (s ServiceGORM) GetCustomDB(key string) (*gorm.DB, error) {
 		c = getDBConfig(key)
 		s.connections[key] = c
 	}
-	connection, err := s.getConnection(c)
+	connection, err := s.GetConnection(c)
 	if err != nil {
 		t := "failed to connect to custom database '%s' using credentials: %s"
 		return nil, errors.Wrap(err, fmt.Sprintf(t, key, c.String()))
@@ -95,7 +96,7 @@ func (s ServiceGORM) GetSchema(connection *gorm.DB) (goose.SchemaInterface, erro
 // Returns a database connection using the provided configuration.
 // Even though this function does not use any instance properties, it is still attached to ServiceGORM because other
 // implementations will have different connection logic.
-func (s ServiceGORM) getConnection(c ConnectionConfig) (*gorm.DB, error) {
+func (s ServiceGORM) GetConnection(c ConnectionConfig) (*gorm.DB, error) {
 	cs := fmt.Sprintf(dbConnectionTemplate, c.Username, c.Password, c.Host, c.Port, c.Database)
 	connection, err := gorm.Open("mysql", cs)
 	if err != nil {

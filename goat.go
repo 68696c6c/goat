@@ -3,6 +3,7 @@ package goat
 import (
 	"strings"
 
+	"github.com/68696c6c/goat/src/database"
 	"github.com/68696c6c/goat/src/http"
 	"github.com/68696c6c/goat/src/sys"
 
@@ -40,6 +41,10 @@ func GetMigrationDB() (*gorm.DB, error) {
 
 func GetDB(key string) (*gorm.DB, error) {
 	return g.DB.GetCustomDB(key)
+}
+
+func GetCustomDB(c database.ConnectionConfig) (*gorm.DB, error) {
+	return g.DB.GetConnection(c)
 }
 
 func GetSchema(connection *gorm.DB) (goose.SchemaInterface, error) {
