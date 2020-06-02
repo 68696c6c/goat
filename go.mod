@@ -3,7 +3,7 @@ module github.com/68696c6c/goat
 go 1.12
 
 require (
-	github.com/68696c6c/goose v0.1.0
+	github.com/68696c6c/goose v0.1.1
 	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/corpix/uarand v0.0.0-20170903190822-2b8494104d86 // indirect
 	github.com/fatih/color v1.6.0

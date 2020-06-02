@@ -1,5 +1,5 @@
-github.com/68696c6c/goose v0.1.0 h1:eEw9IhqoxQK5sYxD3BWYck9ccVkSiR23vHrQ9WxO1Gk=
-github.com/68696c6c/goose v0.1.0/go.mod h1:R8UbYLsjNPMx4x1Z+V+s35Cv9S0lP7GNqP6looCMmZs=
+github.com/68696c6c/goose v0.1.1 h1:xfVl/2EJTrX4kodDoYfaBE1uOxScAuWy7rKnDjnuoFk=
+github.com/68696c6c/goose v0.1.1/go.mod h1:R8UbYLsjNPMx4x1Z+V+s35Cv9S0lP7GNqP6looCMmZs=
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/alexbrainman/sspi v0.0.0-20180613141037-e580b900e9f5 h1:P5U+E4x5OkVEKQDklVPmzs71WM56RTTRqV4OrDC//Y4=
