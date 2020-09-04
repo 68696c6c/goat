@@ -3,6 +3,9 @@ package database
 import (
 	"fmt"
 
+	"github.com/68696c6c/goat/query"
+	"github.com/68696c6c/goat/utils"
+
 	"github.com/68696c6c/goose"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
@@ -23,6 +26,7 @@ type Service interface {
 	GetCustomDB(key string) (*gorm.DB, error)
 	GetSchema(connection *gorm.DB) (goose.SchemaInterface, error)
 	GetConnection(c ConnectionConfig) (*gorm.DB, error)
+	ApplyPaginationToQuery(q *query.Query, baseGormQuery *gorm.DB) error
 }
 
 type Config struct {
@@ -118,4 +122,23 @@ func (s ServiceGORM) GetConnection(c ConnectionConfig) (*gorm.DB, error) {
 		}
 	})
 	return connection, nil
+}
+
+// Returns a GORM query with the provided filter Query applied and updates the Query pagination to match the new
+func (s ServiceGORM) ApplyPaginationToQuery(q *query.Query, baseGormQuery *gorm.DB) error {
+	pageQuery, err := q.GetGormPageQuery(baseGormQuery)
+	if err != nil {
+		return err
+	}
+
+	var count uint
+	errs := pageQuery.Count(&count).GetErrors()
+	if len(errs) > 0 {
+		err := utils.ErrorsToError(errs)
+		return errors.Wrap(err, "failed to execute filter sites count query")
+	}
+
+	q.ApplyPaginationTotals(count)
+
+	return nil
 }

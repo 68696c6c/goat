@@ -1,11 +1,13 @@
 package http
 
 import (
+	"context"
 	"io"
 	"net/http"
 	"os"
 	"reflect"
 
+	"github.com/68696c6c/goat/query"
 	"github.com/68696c6c/goat/src/types"
 	"github.com/68696c6c/goat/utils"
 
@@ -17,9 +19,11 @@ import (
 )
 
 const (
-	httpHost     = ""
-	httpPort     = "80"
-	httpAuthType = "basic"
+	httpHost          = ""
+	httpPort          = "80"
+	httpAuthType      = "basic"
+	contextKeyRequest = "goat_request"
+	contextKeyQuery   = "goat_query"
 )
 
 // Goat writes all request logging to standard out and always enables CORS.
@@ -83,7 +87,11 @@ const (
 type Service interface {
 	DebugEnabled() bool
 	NewRouter() Router
+	GetHandlerContext(c *gin.Context) context.Context
 	BindMiddleware(r interface{}) gin.HandlerFunc
+	GetRequest(c *gin.Context) interface{}
+	FilterMiddleware() gin.HandlerFunc
+	GetFilter(c *gin.Context) *query.Query
 }
 
 type Config struct {
@@ -153,6 +161,10 @@ func (s ServiceGin) NewRouter() Router {
 	return r
 }
 
+func (s ServiceGin) GetHandlerContext(c *gin.Context) context.Context {
+	return c.Request.Context()
+}
+
 // Attempts to bind a JSON request body from the Gin Context to the provided
 // struct. If any of the struct's required fields are missing from the request
 // body, a 400 response is sent.
@@ -168,8 +180,26 @@ func (s ServiceGin) BindMiddleware(r interface{}) gin.HandlerFunc {
 			s.respondRequestBindingError(c, err, typ)
 			return
 		}
+		c.Set(contextKeyRequest, obj)
 		return
 	}
+}
+
+func (s ServiceGin) GetRequest(c *gin.Context) interface{} {
+	return s.getByKey(c, contextKeyRequest)
+}
+
+func (s ServiceGin) FilterMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		q := query.NewQueryFromGin(c)
+		c.Set(contextKeyQuery, q)
+		return
+	}
+}
+
+func (s ServiceGin) GetFilter(c *gin.Context) *query.Query {
+	r := s.getByKey(c, contextKeyQuery)
+	return r.(*query.Query)
 }
 
 func (s ServiceGin) respondRequestBindingError(c *gin.Context, err error, t reflect.Type) {
@@ -206,4 +236,12 @@ func (s ServiceGin) respondRequestBindingError(c *gin.Context, err error, t refl
 		msgs[meta.Path] = meta.Label + " is required"
 	}
 	c.AbortWithStatusJSON(http.StatusBadRequest, types.ValidationResponse{"Invalid Request.", msgs})
+}
+
+func (s ServiceGin) getByKey(c *gin.Context, key string) interface{} {
+	r, exists := c.Get(key)
+	if !exists {
+		return nil
+	}
+	return r
 }

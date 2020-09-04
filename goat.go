@@ -1,8 +1,10 @@
 package goat
 
 import (
+	"context"
 	"strings"
 
+	"github.com/68696c6c/goat/query"
 	"github.com/68696c6c/goat/src/database"
 	"github.com/68696c6c/goat/src/http"
 	"github.com/68696c6c/goat/src/sys"
@@ -51,6 +53,10 @@ func GetSchema(connection *gorm.DB) (goose.SchemaInterface, error) {
 	return g.DB.GetSchema(connection)
 }
 
+func ApplyPaginationToQuery(q *query.Query, baseGormQuery *gorm.DB) error {
+	return g.DB.ApplyPaginationToQuery(q, baseGormQuery)
+}
+
 func GetRouter() http.Router {
 	return g.HTTP.NewRouter()
 }
@@ -74,8 +80,50 @@ func DebugEnabled() bool {
 	return g.HTTP.DebugEnabled()
 }
 
+// Validates an incoming request and binds the request body to the provided
+// struct if the validation passes.
+//
+// Returns a 400 error with validation errors if binding fails.
+//
+// Sets the bound request as an interface{} in the Gin registry if binding
+// succeeds.  You can retrieve in your handlers it like this:
+//
+// r, ok := goat.GetRequest(c).(*yourRequestStruct)
+//
+// This middleware allows you to annotate your request struct fields with
+// `binding:"required"` to make required fields.
+//
+// @TODO it seems that if a request struct has a field that is named the same as one of it's child struct's fields that the validation messages don't prefix the field name with child struct's name
 func BindMiddleware(r interface{}) gin.HandlerFunc {
 	return g.HTTP.BindMiddleware(r)
+}
+
+// Deprecated in favor of BindMiddleware; preserving for backwards-compatibility.
+func BindRequestMiddleware(req interface{}) gin.HandlerFunc {
+	return BindMiddleware(req)
+}
+
+// Returns the bound request struct from the provided Gin context or nil if a goat request has not been bound.
+// After binding a request using BindMiddleware, call this function to retrieve it in your handler:
+// 	req, ok := goat.GetRequest(c).(*MyRequestType)
+//	if !ok {
+//		h.errors.HandleMessage(c, "failed to get request", goat.RespondBadRequestError)
+//		return
+//	}
+func GetRequest(c *gin.Context) interface{} {
+	return g.HTTP.GetRequest(c)
+}
+
+func FilterMiddleware() gin.HandlerFunc {
+	return g.HTTP.FilterMiddleware()
+}
+
+func GetFilter(c *gin.Context) *query.Query {
+	return g.HTTP.GetFilter(c)
+}
+
+func GetHandlerContext(c *gin.Context) context.Context {
+	return g.HTTP.GetHandlerContext(c)
 }
 
 // Returns a random string that can be used as a Basic Auth token.
