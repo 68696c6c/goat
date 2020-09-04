@@ -33,6 +33,7 @@ type Config struct {
 type ServiceGORM struct {
 	connections   map[string]ConnectionConfig
 	migrationPath string
+	dialect       string
 }
 
 func NewServiceGORM(c Config) ServiceGORM {
@@ -41,6 +42,7 @@ func NewServiceGORM(c Config) ServiceGORM {
 			dbMainConnectionKey: c.MainConnectionConfig,
 		},
 		migrationPath: c.MigrationPath,
+		dialect:       "mysql",
 	}
 }
 
@@ -98,7 +100,7 @@ func (s ServiceGORM) GetSchema(connection *gorm.DB) (goose.SchemaInterface, erro
 // implementations will have different connection logic.
 func (s ServiceGORM) GetConnection(c ConnectionConfig) (*gorm.DB, error) {
 	cs := fmt.Sprintf(dbConnectionTemplate, c.Username, c.Password, c.Host, c.Port, c.Database)
-	connection, err := gorm.Open("mysql", cs)
+	connection, err := gorm.Open(s.dialect, cs)
 	if err != nil {
 		return nil, err
 	}
