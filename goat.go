@@ -6,7 +6,6 @@ import (
 
 	"github.com/68696c6c/goat/query"
 	"github.com/68696c6c/goat/src/database"
-	"github.com/68696c6c/goat/src/http"
 	"github.com/68696c6c/goat/src/sys"
 
 	"github.com/68696c6c/goose"
@@ -18,6 +17,13 @@ import (
 )
 
 var g sys.Goat
+
+type Router interface {
+	Run() error
+	SetRegistry(d map[string]interface{})
+	InitRegistry() gin.HandlerFunc
+	GetEngine() *gin.Engine
+}
 
 // Goat has three primary concerns:
 // - database connections and schema management,
@@ -57,7 +63,7 @@ func ApplyPaginationToQuery(q *query.Query, baseGormQuery *gorm.DB) error {
 	return g.DB.ApplyPaginationToQuery(q, baseGormQuery)
 }
 
-func GetRouter() http.Router {
+func GetRouter() Router {
 	return g.HTTP.NewRouter()
 }
 

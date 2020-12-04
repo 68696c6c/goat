@@ -8,8 +8,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	ghttp "github.com/68696c6c/goat/src/http"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -30,7 +28,7 @@ func (r *HandlerTestResponse) Map(m interface{}) error {
 	return err
 }
 
-func NewHandlerTest(r ghttp.Router) *HandlerTest {
+func NewHandlerTest(r Router) *HandlerTest {
 	return &HandlerTest{
 		router:     r.GetEngine(),
 		remoteAddr: "127.0.0.1",

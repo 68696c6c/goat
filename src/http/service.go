@@ -86,7 +86,7 @@ const (
 // @TODO add support for more auth types.
 type Service interface {
 	DebugEnabled() bool
-	NewRouter() Router
+	NewRouter() *RouterGin
 	GetHandlerContext(c *gin.Context) context.Context
 	BindMiddleware(r interface{}) gin.HandlerFunc
 	GetRequest(c *gin.Context) interface{}
@@ -134,7 +134,7 @@ func (s ServiceGin) DebugEnabled() bool {
 	return s.mode == gin.DebugMode
 }
 
-func (s ServiceGin) NewRouter() Router {
+func (s ServiceGin) NewRouter() *RouterGin {
 	r := NewRouterGin(s.host, s.port)
 
 	gin.SetMode(s.mode)

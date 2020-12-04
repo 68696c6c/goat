@@ -5,8 +5,6 @@ import (
 	"os"
 	"testing"
 
-	ghttp "github.com/68696c6c/goat/src/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/stretchr/testify/assert"
@@ -28,7 +26,7 @@ type responseList struct {
 	Data []httpTestModel `json:"data"`
 }
 
-func getTestRouter(t *testing.T) ghttp.Router {
+func getTestRouter(t *testing.T) Router {
 	if !initialized {
 		err := os.Setenv("ENV", "test")
 		require.Nil(t, err, "failed to set env variable 'ENV'")
@@ -44,7 +42,7 @@ func getTestRouter(t *testing.T) ghttp.Router {
 	return r
 }
 
-func setTestRoutes(r ghttp.Router) {
+func setTestRoutes(r Router) {
 	engine := r.GetEngine()
 	engine.GET("/ping", func(c *gin.Context) {
 		RespondMessage(c, "pong")
