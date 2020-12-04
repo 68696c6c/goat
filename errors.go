@@ -2,6 +2,8 @@ package goat
 
 import "github.com/68696c6c/goat/utils"
 
+// The underlying utils functions are in a sub-package so that the Goat internals can use them without circular imports.
+
 func ErrorsToStrings(errs []error) []string {
 	return utils.ErrorsToStrings(errs)
 }
