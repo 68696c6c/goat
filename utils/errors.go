@@ -73,21 +73,10 @@ func ErrorsBesidesRecordNotFound(errs []error) bool {
 }
 
 // Returns true if the provided error is the GORM "record not found" error.  Note that this function only returns true
-// on exact matches, so wrapped or flattened errors containing the "record not found" error will not be caught.  For
-// those cases, use IsOrContainsNotFoundError, but be careful to avoid false positives.
+// on exact matches, so wrapped or flattened errors containing the "record not found" error will not be caught.  Given
+// that the GORM "record not found" error is rather generic, handling those cases is too likely to result in false
+// positives.  For this reason, the check should be performed before wrapping or flattening any GORM errors using the
+// other helper functions in this file.
 func IsNotFoundError(err error) bool {
 	return err == gorm.ErrRecordNotFound
-}
-
-// Returns true if the provided error is or contains the GORM "record not found" error. Note that the GORM "record not
-// found" error message rather generic so the caller needs to be careful to avoid false positives.
-func IsOrContainsNotFoundError(err error) bool {
-	if err == gorm.ErrRecordNotFound {
-		return true
-	}
-	// The provided error could be a flattened slice of errors or a wrapped error that contains the "record not found" error.
-	if strings.Contains(err.Error(), gorm.ErrRecordNotFound.Error()) {
-		return true
-	}
-	return false
 }

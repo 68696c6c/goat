@@ -64,72 +64,12 @@ func TestIsNotFoundError_False(t *testing.T) {
 }
 
 func TestIsNotFoundError_Flattened_False(t *testing.T) {
-	// IsNotFoundError intentionally does not support flattened or wrapped "record not found" errors.
+	// Given that the GORM "record not found" is rather generic, IsNotFoundError intentionally does not support flattened
+	// or wrapped "record not found" errors to avoid the potential of false positives.
 	e := errors.Wrap(ErrorsToError([]error{
 		gorm.ErrRecordNotFound,
 		errors.New(fake.Sentence()),
 	}), fake.Sentence())
 	v := IsNotFoundError(e)
 	assert.False(t, v, "false positive looking for 'record not found' error")
-}
-
-// IsOrContainsNotFoundError tests.
-
-func TestIsOrContainsNotFoundError_Single_True(t *testing.T) {
-	v := IsOrContainsNotFoundError(gorm.ErrRecordNotFound)
-	assert.True(t, v, "failed to recognize 'record not found' error")
-}
-
-func TestIsOrContainsNotFoundError_Flattened_True(t *testing.T) {
-	e := ErrorsToError([]error{
-		gorm.ErrRecordNotFound,
-		errors.New(fake.Word()),
-	})
-	v := IsOrContainsNotFoundError(e)
-	assert.True(t, v, "failed to recognize 'record not found' error in a flattened slice of errors")
-}
-
-func TestIsOrContainsNotFoundError_Wrapped_True(t *testing.T) {
-	e := errors.Wrap(gorm.ErrRecordNotFound, fake.Sentence())
-	v := IsOrContainsNotFoundError(e)
-	assert.True(t, v, "failed to recognize 'record not found' error in a wrapped error")
-}
-
-func TestIsOrContainsNotFoundError_FlattenedWrapped_True(t *testing.T) {
-	e := errors.Wrap(ErrorsToError([]error{
-		gorm.ErrRecordNotFound,
-		errors.New(fake.Sentence()),
-	}), fake.Sentence())
-	v := IsOrContainsNotFoundError(e)
-	assert.True(t, v, "failed to recognize 'record not found' error in a wrapped and flattened error")
-}
-
-func TestIsOrContainsNotFoundError_Single_False(t *testing.T) {
-	e := errors.New(fake.Sentence())
-	v := IsOrContainsNotFoundError(e)
-	assert.False(t, v, "false positive looking for 'record not found' error")
-}
-
-func TestIsOrContainsNotFoundError_Flattened_False(t *testing.T) {
-	e := ErrorsToError([]error{
-		errors.New(fake.Sentence()),
-		errors.New(fake.Sentence()),
-	})
-	v := IsOrContainsNotFoundError(e)
-	assert.False(t, v, "false positive looking for 'record not found' error in a flattened slice of errors")
-}
-
-func TestIsOrContainsNotFoundError_Wrapped_False(t *testing.T) {
-	e := errors.Wrap(errors.New(fake.Sentence()), fake.Sentence())
-	v := IsOrContainsNotFoundError(e)
-	assert.False(t, v, "false positive looking for 'record not found' error in a wrapped error")
-}
-
-func TestIsOrContainsNotFoundError_FlattenedWrapped_False(t *testing.T) {
-	e := errors.Wrap(ErrorsToError([]error{
-		errors.New(fake.Sentence()),
-		errors.New(fake.Sentence()),
-	}), fake.Sentence())
-	v := IsOrContainsNotFoundError(e)
-	assert.False(t, v, "false positive looking for 'record not found' error in a wrapped and flattened error")
 }
