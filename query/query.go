@@ -43,7 +43,7 @@ type Query struct {
 	Preload    []string
 }
 
-func NewQueryFromGin(c *gin.Context) *Query {
+func NewQueryBuilder(c *gin.Context) *Query {
 	return &Query{
 		Pagination: NewPaginationFromGin(c),
 		Filter:     filter.NewFilter(),

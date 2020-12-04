@@ -191,7 +191,7 @@ func (s ServiceGin) GetRequest(c *gin.Context) interface{} {
 
 func (s ServiceGin) FilterMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		q := query.NewQueryFromGin(c)
+		q := query.NewQueryBuilder(c)
 		c.Set(contextKeyQuery, q)
 		return
 	}
