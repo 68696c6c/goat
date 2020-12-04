@@ -1,6 +1,6 @@
 module github.com/68696c6c/goat
 
-go 1.12
+go 1.15
 
 require (
 	github.com/68696c6c/goose v0.1.1
