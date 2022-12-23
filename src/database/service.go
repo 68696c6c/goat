@@ -6,7 +6,6 @@ import (
 	"github.com/68696c6c/goat/query"
 	"github.com/68696c6c/goat/utils"
 
-	"github.com/68696c6c/goose"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
@@ -24,7 +23,6 @@ type Service interface {
 	GetMainDB() (*gorm.DB, error)
 	GetMigrationDB() (*gorm.DB, error)
 	GetCustomDB(key string) (*gorm.DB, error)
-	GetSchema(connection *gorm.DB) (goose.SchemaInterface, error)
 	GetConnection(c ConnectionConfig) (*gorm.DB, error)
 	ApplyPaginationToQuery(q *query.Query, baseGormQuery *gorm.DB) error
 }
@@ -88,15 +86,6 @@ func (s ServiceGORM) GetCustomDB(key string) (*gorm.DB, error) {
 		return nil, errors.Wrap(err, fmt.Sprintf(t, key, c.String()))
 	}
 	return connection, nil
-}
-
-func (s ServiceGORM) GetSchema(connection *gorm.DB) (goose.SchemaInterface, error) {
-	// @TODO handle logging better?
-	schema, err := goose.NewSchema(connection, s.migrationPath, nil)
-	if err != nil {
-		return nil, err
-	}
-	return schema, nil
 }
 
 // Returns a database connection using the provided configuration.

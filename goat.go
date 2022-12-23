@@ -8,7 +8,6 @@ import (
 	"github.com/68696c6c/goat/src/database"
 	"github.com/68696c6c/goat/src/sys"
 
-	"github.com/68696c6c/goose"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
@@ -26,7 +25,7 @@ type Router interface {
 }
 
 // Goat has three primary concerns:
-// - database connections and schema management,
+// - database connections
 // - request handling
 // - logging
 // These concerns are encapsulated inside of services that are bootstrapped when goat.Init() is called.
@@ -53,10 +52,6 @@ func GetDB(key string) (*gorm.DB, error) {
 
 func GetCustomDB(c database.ConnectionConfig) (*gorm.DB, error) {
 	return g.DB.GetConnection(c)
-}
-
-func GetSchema(connection *gorm.DB) (goose.SchemaInterface, error) {
-	return g.DB.GetSchema(connection)
 }
 
 func ApplyPaginationToQuery(q *query.Query, baseGormQuery *gorm.DB) error {
@@ -111,7 +106,8 @@ func BindRequestMiddleware(req interface{}) gin.HandlerFunc {
 
 // Returns the bound request struct from the provided Gin context or nil if a goat request has not been bound.
 // After binding a request using BindMiddleware, call this function to retrieve it in your handler:
-// 	req, ok := goat.GetRequest(c).(*MyRequestType)
+//
+//	req, ok := goat.GetRequest(c).(*MyRequestType)
 //	if !ok {
 //		h.errors.HandleMessage(c, "failed to get request", goat.RespondBadRequestError)
 //		return
