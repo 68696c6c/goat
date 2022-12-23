@@ -45,7 +45,7 @@ type Query struct {
 
 func NewQueryBuilder(c *gin.Context) *Query {
 	return &Query{
-		Pagination: NewPagination(c),
+		Pagination: NewPaginationFromGin(c),
 		Filter:     filter.NewFilter(),
 		Sort:       NewSort(c),
 	}
@@ -117,7 +117,8 @@ func (q *Query) ApplyToGorm(g *gorm.DB) (*gorm.DB, error) {
 // Copies the query, removing the pagination and applies it to the provided Gorm
 // instance.  Can be used to get the unpaginated total count of rows for use in
 // pagination.
-func (q *Query) ApplyToGormCount(g *gorm.DB) (*gorm.DB, error) {
+// DOES NOT MODIFY THE QUERY INSTANCE
+func (q *Query) GetGormPageQuery(g *gorm.DB) (*gorm.DB, error) {
 	c := &Query{
 		Filter:  q.Filter,
 		Preload: q.Preload,
@@ -127,6 +128,17 @@ func (q *Query) ApplyToGormCount(g *gorm.DB) (*gorm.DB, error) {
 		return nil, err
 	}
 	return cg, nil
+}
+
+// deprecated in favor of GetGormPageQuery
+func (q *Query) ApplyToGormCount(g *gorm.DB) (*gorm.DB, error) {
+	return q.GetGormPageQuery(g)
+}
+
+// Updates the Pagination Total and TotalPages values using the provided new totalRecordCount.
+func (q *Query) ApplyPaginationTotals(totalRecordCount uint) {
+	original := q.Pagination
+	q.Pagination = NewPaginationFromValues(original.Page, original.PageSize, totalRecordCount)
 }
 
 // AND Filters

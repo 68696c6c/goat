@@ -28,9 +28,9 @@ func (r *HandlerTestResponse) Map(m interface{}) error {
 	return err
 }
 
-func NewHandlerTest(r *Router) *HandlerTest {
+func NewHandlerTest(r Router) *HandlerTest {
 	return &HandlerTest{
-		router:     r.Engine,
+		router:     r.GetEngine(),
 		remoteAddr: "127.0.0.1",
 	}
 }

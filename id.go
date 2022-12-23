@@ -6,7 +6,8 @@ import (
 	"github.com/google/uuid"
 )
 
-// A UUID type that implements a custom Value function for storing UUIDs as binary(16) columns in the database.
+// A UUID type that implements a custom Value function for storing UUIDs as
+// binary(16) columns in a database using GORM.
 type ID uuid.UUID
 
 func (id *ID) Scan(src interface{}) error {

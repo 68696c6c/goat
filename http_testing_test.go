@@ -11,6 +11,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var initialized bool
+
 type httpTestModel struct {
 	ID   int    `json:"id"`
 	Name string `json:"name"`
@@ -24,30 +26,33 @@ type responseList struct {
 	Data []httpTestModel `json:"data"`
 }
 
-var testRouter *Router
-
-func getTestRouter() *Router {
+func getTestRouter(t *testing.T) Router {
 	if !initialized {
-		ReadConfig(false)
-		SetRoot(os.Getenv("APP_BASE"))
+		err := os.Setenv("ENV", "test")
+		require.Nil(t, err, "failed to set env variable 'ENV'")
+
+		err = os.Setenv("MIGRATION_PATH", "src/database")
+		require.Nil(t, err, "failed to set env variable 'MIGRATION_PATH'")
+
 		Init()
+		initialized = true
 	}
-	if testRouter == nil {
-		testRouter = NewRouter("debug", setTestRoutes)
-	}
-	return testRouter
+	r := GetRouter()
+	setTestRoutes(r)
+	return r
 }
 
-func setTestRoutes(r *Router) {
-	r.Engine.GET("/ping", func(c *gin.Context) {
+func setTestRoutes(r Router) {
+	engine := r.GetEngine()
+	engine.GET("/ping", func(c *gin.Context) {
 		RespondMessage(c, "pong")
 	})
-	r.Engine.GET("/headers", func(c *gin.Context) {
+	engine.GET("/headers", func(c *gin.Context) {
 		key := c.Request.Header.Get("Authorization")
 		m := httpTestModel{1, key}
 		RespondData(c, responseItem{m})
 	})
-	r.Engine.POST("/post", func(c *gin.Context) {
+	engine.POST("/post", func(c *gin.Context) {
 		m := httpTestModel{}
 		if err := c.ShouldBindWith(&m, binding.JSON); err != nil {
 			RespondBadRequestError(c, err)
@@ -55,7 +60,7 @@ func setTestRoutes(r *Router) {
 		}
 		RespondData(c, responseItem{m})
 	})
-	r.Engine.PUT("/put", func(c *gin.Context) {
+	engine.PUT("/put", func(c *gin.Context) {
 		m := httpTestModel{}
 		if err := c.ShouldBindWith(&m, binding.JSON); err != nil {
 			RespondBadRequestError(c, err)
@@ -63,24 +68,24 @@ func setTestRoutes(r *Router) {
 		}
 		RespondData(c, responseItem{m})
 	})
-	r.Engine.GET("/get/:id", func(c *gin.Context) {
+	engine.GET("/get/:id", func(c *gin.Context) {
 		m := httpTestModel{1, "model"}
 		RespondData(c, responseItem{m})
 	})
-	r.Engine.GET("/list", func(c *gin.Context) {
+	engine.GET("/list", func(c *gin.Context) {
 		data := []httpTestModel{
 			{1, "model 1"},
 			{2, "model 2"},
 		}
 		RespondData(c, responseList{data})
 	})
-	r.Engine.DELETE("/delete", func(c *gin.Context) {
+	engine.DELETE("/delete", func(c *gin.Context) {
 		RespondMessage(c, "ok")
 	})
 }
 
 func TestHandlerTest_Simple(t *testing.T) {
-	tr := getTestRouter()
+	tr := getTestRouter(t)
 
 	h := NewHandlerTest(tr)
 	r := h.Get("/ping").Send()
@@ -89,7 +94,7 @@ func TestHandlerTest_Simple(t *testing.T) {
 }
 
 func TestHandlerTest_Headers(t *testing.T) {
-	tr := getTestRouter()
+	tr := getTestRouter(t)
 
 	c := NewHandlerTest(tr)
 	h := map[string]string{
@@ -104,7 +109,7 @@ func TestHandlerTest_Headers(t *testing.T) {
 }
 
 func TestHandlerTest_Post(t *testing.T) {
-	tr := getTestRouter()
+	tr := getTestRouter(t)
 
 	c := NewHandlerTest(tr)
 	data := &map[string]interface{}{
@@ -121,7 +126,7 @@ func TestHandlerTest_Post(t *testing.T) {
 }
 
 func TestHandlerTest_Get(t *testing.T) {
-	tr := getTestRouter()
+	tr := getTestRouter(t)
 
 	c := NewHandlerTest(tr)
 	r := c.GetF("/get/%v", 1).Send()
@@ -132,7 +137,7 @@ func TestHandlerTest_Get(t *testing.T) {
 }
 
 func TestHandlerTest_List(t *testing.T) {
-	tr := getTestRouter()
+	tr := getTestRouter(t)
 
 	c := NewHandlerTest(tr)
 	r := c.Get("/list").Send()
@@ -144,7 +149,7 @@ func TestHandlerTest_List(t *testing.T) {
 }
 
 func TestHandlerTest_Put(t *testing.T) {
-	tr := getTestRouter()
+	tr := getTestRouter(t)
 
 	c := NewHandlerTest(tr)
 	data := &map[string]interface{}{
@@ -161,7 +166,7 @@ func TestHandlerTest_Put(t *testing.T) {
 }
 
 func TestHandlerTest_Delete(t *testing.T) {
-	tr := getTestRouter()
+	tr := getTestRouter(t)
 
 	c := NewHandlerTest(tr)
 	r := c.Delete("/delete").Send()

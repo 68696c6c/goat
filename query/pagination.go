@@ -2,52 +2,70 @@ package query
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
 const (
-	defaultPage     = 1
-	defaultPageSize = 50
-	defaultTotal    = 0
+	defaultTotalRecords     uint = 0
+	defaultTotalPages       uint = 0
+	defaultRecordsPerPage   uint = 50
+	defaultCurrentPageIndex uint = 1
+
+	currentPageKey = "page"
+	perPageKey     = "page_size"
 )
 
-func NewPagination(c *gin.Context) Pagination {
-	if c == nil {
-		return Pagination{
-			Page:     uint(defaultPage),
-			PageSize: uint(defaultPageSize),
-			Total:    defaultTotal,
-		}
-	}
-	page, err := strconv.ParseUint(c.Query("page"), 10, 32)
-	if err != nil {
-		page = defaultPage
-	}
-	pageSize, err := strconv.ParseUint(c.Query("page_size"), 10, 32)
-	if err != nil {
-		pageSize = defaultPageSize
-	}
-	return Pagination{
-		Page:     uint(page),
-		PageSize: uint(pageSize),
-		Total:    defaultTotal,
-	}
+type Pagination struct {
+	Page       uint `json:"page"`      // the json name must match currentPageKey, defined above
+	PageSize   uint `json:"page_size"` // the json name must match perPageKey, defined above
+	Total      uint `json:"total"`
+	TotalPages uint `json:"total_pages"`
+
+	FirstPage    string `json:"first_page"`
+	PreviousPage string `json:"previous_page"`
+	NextPage     string `json:"next_page"`
+	LastPage     string `json:"last_page"`
 }
 
-type Pagination struct {
-	Page     uint `json:"page"`
-	PageSize uint `json:"page_size"`
-	Total    uint `json:"total"`
+func NewPaginationFromGin(c *gin.Context) Pagination {
+	result := Pagination{
+		Page:       defaultCurrentPageIndex,
+		PageSize:   defaultRecordsPerPage,
+		Total:      defaultTotalRecords,
+		TotalPages: defaultTotalPages,
+	}
+
+	if c == nil {
+		return result
+	}
+
+	page, err := strconv.ParseUint(c.Query(currentPageKey), 10, 32)
+	if err == nil {
+		result.Page = uint(page)
+	}
+
+	pageSize, err := strconv.ParseUint(c.Query(perPageKey), 10, 32)
+	if err == nil {
+		result.PageSize = uint(pageSize)
+	}
+
+	return result
+}
+
+func NewPaginationFromValues(page, size, total uint) Pagination {
+	return Pagination{
+		Page:     page,
+		PageSize: size,
+		Total:    total,
+		// When performing integer division, Go rounds quotients down to the nearest integer.
+		// We want to round up in this case, so we need to divide floats.
+		TotalPages: uint(math.Ceil(float64(total) / float64(size))),
+	}
 }
 
 func (p Pagination) String() string {
 	return fmt.Sprintf("page: %v\n page_size: %v\n total: %v\n", p.Page, p.PageSize, p.Total)
-}
-
-func (p Pagination) Paginate(page, size, total uint) {
-	p.Page = page
-	p.PageSize = size
-	p.Total = total
 }

@@ -1,45 +1,75 @@
-package goat
+package utils
 
-import "github.com/68696c6c/goat/utils"
+import (
+	"errors"
+	"log"
+	"os"
+	"strings"
 
-// The underlying utils functions are in a sub-package so that the Goat internals can use them without circular imports.
+	"github.com/jinzhu/gorm"
+)
 
 func ErrorsToStrings(errs []error) []string {
-	return utils.ErrorsToStrings(errs)
+	var s []string
+	for _, err := range errs {
+		s = append(s, err.Error())
+	}
+	return s
 }
 
 func ErrorsToString(errs []error) string {
-	return utils.ErrorsToString(errs)
+	s := ErrorsToStrings(errs)
+	return strings.Join(s, ", ")
 }
 
 func PrependErrors(errs []error, err error) []error {
-	return utils.PrependErrors(errs, err)
+	return append([]error{err}, errs...)
 }
 
 func ErrorsToError(errs []error) error {
-	return utils.ErrorsToError(errs)
+	var msg []string
+	for _, err := range errs {
+		msg = append(msg, err.Error())
+	}
+	return errors.New(strings.Join(msg, ", "))
 }
 
 func ExitError(err error) {
-	utils.ExitError(err)
+	l := log.New(os.Stderr, "", 0)
+	l.Println(err)
+	os.Exit(1)
 }
 
 func ExitErrors(errs []error) {
-	utils.ExitErrors(errs)
+	l := log.New(os.Stderr, "", 0)
+	for _, e := range errs {
+		l.Println(e)
+	}
+	os.Exit(1)
 }
 
 func ExitSuccess() {
-	utils.ExitSuccess()
+	os.Exit(0)
 }
 
 // Returns true if the provided slice of errors contains a GORM "record not found" error.
 func RecordNotFound(errs []error) bool {
-	return utils.RecordNotFound(errs)
+	for _, err := range errs {
+		if err == gorm.ErrRecordNotFound {
+			return true
+		}
+	}
+	return false
 }
 
 // Returns true if there are any errors in the provided array that are NOT a GORM "record not found" error.
 func ErrorsBesidesRecordNotFound(errs []error) bool {
-	return utils.ErrorsBesidesRecordNotFound(errs)
+	for _, e := range errs {
+		if e != gorm.ErrRecordNotFound {
+			return true
+		}
+	}
+	return false
 }
 
 // Returns true if the provided error is the GORM "record not found" error.  Note that this function only returns true
@@ -48,5 +78,5 @@ func ErrorsBesidesRecordNotFound(errs []error) bool {
 // positives.  For this reason, the check should be performed before wrapping or flattening any GORM errors using the
 // other helper functions in this file.
 func IsNotFoundError(err error) bool {
-	return utils.IsNotFoundError(err)
+	return err == gorm.ErrRecordNotFound
 }

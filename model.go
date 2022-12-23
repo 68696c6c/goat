@@ -1,8 +1,9 @@
 package goat
 
 import (
-	"github.com/jinzhu/gorm"
 	"time"
+
+	"github.com/jinzhu/gorm"
 )
 
 type Model struct {
@@ -13,6 +14,18 @@ type Model struct {
 }
 
 func (m Model) BeforeCreate(scope *gorm.Scope) error {
+	id := NewID()
+	scope.SetColumn("ID", id)
+	return nil
+}
+
+type ModelHardDelete struct {
+	ID        ID         `json:"id" gorm:"primary_key"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt *time.Time `json:"updated_at"`
+}
+
+func (m ModelHardDelete) BeforeCreate(scope *gorm.Scope) error {
 	id := NewID()
 	scope.SetColumn("ID", id)
 	return nil
