@@ -4,5 +4,4 @@
 - R&D generic repos & controllers
 - validation error responder (RespondValidationError takes a map instead of an error so it doesn't match the ErrorResponder interface)
 - more utils
-- remove 68696c6c/goose
-- update dependencies to latest
+- upgrade to gorm v2
