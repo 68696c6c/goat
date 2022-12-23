@@ -10,7 +10,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
@@ -68,13 +67,6 @@ func GetLogger() *logrus.Logger {
 
 func GetFileLogger(name string) (*logrus.Logger, error) {
 	return g.Log.NewFileLogger(name)
-}
-
-func ErrorIfProd() error {
-	if g.Env == sys.EnvironmentProd {
-		return errors.Errorf("app environment is set to '%s'", sys.EnvironmentProd.String())
-	}
-	return nil
 }
 
 func DebugEnabled() bool {
