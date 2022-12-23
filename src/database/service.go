@@ -105,14 +105,6 @@ func (s ServiceGORM) GetConnection(c ConnectionConfig) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	// Don't set the updated_at column on create.
-	err = connection.Callback().Create().Replace("gorm:before_create", func(db *gorm.DB) {
-		db.Statement.SetColumn("CreatedAt", db.NowFunc())
-	})
-	if err != nil {
-		return nil, err
-	}
-
 	return connection, nil
 }
 
