@@ -6,18 +6,22 @@ import (
 	"gorm.io/gorm"
 )
 
-type Model struct {
+type Model interface {
+	*ModelSoftDelete | *ModelHardDelete
+}
+
+type ModelSoftDelete struct {
 	ID        ID         `json:"id" gorm:"primaryKey"`
 	CreatedAt time.Time  `json:"created_at"`
 	UpdatedAt *time.Time `json:"updated_at" gorm:"-"`
 	DeletedAt *time.Time `json:"deleted_at"`
 }
 
-func (m *Model) BeforeCreate(tx *gorm.DB) error {
+func (m *ModelSoftDelete) BeforeCreate(tx *gorm.DB) error {
 	return setId(m.ID, tx)
 }
 
-func (m *Model) BeforeUpdate(tx *gorm.DB) error {
+func (m *ModelSoftDelete) BeforeUpdate(tx *gorm.DB) error {
 	return setUpdatedAt(tx)
 }
 
