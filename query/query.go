@@ -7,8 +7,8 @@ import (
 	"github.com/68696c6c/goat/query/filter"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
+	"gorm.io/gorm"
 )
 
 type Builder interface {
@@ -114,9 +114,8 @@ func (q *Query) ApplyToGorm(g *gorm.DB) (*gorm.DB, error) {
 	return g, nil
 }
 
-// Copies the query, removing the pagination and applies it to the provided Gorm
-// instance.  Can be used to get the unpaginated total count of rows for use in
-// pagination.
+// GetGormPageQuery copies the query, removing the pagination and applies it to the provided Gorm instance.
+// Can be used to get the un-paginated total count of rows for use in pagination.
 // DOES NOT MODIFY THE QUERY INSTANCE
 func (q *Query) GetGormPageQuery(g *gorm.DB) (*gorm.DB, error) {
 	c := &Query{
@@ -130,13 +129,8 @@ func (q *Query) GetGormPageQuery(g *gorm.DB) (*gorm.DB, error) {
 	return cg, nil
 }
 
-// deprecated in favor of GetGormPageQuery
-func (q *Query) ApplyToGormCount(g *gorm.DB) (*gorm.DB, error) {
-	return q.GetGormPageQuery(g)
-}
-
-// Updates the Pagination Total and TotalPages values using the provided new totalRecordCount.
-func (q *Query) ApplyPaginationTotals(totalRecordCount uint) {
+// ApplyPaginationTotals updates the Pagination Total and TotalPages values using the provided new totalRecordCount.
+func (q *Query) ApplyPaginationTotals(totalRecordCount int64) {
 	original := q.Pagination
 	q.Pagination = NewPaginationFromValues(original.Page, original.PageSize, totalRecordCount)
 }

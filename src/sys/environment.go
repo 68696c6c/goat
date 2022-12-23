@@ -8,7 +8,7 @@ import (
 // For example, 'local' would be a developers local machine, 'test' would be the environment used while running unit
 // tests, while 'dev', 'staging', and 'prod' are reserved for deployment environments.
 //
-// In 'local' and 'test' environments, Gin and GORM are run in debug mode.
+// In 'local' and 'test' environments, Gin and Gorm are run in debug mode.
 type Environment string
 
 const (
@@ -38,9 +38,9 @@ func (t Environment) String() string {
 // Gin has two log modes, expressed by string constants.
 // Gin also has a third mode for testing, but that is reserved for its own internal use.
 //
-// GORM has two log modes, expressed by an integer: 2 enables detailed logs, 1 disables logging, and 0 prints only
-// errors. GORM defaults to 0; calling gorm.LogMode(true) set the mode to 2; calling gorm.LogMode(false) will set the
-// mode to 1.  Goat will only call gorm.LogMode to enable detailed logs and will never disable GORM logging completely.
+// Gorm has two log modes, expressed by an integer: 2 enables detailed logs, 1 disables logging, and 0 prints only
+// errors. Gorm defaults to 0; calling gorm.LogMode(true) set the mode to 2; calling gorm.LogMode(false) will set the
+// mode to 1.  Goat will only call gorm.LogMode to enable detailed logs and will never disable Gorm logging completely.
 func DebugFromEnvironment(env Environment) bool {
 	switch env {
 	case EnvironmentLocal:

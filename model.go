@@ -3,30 +3,32 @@ package goat
 import (
 	"time"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 type Model struct {
-	ID        ID         `json:"id" gorm:"primary_key"`
+	ID        ID         `json:"id" gorm:"primaryKey"`
 	CreatedAt time.Time  `json:"created_at"`
 	UpdatedAt *time.Time `json:"updated_at"`
 	DeletedAt *time.Time `json:"deleted_at"`
 }
 
-func (m Model) BeforeCreate(scope *gorm.Scope) error {
-	id := NewID()
-	scope.SetColumn("ID", id)
+func (m Model) BeforeCreate(tx *gorm.DB) error {
+	if m.ID == NilID() {
+		m.ID = NewID()
+	}
 	return nil
 }
 
 type ModelHardDelete struct {
-	ID        ID         `json:"id" gorm:"primary_key"`
+	ID        ID         `json:"id" gorm:"primaryKey"`
 	CreatedAt time.Time  `json:"created_at"`
 	UpdatedAt *time.Time `json:"updated_at"`
 }
 
-func (m ModelHardDelete) BeforeCreate(scope *gorm.Scope) error {
-	id := NewID()
-	scope.SetColumn("ID", id)
+func (m ModelHardDelete) BeforeCreate(tx *gorm.DB) error {
+	if m.ID == NilID() {
+		m.ID = NewID()
+	}
 	return nil
 }
