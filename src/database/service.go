@@ -30,13 +30,11 @@ type Service interface {
 
 type Config struct {
 	MainConnectionConfig ConnectionConfig
-	MigrationPath        string
 }
 
 type ServiceGORM struct {
-	connections   map[string]ConnectionConfig
-	migrationPath string
-	dialect       string
+	connections map[string]ConnectionConfig
+	dialect     string
 }
 
 func NewServiceGORM(c Config) ServiceGORM {
@@ -44,8 +42,7 @@ func NewServiceGORM(c Config) ServiceGORM {
 		connections: map[string]ConnectionConfig{
 			dbMainConnectionKey: c.MainConnectionConfig,
 		},
-		migrationPath: c.MigrationPath,
-		dialect:       "mysql",
+		dialect: "mysql",
 	}
 }
 
