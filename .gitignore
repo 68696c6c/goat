@@ -1,6 +1,6 @@
 .idea
-vendor/*
-demo/vendor/*
+vendor
+demo/vendor
 demo/example
 demo/logs/*
 !demo/logs/.gitkeep

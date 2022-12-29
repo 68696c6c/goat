@@ -1,12 +1,7 @@
-built in migrations
 
-default commands like make:migration, something like this:
-func init() {
-	RootCommand.AddCommand(goat.MakeMigrationCommand)
-}
-
-generators for application (including structure, Dockerfile and Makefile), repos, handlers, etc
-
-cloudformation support template generator with Make targets for bootstrapping
-
-Oauth support
+# v0.2.0
+- ID to Id, DB to Db, etc
+- R&D generic repos & controllers
+- validation error responder (RespondValidationError takes a map instead of an error so it doesn't match the ErrorResponder interface)
+- more utils
+- upgrade to gorm v2

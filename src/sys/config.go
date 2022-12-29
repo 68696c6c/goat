@@ -8,12 +8,10 @@ import (
 	"github.com/68696c6c/goat/src/http"
 	log "github.com/68696c6c/goat/src/logging"
 
-	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 )
 
 type Config struct {
-	Env  Environment
 	CMD  cmd.Config
 	DB   db.Config
 	HTTP http.Config
@@ -30,37 +28,14 @@ func mustGetConfig() Config {
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
 
-	// Determine the environment that the app is running in.
-	e := viper.GetString("env")
-	env, err := EnvironmentFromString(e)
-	if err != nil {
-		panic(errors.Wrap(err, "failed to determine app environment"))
-	}
-
-	// If a Gin log mode was not specified, assume one based on the environment.
-	httpDebug := false
-	if hd := viper.GetString("http_debug"); hd == "" {
-		httpDebug = DebugFromEnvironment(env)
-	} else if hd == "1" {
-		httpDebug = true
-	}
-
-	// In order to avoid relying on hacky 'base path' assumptions, require the user to provide a path.
-	migrationPath := viper.GetString("migration_path")
-	if migrationPath == "" {
-		panic("failed to determine path to migration files")
-	}
-
 	// Read database, logger, and router config from the env using Viper.
 	return Config{
-		Env: env,
 		CMD: cmd.Config{},
 		DB: db.Config{
 			MainConnectionConfig: db.GetMainDBConfig(),
-			MigrationPath:        migrationPath,
 		},
 		HTTP: http.Config{
-			Debug:           httpDebug,
+			Debug:           viper.GetBool("http_debug"),
 			Host:            viper.GetString("http_host"),
 			Port:            viper.GetString("http_port"),
 			AuthType:        viper.GetString("auth_type"),
