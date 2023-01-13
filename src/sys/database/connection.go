@@ -22,12 +22,12 @@ func (c ConnectionConfig) String() string {
 	return fmt.Sprintf(t, c.Host, c.Port, c.Database, c.Username, c.Password, c.Debug, c.MultiStatements)
 }
 
-// Returns the default database connection.
+// GetMainDBConfig returns the default database connection.
 func GetMainDBConfig() ConnectionConfig {
 	return getDBConfig(dbMainConnectionKey)
 }
 
-// Returns a database connection config struct using app config values.
+// getDBConfig returns a database connection config struct using app config values.
 func getDBConfig(name string) ConnectionConfig {
 	return ConnectionConfig{
 		Debug:           viper.GetBool(name + ".debug"),

@@ -26,5 +26,3 @@ func MakeLink(href string) Link {
 		Href: href,
 	}
 }
-
-type LinkMaker func(string) Link

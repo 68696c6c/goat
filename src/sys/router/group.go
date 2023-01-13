@@ -3,7 +3,7 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 
-	"github.com/68696c6c/goat/sys/http/router/links"
+	"github.com/68696c6c/goat/sys/router/links"
 )
 
 type Group struct {

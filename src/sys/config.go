@@ -8,8 +8,8 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/68696c6c/goat/sys/database"
-	"github.com/68696c6c/goat/sys/http/router"
 	log "github.com/68696c6c/goat/sys/logging"
+	"github.com/68696c6c/goat/sys/router"
 	"github.com/68696c6c/goat/sys/utils"
 )
 

@@ -1,8 +1,6 @@
 package router
 
-import (
-	"net/url"
-)
+import "net/url"
 
 type Config struct {
 	BaseUrl               *url.URL
@@ -17,7 +15,6 @@ type Config struct {
 type Service interface {
 	InitRouter() Router
 	GetUrl(key ...string) *url.URL
-	// GetValidator() (*validator.Validate, error)
 }
 
 type service struct {
@@ -46,7 +43,3 @@ func (s *service) InitRouter() Router {
 func (s *service) GetUrl(key ...string) *url.URL {
 	return s.initRouter().GetUrl(key...)
 }
-
-// func (s *service) GetValidator() (*validator.Validate, error) {
-// 	return s.initRouter().GetValidator()
-// }

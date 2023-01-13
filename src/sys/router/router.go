@@ -17,7 +17,7 @@ import (
 	"github.com/pkg/errors"
 	"gopkg.in/gin-contrib/cors.v1"
 
-	"github.com/68696c6c/goat/sys/http/router/links"
+	"github.com/68696c6c/goat/sys/router/links"
 )
 
 // type Routes interface {

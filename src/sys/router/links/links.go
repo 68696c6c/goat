@@ -7,21 +7,7 @@ type Service interface {
 	AddBaseUrlPath(key, path string)
 	GetUrl(key ...string) *url.URL
 	GetBaseUrl() *url.URL
-	// GetUrlPath(key, path string) *url.URL
 }
-
-// type Url struct {
-// 	*url.URL
-// }
-//
-// func (u *Url) SetQueryParams(params url.Values) {
-// 	q := u.Query()
-// 	for key, value := range params {
-// 		for _, v := range value {
-// 			q.Add(key, v)
-// 		}
-// 	}
-// }
 
 func copyUrl(input *url.URL) *url.URL {
 	result, _ := url.Parse(input.String())
@@ -59,16 +45,6 @@ func (s *service) GetUrl(key ...string) *url.URL {
 func (s *service) GetBaseUrl() *url.URL {
 	return copyUrl(s.baseUrl)
 }
-
-// func (s *service) GetUrlPath(key, path string) *url.URL {
-// 	println("getting url path for '" + key + "' with path '" + path + "'")
-// 	base, ok := s.urls[key]
-// 	if ok {
-// 		return base.JoinPath(path)
-// 	}
-// 	// TODO: test this?
-// 	return s.baseUrl.JoinPath(path)
-// }
 
 func (s *service) AddBaseUrlPath(key, path string) {
 	s.urls[key] = s.baseUrl.JoinPath(path)

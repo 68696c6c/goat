@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/68696c6c/goat"
-	"github.com/68696c6c/goat/query2"
+	"github.com/68696c6c/goat/query"
 	"github.com/68696c6c/goat/resource"
 	"github.com/icrowley/fake"
 	"github.com/stretchr/testify/assert"
@@ -18,7 +18,7 @@ import (
 // Filter tests must come first in order to have a reliable expected count since other tests add records.
 
 func Test_OrganizationsRepo_Filter(t *testing.T) {
-	q := query2.NewQuery()
+	q := query.NewQuery()
 	p := resource.NewPagination()
 	result, _, err := tc.organizationsRepo.Filter(context.Background(), q, p)
 	require.Nil(t, err, "unexpected error")

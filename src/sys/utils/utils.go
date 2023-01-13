@@ -22,6 +22,14 @@ func EnvOrDefault[T any](envKey string, defaultValue T) T {
 	return defaultValue
 }
 
+func ArgStringD(arg, def string) string {
+	v := arg
+	if arg == "" {
+		v = def
+	}
+	return v
+}
+
 func MakeValidationError(field, rule string) error {
 	return errors.Errorf("%s failed on validation '%s'", field, rule)
 }

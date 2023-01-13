@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/68696c6c/goat"
-	"github.com/68696c6c/goat/query2"
+	"github.com/68696c6c/goat/query"
 	"github.com/68696c6c/goat/resource"
 
 	"github.com/68696c6c/example/app/models"
@@ -54,11 +54,11 @@ func (r dummyUsersRepo) Update(cx context.Context, id goat.ID, u models.UserRequ
 	return nil, nil
 }
 
-func (r dummyUsersRepo) Filter(cx context.Context, q query2.Builder, p resource.Pagination) ([]*models.User, resource.Pagination, error) {
+func (r dummyUsersRepo) Filter(cx context.Context, q query.Builder, p resource.Pagination) ([]*models.User, resource.Pagination, error) {
 	return []*models.User{}, resource.Pagination{}, nil
 }
 
-func (r dummyUsersRepo) ApplyFilterForUser(q query2.Builder, user *models.User) error {
+func (r dummyUsersRepo) ApplyFilterForUser(q query.Builder, user *models.User) error {
 	return nil
 }
 
@@ -74,6 +74,6 @@ func (r dummyUsersRepo) Delete(cx context.Context, m *models.User) error {
 	return nil
 }
 
-func (r dummyUsersRepo) FilterStrings(q query2.Builder, fields map[string][]string) error {
+func (r dummyUsersRepo) FilterStrings(q query.Builder, fields map[string][]string) error {
 	return nil
 }

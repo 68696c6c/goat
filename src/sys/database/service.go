@@ -7,8 +7,6 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-
-	"github.com/68696c6c/goat/query"
 )
 
 const (
@@ -20,13 +18,11 @@ const (
 // database connections if needed.  Only MySQL is directly supported, but since
 // Goat uses Gorm, any database supported by Gorm can theoretically be used.
 
-// Service
 type Service interface {
 	GetMainDB() (*gorm.DB, error)
 	GetMigrationDB() (*gorm.DB, error)
 	GetCustomDB(key string) (*gorm.DB, error)
 	GetConnection(c ConnectionConfig) (*gorm.DB, error)
-	ApplyPaginationToQuery(q query.Builder, baseGormQuery *gorm.DB) error
 
 	getConnections() map[string]ConnectionConfig
 }
@@ -53,7 +49,7 @@ func (s service) getConnections() map[string]ConnectionConfig {
 	return s.connections
 }
 
-// Returns a new database connection using the configured defaults.
+// GetMainDB returns a new database connection using the configured defaults.
 func (s service) GetMainDB() (*gorm.DB, error) {
 	c := s.connections[dbMainConnectionKey]
 	connection, err := s.GetConnection(c)
@@ -64,7 +60,7 @@ func (s service) GetMainDB() (*gorm.DB, error) {
 	return connection, nil
 }
 
-// Returns a new database connection using the configured defaults, but supporting multi-statements for running migrations.
+// GetMigrationDB returns a new database connection using the configured defaults, but supporting multi-statements for running migrations.
 func (s service) GetMigrationDB() (*gorm.DB, error) {
 	c := s.connections[dbMainConnectionKey]
 	c.MultiStatements = true
@@ -77,7 +73,7 @@ func (s service) GetMigrationDB() (*gorm.DB, error) {
 	return connection, nil
 }
 
-// Returns a new database connection using DB env variables with the provided  config key.
+// GetCustomDB returns a new database connection using DB env variables with the provided  config key.
 func (s service) GetCustomDB(key string) (*gorm.DB, error) {
 	c, ok := s.connections[key]
 	if !ok {
@@ -110,22 +106,4 @@ func (s service) GetConnection(c ConnectionConfig) (*gorm.DB, error) {
 	}
 
 	return connection, nil
-}
-
-// ApplyPaginationToQuery returns a Gorm query with the provided filter Query applied and updates the Query pagination to match the new row counts.
-func (s service) ApplyPaginationToQuery(q query.Builder, baseGormQuery *gorm.DB) error {
-	pageQuery, err := q.GetGormPageQuery(baseGormQuery)
-	if err != nil {
-		return err
-	}
-
-	var count int64
-	err = pageQuery.Count(&count).Error
-	if err != nil {
-		return errors.Wrap(err, "failed to execute filter count query")
-	}
-
-	q.ApplyPaginationTotals(count)
-
-	return nil
 }

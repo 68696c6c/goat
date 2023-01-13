@@ -21,7 +21,7 @@ func getLoggerConfig() Config {
 func TestNewServiceLogrus_Config(t *testing.T) {
 	c := getLoggerConfig()
 	c.Level = "info"
-	s := NewServiceLogrus(c)
+	s := NewService(c)
 
 	assert.Equal(t, c.Path, s.GetLogPath(), "unexpected log path")
 	assert.Equal(t, c.Ext, s.GetLogExt(), "unexpected log file extension")
@@ -29,7 +29,7 @@ func TestNewServiceLogrus_Config(t *testing.T) {
 }
 
 func TestNewServiceLogrus_Defaults(t *testing.T) {
-	s := NewServiceLogrus(Config{})
+	s := NewService(Config{})
 
 	assert.Equal(t, loggerPath, s.GetLogPath(), "unexpected default log path")
 	assert.Equal(t, loggerExt, s.GetLogExt(), "unexpected default log file extension")
@@ -38,7 +38,7 @@ func TestNewServiceLogrus_Defaults(t *testing.T) {
 
 func TestServiceLogrus_NewLogger(t *testing.T) {
 	c := getLoggerConfig()
-	s := NewServiceLogrus(c)
+	s := NewService(c)
 	l := s.NewLogger()
 
 	assert.Equal(t, os.Stderr, l.Out, "unexpected default logger out")
@@ -48,7 +48,7 @@ func TestServiceLogrus_NewLogger(t *testing.T) {
 func TestServiceLogrus_NewLogger_LogLevel(t *testing.T) {
 	c := getLoggerConfig()
 	c.Level = "error"
-	s := NewServiceLogrus(c)
+	s := NewService(c)
 	l := s.NewLogger()
 
 	assert.Equal(t, c.Level, l.Level.String(), "unexpected logger level")
@@ -59,7 +59,7 @@ func TestServiceLogrus_NewFileLogger_FileCreated(t *testing.T) {
 		Path: "test",
 		Ext:  "ext",
 	}
-	s := NewServiceLogrus(c)
+	s := NewService(c)
 	f := fake.Word()
 	l, err := s.NewFileLogger(f)
 	require.Nil(t, err, "unexpected error returned")

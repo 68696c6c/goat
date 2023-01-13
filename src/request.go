@@ -39,6 +39,7 @@ func getContextValue(cx *gin.Context, key string) any {
 // `binding:"required"` to make required fields.
 //
 // TODO: update the above comment
+// TODO: do we still need/want this?  need to test if the validation errors are actually useful I guess...
 func BindMiddleware[T any]() gin.HandlerFunc {
 	return func(cx *gin.Context) {
 		var obj T
@@ -107,7 +108,7 @@ func respondRequestBindingError(c *gin.Context, err error) {
 
 func FilterMiddleware() gin.HandlerFunc {
 	return func(cx *gin.Context) {
-		q := query.NewQueryBuilder(cx)
+		q := query.NewQueryFromUrl(cx.Request.URL.Query())
 		cx.Set(contextKeyQuery, q)
 		return
 	}
@@ -120,21 +121,4 @@ func GetFilter(cx *gin.Context) (query.Builder, error) {
 		return result, errors.New("failed to get filter")
 	}
 	return result, nil
-	// r := s.getByKey(cx, contextKeyQuery)
-	// return r.(*query.Query)
 }
-
-// // Goals:
-// // - bind requests to structs with as much type-safety as possible
-// // - request validation:
-// // 	- required/ignore for create
-// //  - required/ignore for update
-// //  - all go-playground validators
-//
-// func bind[T any](cx *gin.Context, target T) error {
-// 	err := cx.ShouldBindWith(target, binding.JSON)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }

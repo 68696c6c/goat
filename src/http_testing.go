@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	"github.com/68696c6c/goat/sys/http/router"
+	"github.com/68696c6c/goat/sys/router"
 )
 
 type HandlerTest struct {

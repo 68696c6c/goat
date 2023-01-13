@@ -10,10 +10,10 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 
-	"github.com/68696c6c/goat/query2"
+	"github.com/68696c6c/goat/query"
 	"github.com/68696c6c/goat/resource"
 	"github.com/68696c6c/goat/sys"
-	"github.com/68696c6c/goat/sys/http/router"
+	"github.com/68696c6c/goat/sys/router"
 )
 
 // type ResourceLinks map[string]*url.URL
@@ -57,20 +57,8 @@ func DebugEnabled() bool {
 	return g.HttpDebug
 }
 
-// func FilterMiddleware() gin.HandlerFunc {
-// 	return g.HTTP.FilterMiddleware()
-// }
-//
-// func GetFilter(cx *gin.Context) *query.Query {
-// 	return g.HTTP.GetFilter(cx)
-// }
-
-// This doesn't appear to be used?
-// func GetHandlerContext(cx *gin.Context) context.Context {
-// 	return g.HTTP.GetHandlerContext(cx)
-// }
-
-// Returns a random string that can be used as a Basic Auth token.
+// GenerateToken returns a random string that can be used as a Basic Auth token.
+// TODO: does it really?
 func GenerateToken() string {
 	u := uuid.New().String()
 	return strings.Replace(u, "-", "", -1)
@@ -86,11 +74,11 @@ func MakeResourceLinks(key, path string) *resource.Links {
 
 // TODO: find a final resting place for these
 
-func QueryFromGin(cx *gin.Context) query2.Builder {
+func QueryFromGin(cx *gin.Context) query.Builder {
 	if cx == nil {
-		return query2.NewQuery()
+		return query.NewQuery()
 	}
-	return query2.NewQueryFromUrl(cx.Request.URL.Query())
+	return query.NewQueryFromUrl(cx.Request.URL.Query())
 }
 
 func PaginationFromGin(cx *gin.Context) resource.Pagination {
@@ -101,8 +89,7 @@ func PaginationFromGin(cx *gin.Context) resource.Pagination {
 }
 
 // includes limit and offset, use for general purpose querying
-func ApplyQueryToGorm(g *gorm.DB, q query2.Builder) (*gorm.DB, error) {
-	// if q.Filter != nil {
+func ApplyQueryToGorm(g *gorm.DB, q query.Builder) (*gorm.DB, error) {
 	where, params, err := q.GetWhere()
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to apply filter")
@@ -111,7 +98,6 @@ func ApplyQueryToGorm(g *gorm.DB, q query2.Builder) (*gorm.DB, error) {
 	if where != "" {
 		g = g.Where(where, params...)
 	}
-	// }
 
 	order := q.GetOrder()
 	if order != "" {
@@ -127,12 +113,6 @@ func ApplyQueryToGorm(g *gorm.DB, q query2.Builder) (*gorm.DB, error) {
 	if offset > 0 {
 		g = g.Offset(offset)
 	}
-	// page := q.Pagination.Page
-	// size := q.Pagination.PageSize
-	//
-	// if size > 0 {
-	// 	g = g.Limit(int(size)).Offset(int((page - 1) * size))
-	// }
 
 	for _, p := range q.GetPreload() {
 		g = g.Preload(p)
@@ -142,8 +122,7 @@ func ApplyQueryToGorm(g *gorm.DB, q query2.Builder) (*gorm.DB, error) {
 }
 
 // does not set limit or offset, use for filtering
-func ApplyQueryToGormNoLimitOffset(g *gorm.DB, q query2.Builder) (*gorm.DB, error) {
-	// if q.Filter != nil {
+func ApplyQueryToGormNoLimitOffset(g *gorm.DB, q query.Builder) (*gorm.DB, error) {
 	where, params, err := q.GetWhere()
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to apply filter")
@@ -152,28 +131,11 @@ func ApplyQueryToGormNoLimitOffset(g *gorm.DB, q query2.Builder) (*gorm.DB, erro
 	if where != "" {
 		g = g.Where(where, params...)
 	}
-	// }
 
 	order := q.GetOrder()
 	if order != "" {
 		g = g.Order(order)
 	}
-
-	// limit := q.GetLimit()
-	// if limit > 0 {
-	// 	g = g.Limit(limit)
-	// }
-	//
-	// offset := q.GetOffset()
-	// if offset > 0 {
-	// 	g = g.Offset(offset)
-	// }
-	// // page := q.Pagination.Page
-	// // size := q.Pagination.PageSize
-	// //
-	// // if size > 0 {
-	// // 	g = g.Limit(int(size)).Offset(int((page - 1) * size))
-	// // }
 
 	for _, p := range q.GetPreload() {
 		g = g.Preload(p)
