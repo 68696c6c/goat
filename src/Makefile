@@ -9,10 +9,11 @@
 default: .DEFAULT
 
 deps:
-	make -C src deps
+	go mod tidy
+	go mod vendor
 
 test:
-	make -C src test
+	go test ./... -cover
 
 build:
-	make -C src build
+	go build
