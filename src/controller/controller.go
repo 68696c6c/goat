@@ -41,11 +41,9 @@ type Deleter interface {
 }
 
 func HandleList[M any](cx *gin.Context, r repo.Filterer[M], baseUrl *url.URL, q query.Builder, p resource.Pagination) {
-	e := goat.InitErrorHandler()
-
 	resources, pagination, err := r.Filter(cx.Request.Context(), q, p)
 	if err != nil {
-		e.HandleError(cx, errors.Wrap(err, "failed to list resources"), goat.RespondServerError)
+		goat.RespondServerError(cx, errors.Wrap(err, "failed to list resources"))
 		return
 	}
 
@@ -53,21 +51,19 @@ func HandleList[M any](cx *gin.Context, r repo.Filterer[M], baseUrl *url.URL, q 
 }
 
 func HandleView[M any](cx *gin.Context, r repo.Identifier[M]) {
-	e := goat.InitErrorHandler()
-
 	id, err := goat.GetIdParam(cx)
 	if err != nil {
-		e.HandleError(cx, err, goat.RespondBadRequest)
+		goat.RespondBadRequest(cx, err)
 		return
 	}
 
 	m, err := r.GetById(cx.Request.Context(), id, true)
 	if err != nil {
 		if goat.RecordNotFound(err) {
-			e.HandleError(cx, errors.New("resource does not exist"), goat.RespondNotFound)
+			goat.RespondNotFound(cx, errors.New("resource does not exist"))
 			return
 		} else {
-			e.HandleError(cx, errors.Wrap(err, "failed to get resource"), goat.RespondServerError)
+			goat.RespondServerError(cx, errors.Wrap(err, "failed to get resource"))
 			return
 		}
 	}
@@ -82,25 +78,23 @@ type repoCreate[Model, Request any] interface {
 }
 
 func HandleCreate[M any, U any](cx *gin.Context, r repoCreate[M, U]) {
-	e := goat.InitErrorHandler()
-
 	ctx := cx.Request.Context()
 
 	req, err := goat.GetRequest[U](cx)
 	if err != nil {
-		e.HandleError(cx, err, goat.RespondBadRequest)
+		goat.RespondBadRequest(cx, err)
 		return
 	}
 
 	m, err := r.Create(ctx, req)
 	if err != nil {
-		e.HandleError(cx, err, goat.RespondValidationError)
+		goat.RespondValidationError(cx, err)
 		return
 	}
 
 	err = r.Save(ctx, m)
 	if err != nil {
-		e.HandleError(cx, errors.Wrap(err, "failed to save resource"), goat.RespondServerError)
+		goat.RespondServerError(cx, errors.Wrap(err, "failed to save resource"))
 		return
 	}
 
@@ -114,35 +108,34 @@ type repoUpdate[M any, U any] interface {
 }
 
 func HandleUpdate[M any, U any](cx *gin.Context, r repoUpdate[M, U]) {
-	e := goat.InitErrorHandler()
 	ctx := cx.Request.Context()
 
 	id, err := goat.GetIdParam(cx)
 	if err != nil {
-		e.HandleError(cx, err, goat.RespondBadRequest)
+		goat.RespondBadRequest(cx, err)
 		return
 	}
 
 	req, err := goat.GetRequest[U](cx)
 	if err != nil {
-		e.HandleError(cx, err, goat.RespondBadRequest)
+		goat.RespondBadRequest(cx, err)
 		return
 	}
 
 	m, err := r.Update(ctx, id, req)
 	if err != nil {
 		if goat.RecordNotFound(err) {
-			e.HandleError(cx, errors.New("resource does not exist"), goat.RespondNotFound)
+			goat.RespondNotFound(cx, errors.New("resource does not exist"))
 			return
 		} else {
-			e.HandleError(cx, err, goat.RespondValidationError)
+			goat.RespondValidationError(cx, err)
 			return
 		}
 	}
 
 	err = r.Save(ctx, m)
 	if err != nil {
-		e.HandleError(cx, errors.Wrap(err, "failed to save resource"), goat.RespondServerError)
+		goat.RespondServerError(cx, errors.Wrap(err, "failed to save resource"))
 		return
 	}
 
@@ -155,29 +148,28 @@ type repoDelete[M any] interface {
 }
 
 func HandleDelete[M any](cx *gin.Context, r repoDelete[M]) {
-	e := goat.InitErrorHandler()
 	ctx := cx.Request.Context()
 
 	id, err := goat.GetIdParam(cx)
 	if err != nil {
-		e.HandleError(cx, err, goat.RespondBadRequest)
+		goat.RespondBadRequest(cx, err)
 		return
 	}
 
 	m, err := r.GetById(ctx, id)
 	if err != nil {
 		if goat.RecordNotFound(err) {
-			e.HandleError(cx, errors.New("resource does not exist"), goat.RespondNotFound)
+			goat.RespondNotFound(cx, errors.New("resource does not exist"))
 			return
 		} else {
-			e.HandleError(cx, errors.Wrap(err, "failed to load resource"), goat.RespondServerError)
+			goat.RespondServerError(cx, errors.Wrap(err, "failed to load resource"))
 			return
 		}
 	}
 
 	err = r.Delete(ctx, m)
 	if err != nil {
-		e.HandleError(cx, errors.Wrap(err, "failed to delete resource"), goat.RespondServerError)
+		goat.RespondServerError(cx, errors.Wrap(err, "failed to delete resource"))
 		return
 	}
 

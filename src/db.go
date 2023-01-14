@@ -10,10 +10,6 @@ func GetMainDB() (*gorm.DB, error) {
 	return g.DB.GetMainDB()
 }
 
-func GetMigrationDB() (*gorm.DB, error) {
-	return g.DB.GetMigrationDB()
-}
-
 func GetDB(key string) (*gorm.DB, error) {
 	return g.DB.GetCustomDB(key)
 }

@@ -1,6 +1,7 @@
 package goat
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -21,6 +22,10 @@ func debugError(err error) error {
 		return err
 	}
 	return nil
+}
+
+func logHandlerError(cx *gin.Context, err error) {
+	g.Logger.Error(fmt.Sprintf("%s | %s", cx.HandlerName(), err))
 }
 
 func RespondOk(cx *gin.Context, data any) {
@@ -45,30 +50,36 @@ func RespondCreated(cx *gin.Context, data any) {
 
 func RespondNotFound(cx *gin.Context, err error) {
 	status := http.StatusNotFound
+	logHandlerError(cx, err)
 	cx.AbortWithStatusJSON(status, resource.NewApiProblem(status, "not found", debugError(err)))
 }
 
 func RespondBadRequest(cx *gin.Context, err error) {
 	status := http.StatusBadRequest
+	logHandlerError(cx, err)
 	cx.AbortWithStatusJSON(status, resource.NewApiProblem(status, "invalid request", debugError(err)))
 }
 
 func RespondValidationError(cx *gin.Context, err error) {
 	status := http.StatusBadRequest
+	logHandlerError(cx, err)
 	cx.AbortWithStatusJSON(status, resource.NewApiProblem(status, "invalid request", err))
 }
 
 func RespondUnauthorized(cx *gin.Context, err error) {
 	status := http.StatusUnauthorized
+	logHandlerError(cx, err)
 	cx.AbortWithStatusJSON(status, resource.NewApiProblem(status, "unauthorized", debugError(err)))
 }
 
 func RespondForbidden(cx *gin.Context, err error) {
 	status := http.StatusForbidden
+	logHandlerError(cx, err)
 	cx.AbortWithStatusJSON(status, resource.NewApiProblem(status, "authentication error", debugError(err)))
 }
 
 func RespondServerError(cx *gin.Context, err error) {
 	status := http.StatusInternalServerError
+	logHandlerError(cx, err)
 	cx.AbortWithStatusJSON(status, resource.NewApiProblem(status, "internal server error", debugError(err)))
 }

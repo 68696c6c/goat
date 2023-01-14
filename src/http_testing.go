@@ -7,12 +7,10 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-
-	"github.com/68696c6c/goat/sys/router"
 )
 
 type HandlerTest struct {
-	router     router.Router
+	router     Router
 	remoteAddr string
 	request    handlerTestRequest
 }

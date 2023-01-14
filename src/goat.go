@@ -7,13 +7,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 
 	"github.com/68696c6c/goat/query"
 	"github.com/68696c6c/goat/resource"
 	"github.com/68696c6c/goat/sys"
-	"github.com/68696c6c/goat/sys/router"
+	"github.com/68696c6c/goat/sys/http"
 )
 
 // type ResourceLinks map[string]*url.URL
@@ -38,23 +38,19 @@ func Init() {
 
 // Global functions for calling encapsulated services.
 
-type Router router.Router
+type Router http.Router
 
 func InitRouter() Router {
-	return g.Router.InitRouter()
+	return g.HTTP.InitRouter()
 }
 
-func GetLogger() *logrus.Logger {
-	return g.Log.NewLogger()
-}
-
-func GetFileLogger(name string) (*logrus.Logger, error) {
-	return g.Log.NewFileLogger(name)
+func GetLogger() *zap.SugaredLogger {
+	return g.Logger
 }
 
 func DebugEnabled() bool {
-	// return g.HTTP.DebugEnabled()
-	return g.HttpDebug
+	return g.HTTP.DebugEnabled()
+	// return g.HttpDebug
 }
 
 // GenerateToken returns a random string that can be used as a Basic Auth token.
@@ -65,11 +61,11 @@ func GenerateToken() string {
 }
 
 func GetUrl(key ...string) *url.URL {
-	return g.Router.GetUrl(key...)
+	return g.HTTP.GetUrl(key...)
 }
 
 func MakeResourceLinks(key, path string) *resource.Links {
-	return resource.MakeResourceLinks(g.Router.GetUrl(key).JoinPath(path).String())
+	return resource.MakeResourceLinks(g.HTTP.GetUrl(key).JoinPath(path).String())
 }
 
 // TODO: find a final resting place for these

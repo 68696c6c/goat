@@ -17,12 +17,12 @@ func setupDBConfig(t *testing.T, key string) ConnectionConfig {
 	viper.AutomaticEnv()
 
 	c := ConnectionConfig{
-		Debug:           true,
-		Host:            fake.Word(),
-		Port:            1234,
-		Username:        fake.Word(),
-		Password:        fake.Word(),
-		MultiStatements: true,
+		Debug:    true,
+		Host:     fake.Word(),
+		Port:     1234,
+		Username: fake.Word(),
+		Password: fake.Word(),
+		// MultiStatements: true,
 	}
 
 	err := os.Setenv(key+"_DEBUG", "1")
@@ -56,7 +56,7 @@ func assertConnectionEqual(t *testing.T, config, result ConnectionConfig) {
 	assert.Equal(t, config.Database, result.Database, "unexpected config value for 'database'")
 	assert.Equal(t, config.Username, result.Username, "unexpected config value for 'username'")
 	assert.Equal(t, config.Password, result.Password, "unexpected config value for 'password'")
-	assert.True(t, config.MultiStatements, "unexpected config value for 'multi_statements'")
+	// assert.True(t, config.MultiStatements, "unexpected config value for 'multi_statements'")
 }
 
 func TestGetDBConfig_Default(t *testing.T) {
@@ -78,19 +78,20 @@ func TestConnectionConfig_String(t *testing.T) {
 	username := fake.Word()
 	password := fake.Word()
 	debug := true
-	multi := true
+	// multi := true
 
 	c := ConnectionConfig{
-		Debug:           debug,
-		Host:            host,
-		Port:            port,
-		Database:        database,
-		Username:        username,
-		Password:        password,
-		MultiStatements: multi,
+		Debug:    debug,
+		Host:     host,
+		Port:     port,
+		Database: database,
+		Username: username,
+		Password: password,
+		// MultiStatements: multi,
 	}
 
-	e := fmt.Sprintf("Host: %v, Port: %v, Database: %v, Username: %v, Password: %v, Debug: true, MultiStatements: true", host, port, database, username, password)
+	// e := fmt.Sprintf("Host: %v, Port: %v, Database: %v, Username: %v, Password: %v, Debug: true, MultiStatements: true", host, port, database, username, password)
+	e := fmt.Sprintf("Host: %v, Port: %v, Database: %v, Username: %v, Password: %v, Debug: true", host, port, database, username, password)
 	s := c.String()
 	assert.Equal(t, e, s, "unexpected value returned")
 }

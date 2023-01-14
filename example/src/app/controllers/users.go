@@ -27,24 +27,23 @@ func NewUsersController(repo repos.UsersRepo) UsersController {
 }
 
 func (c users) List(cx *gin.Context) {
-	e := goat.InitErrorHandler()
 	queryString := cx.Request.URL.Query()
 	q := query.NewQueryFromUrl(queryString)
 	p := resource.NewPaginationFromUrl(queryString)
 
 	currentUser, ok := getCurrentUser(cx)
 	if !ok || currentUser == nil {
-		e.HandleError(cx, errors.New("login required"), goat.RespondUnauthorized)
+		goat.RespondUnauthorized(cx, errors.New("login required"))
 		return
 	}
 	err := c.repo.ApplyFilterForUser(q, currentUser)
 	if err != nil {
-		e.HandleError(cx, err, goat.RespondServerError)
+		goat.RespondServerError(cx, err)
 		return
 	}
 	err = c.repo.FilterStrings(q, queryString)
 	if err != nil {
-		e.HandleError(cx, err, goat.RespondServerError)
+		goat.RespondServerError(cx, err)
 		return
 	}
 	controller.HandleList[*models.User](cx, c.repo, goat.GetUrl(models.UserLinkKey), q, p)

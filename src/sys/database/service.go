@@ -20,7 +20,6 @@ const (
 
 type Service interface {
 	GetMainDB() (*gorm.DB, error)
-	GetMigrationDB() (*gorm.DB, error)
 	GetCustomDB(key string) (*gorm.DB, error)
 	GetConnection(c ConnectionConfig) (*gorm.DB, error)
 
@@ -31,6 +30,7 @@ type Config struct {
 	MainConnectionConfig ConnectionConfig
 }
 
+// TODO: do we really need to track multiple connections?  maybe replace with a simple way to turn env into an arbitrary gorm connection
 type service struct {
 	connections map[string]ConnectionConfig
 	dialect     string
@@ -55,19 +55,6 @@ func (s service) GetMainDB() (*gorm.DB, error) {
 	connection, err := s.GetConnection(c)
 	if err != nil {
 		t := "failed to connect to default database using credentials: %s"
-		return nil, errors.Wrap(err, fmt.Sprintf(t, c.String()))
-	}
-	return connection, nil
-}
-
-// GetMigrationDB returns a new database connection using the configured defaults, but supporting multi-statements for running migrations.
-func (s service) GetMigrationDB() (*gorm.DB, error) {
-	c := s.connections[dbMainConnectionKey]
-	c.MultiStatements = true
-	c.Debug = true
-	connection, err := s.GetConnection(c)
-	if err != nil {
-		t := "failed to connect to default migration database using credentials: %s"
 		return nil, errors.Wrap(err, fmt.Sprintf(t, c.String()))
 	}
 	return connection, nil
