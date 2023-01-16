@@ -13,8 +13,6 @@ var container App
 type App struct {
 	Version string
 	DB      *gorm.DB
-	// Logger  *zap.SugaredLogger
-	// Errors  goat.ErrorHandler
 	repos.UsersRepo
 	repos.OrganizationsRepo
 }
@@ -25,10 +23,8 @@ func GetApp(db *gorm.DB, config Config) (App, error) {
 	}
 
 	container = App{
-		Version: config.Version,
-		DB:      db,
-		// Logger:            logger,
-		// Errors:            goat.NewErrorHandler(logger),
+		Version:           config.Version,
+		DB:                db,
 		UsersRepo:         repos.NewUsersRepo(db),
 		OrganizationsRepo: repos.NewOrganizationsRepo(db),
 	}

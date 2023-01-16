@@ -18,14 +18,14 @@ type Collection[T any] resource.Collection[T]
 type MessageResponse resource.MessageResponse
 
 func debugError(err error) error {
-	if DebugEnabled() {
+	if g.HTTP.DebugEnabled() {
 		return err
 	}
 	return nil
 }
 
 func logHandlerError(cx *gin.Context, err error) {
-	g.Logger.Error(fmt.Sprintf("%s | %s", cx.HandlerName(), err))
+	GetLogger().Error(fmt.Sprintf("%s | %s", cx.HandlerName(), err))
 }
 
 func RespondOk(cx *gin.Context, data any) {

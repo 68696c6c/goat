@@ -14,12 +14,9 @@ import (
 )
 
 type Goat struct {
-	config Config
-	DB     database.Service
-	HTTP   http.Service
-	Logger *zap.SugaredLogger
-	// ErrorHandler ErrorHandler
-	// Log    log.Service
+	DB   database.Service
+	HTTP http.Service
+	Log  log.Service
 }
 
 func Init() Goat {
@@ -27,44 +24,33 @@ func Init() Goat {
 	if err != nil {
 		panic(err)
 	}
-	logger, err := log.InitLogger(config.Log)
+	logService, err := log.NewService(config.Log)
 	if err != nil {
 		panic(err)
 	}
 	return Goat{
-		config: config,
-		DB:     database.NewService(config.DB),
-		HTTP:   http.NewService(config.HTTP),
-		Logger: logger,
+		DB:   database.NewService(config.DB, logService),
+		HTTP: http.NewService(config.HTTP, logService),
+		Log:  logService,
 	}
 }
 
 type Config struct {
 	DB   database.Config
 	HTTP http.Config
-	// LogLevel zap.AtomicLevel
-	Log log.Config
+	Log  log.Config
 }
 
-// const (
-// 	httpHost          = ""
-// 	httpPort          = "80"
-// 	httpAuthType      = "basic"
-// 	contextKeyRequest = "goat_request"
-// 	contextKeyQuery   = "goat_query"
-// )
-
 const (
-	keyBaseUrl       = "base_url"
-	keyDbDebug       = "db_debug"
-	keyDbHost        = "db_host"
-	keyDbPort        = "db_port"
-	keyDbDatabase    = "db_database"
-	keyDbUsername    = "db_username"
-	keyDbPassword    = "db_password"
-	keyLogLevel      = "log_level"
-	keyLogStacktrace = "log_stacktrace"
-	// keyLogDebug   = "log_debug"
+	keyBaseUrl              = "base_url"
+	keyDbDebug              = "db_debug"
+	keyDbHost               = "db_host"
+	keyDbPort               = "db_port"
+	keyDbDatabase           = "db_database"
+	keyDbUsername           = "db_username"
+	keyDbPassword           = "db_password"
+	keyLogLevel             = "log_level"
+	keyLogStacktrace        = "log_stacktrace"
 	keyHttpDebug            = "http_debug"
 	keyHttpHost             = "http_host"
 	keyHttpPort             = "http_port"
@@ -87,7 +73,7 @@ func readConfig() (Config, error) {
 	viper.SetDefault(keyHttpHost, "")
 	viper.SetDefault(keyHttpPort, "80")
 	viper.SetDefault(keyHttpAllowOrigins, "*")
-	viper.SetDefault(keyHttpAllowMethods, "GET,POST,PUT,DELETE,HEAD,OPTIONS")
+	viper.SetDefault(keyHttpAllowMethods, "*")
 	viper.SetDefault(keyHttpAllowHeaders, "*")
 	viper.SetDefault(keyHttpAllowCredentials, true)
 
@@ -103,14 +89,12 @@ func readConfig() (Config, error) {
 
 	return Config{
 		DB: database.Config{
-			MainConnectionConfig: database.ConnectionConfig{
-				Debug:    viper.GetBool(keyDbDebug),
-				Host:     viper.GetString(keyDbHost),
-				Port:     viper.GetInt(keyDbPort),
-				Database: viper.GetString(keyDbDatabase),
-				Username: viper.GetString(keyDbUsername),
-				Password: viper.GetString(keyDbPassword),
-			},
+			Debug:    viper.GetBool(keyDbDebug),
+			Host:     viper.GetString(keyDbHost),
+			Port:     viper.GetInt(keyDbPort),
+			Database: viper.GetString(keyDbDatabase),
+			Username: viper.GetString(keyDbUsername),
+			Password: viper.GetString(keyDbPassword),
 		},
 		HTTP: http.Config{
 			BaseUrl: baseUrl,

@@ -10,12 +10,8 @@ func GetMainDB() (*gorm.DB, error) {
 	return g.DB.GetMainDB()
 }
 
-func GetDB(key string) (*gorm.DB, error) {
-	return g.DB.GetCustomDB(key)
-}
+type DatabaseConfig database.Config
 
-type DatabaseConnection database.ConnectionConfig
-
-func GetCustomDB(c DatabaseConnection) (*gorm.DB, error) {
-	return g.DB.GetConnection(database.ConnectionConfig(c))
+func GetDB(c DatabaseConfig) (*gorm.DB, error) {
+	return g.DB.GetConnection(database.Config(c))
 }

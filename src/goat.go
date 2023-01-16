@@ -45,12 +45,11 @@ func InitRouter() Router {
 }
 
 func GetLogger() *zap.SugaredLogger {
-	return g.Logger
+	return g.Log.GetLogger()
 }
 
-func DebugEnabled() bool {
-	return g.HTTP.DebugEnabled()
-	// return g.HttpDebug
+func GetStrictLogger() *zap.Logger {
+	return g.Log.GetStrictLogger()
 }
 
 // GenerateToken returns a random string that can be used as a Basic Auth token.

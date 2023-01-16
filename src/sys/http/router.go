@@ -2,11 +2,9 @@ package http
 
 import (
 	"fmt"
-	"io"
 	"net"
 	"net/http"
 	"net/url"
-	"os"
 	"reflect"
 	"strconv"
 	"strings"
@@ -18,6 +16,7 @@ import (
 	"gopkg.in/gin-contrib/cors.v1"
 
 	"github.com/68696c6c/goat/sys/http/links"
+	"github.com/68696c6c/goat/sys/log"
 )
 
 type Router interface {
@@ -29,58 +28,14 @@ type Router interface {
 	Run() error
 }
 
-func NewRouter(c Config) Router {
-	mode := gin.ReleaseMode
-	if c.Debug {
-		mode = gin.DebugMode
-	}
-	gin.SetMode(mode)
-	engine := gin.New()
-	engine.Use(gin.Recovery())
-
-	// Setup logging.
-	gin.DefaultWriter = io.MultiWriter(os.Stdout)
-	engine.Use(gin.Logger())
-
+func NewRouter(c Config, l log.Service) Router {
 	return &router{
-		Engine:  newEngine(c),
+		Engine:  newEngine(c, l),
 		host:    c.Host,
 		port:    c.Port,
 		address: fmt.Sprintf("%s:%d", c.Host, c.Port),
 		links:   links.NewService(c.BaseUrl),
 	}
-}
-
-func newEngine(c Config) *gin.Engine {
-	engine := gin.New()
-	engine.Use(gin.Recovery())
-
-	// Set Gin debug mode
-	mode := gin.ReleaseMode
-	if c.Debug {
-		mode = gin.DebugMode
-	}
-	gin.SetMode(mode)
-
-	// Setup logging.
-	gin.DefaultWriter = io.MultiWriter(os.Stdout)
-	engine.Use(gin.Logger())
-
-	// Configure CORS.
-	engine.Use(cors.New(c.CORS))
-
-	// Use json tag names in request binding validation errors.
-	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		v.RegisterTagNameFunc(func(fld reflect.StructField) string {
-			name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
-			if name == "-" {
-				return ""
-			}
-			return name
-		})
-	}
-
-	return engine
 }
 
 type router struct {
@@ -110,6 +65,37 @@ func (r *router) Group(relativePath string, handlers ...gin.HandlerFunc) *Group 
 		RouterGroup: result,
 		links:       r.links,
 	}
+}
+
+func newEngine(c Config, l log.Service) *gin.Engine {
+	engine := gin.New()
+
+	// Set Gin debug mode
+	mode := gin.ReleaseMode
+	if c.Debug {
+		mode = gin.DebugMode
+	}
+	gin.SetMode(mode)
+
+	// Setup logging.
+	engine.Use(l.GinLogger())
+	engine.Use(l.GinRecovery())
+
+	// Configure CORS.
+	engine.Use(cors.New(c.GetCors()))
+
+	// Use json tag names in request binding validation errors.
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterTagNameFunc(func(fld reflect.StructField) string {
+			name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
+			if name == "-" {
+				return ""
+			}
+			return name
+		})
+	}
+
+	return engine
 }
 
 // validPort returns an error if the port is already in use.

@@ -9,7 +9,6 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/68696c6c/goat/query"
-	"github.com/68696c6c/goat/sys/utils"
 )
 
 const (
@@ -100,7 +99,7 @@ func respondRequestBindingError(c *gin.Context, err error) {
 
 	var errs []string
 	for _, e := range ve {
-		errs = append(errs, utils.MakeValidationError(e.Field(), e.Tag()).Error())
+		errs = append(errs, MakeValidationError(e.Field(), e.Tag()).Error())
 	}
 	RespondValidationError(c, errors.New(strings.Join(errs, "; ")))
 	return

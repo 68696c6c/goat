@@ -56,17 +56,3 @@ func (m *User) MarshalJSON() ([]byte, error) {
 		Links: goat.MakeResourceLinks(UserLinkKey, m.ID.String()),
 	})
 }
-
-//
-// func (m *User) ValidateCreate() {
-// 	// Email is required, must be a valid email, and must be unique.
-// }
-//
-// func ValidateUser(sl validator.StructLevel) {
-// 	user := sl.Current().Interface().(User)
-//
-// 	// If createdAt is nil, Email is required and must be a valid email
-//
-// 	// If createdAt is not nil, Email must not be present.
-//
-// }

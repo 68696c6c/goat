@@ -6,87 +6,66 @@ import (
 	"github.com/pkg/errors"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	gormlog "gorm.io/gorm/logger"
+
+	"github.com/68696c6c/goat/sys/log"
 )
 
-const (
-	dbMainConnectionKey  = "db"
-	dbConnectionTemplate = "%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=true"
-)
+type Config struct {
+	Debug    bool
+	Host     string
+	Port     int
+	Database string
+	Username string
+	Password string
+}
 
-// Goat assumes a primary database connection, but an arbitrary number of
-// database connections if needed.  Only MySQL is directly supported, but since
-// Goat uses Gorm, any database supported by Gorm can theoretically be used.
+func (c Config) String() string {
+	return fmt.Sprintf("Host: %v, Port: %v, Database: %v, Username: %v, Password: %v, Debug: %v", c.Host, c.Port, c.Database, c.Username, c.Password, c.Debug)
+}
+
+func (c Config) ConnectionString() string {
+	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=true", c.Username, c.Password, c.Host, c.Port, c.Database)
+}
 
 type Service interface {
 	GetMainDB() (*gorm.DB, error)
-	GetCustomDB(key string) (*gorm.DB, error)
-	GetConnection(c ConnectionConfig) (*gorm.DB, error)
-
-	getConnections() map[string]ConnectionConfig
+	GetConnection(c Config) (*gorm.DB, error)
 }
 
-type Config struct {
-	MainConnectionConfig ConnectionConfig
-}
-
-// TODO: do we really need to track multiple connections?  maybe replace with a simple way to turn env into an arbitrary gorm connection
-type service struct {
-	connections map[string]ConnectionConfig
-	dialect     string
-}
-
-func NewService(c Config) Service {
+func NewService(c Config, l log.Service) Service {
 	return service{
-		connections: map[string]ConnectionConfig{
-			dbMainConnectionKey: c.MainConnectionConfig,
-		},
+		config:  c,
 		dialect: "mysql",
+		log:     l,
 	}
 }
 
-func (s service) getConnections() map[string]ConnectionConfig {
-	return s.connections
+type service struct {
+	config  Config
+	dialect string
+	log     log.Service
 }
 
 // GetMainDB returns a new database connection using the configured defaults.
 func (s service) GetMainDB() (*gorm.DB, error) {
-	c := s.connections[dbMainConnectionKey]
-	connection, err := s.GetConnection(c)
+	connection, err := s.GetConnection(s.config)
 	if err != nil {
-		t := "failed to connect to default database using credentials: %s"
-		return nil, errors.Wrap(err, fmt.Sprintf(t, c.String()))
+		msg := fmt.Sprintf("failed to connect to default database using credentials: %s", s.config.String())
+		return nil, errors.Wrap(err, msg)
 	}
 	return connection, nil
 }
 
-// GetCustomDB returns a new database connection using DB env variables with the provided  config key.
-func (s service) GetCustomDB(key string) (*gorm.DB, error) {
-	c, ok := s.connections[key]
-	if !ok {
-		c = getDBConfig(key)
-		s.connections[key] = c
-	}
-	connection, err := s.GetConnection(c)
-	if err != nil {
-		t := "failed to connect to custom database '%s' using credentials: %s"
-		return nil, errors.Wrap(err, fmt.Sprintf(t, key, c.String()))
-	}
-	return connection, nil
-}
-
-// GetConnection Returns a database connection using the provided configuration.
-func (s service) GetConnection(c ConnectionConfig) (*gorm.DB, error) {
-	cs := fmt.Sprintf(dbConnectionTemplate, c.Username, c.Password, c.Host, c.Port, c.Database)
-
-	// By default, Gorm logs slow queries and errors.
-	logLevel := logger.Error
+// GetConnection returns a database connection using the provided configuration.
+func (s service) GetConnection(c Config) (*gorm.DB, error) {
+	logLevel := gormlog.Error
 	if c.Debug {
-		logLevel = logger.Info
+		logLevel = gormlog.Info
 	}
 
-	connection, err := gorm.Open(mysql.Open(cs), &gorm.Config{
-		Logger: logger.Default.LogMode(logLevel),
+	connection, err := gorm.Open(mysql.Open(c.ConnectionString()), &gorm.Config{
+		Logger: s.log.GormLogger().LogMode(logLevel),
 	})
 	if err != nil {
 		return nil, err

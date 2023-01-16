@@ -7,8 +7,6 @@ import (
 
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
-
-	"github.com/68696c6c/goat/sys/utils"
 )
 
 func ExitError(err error) {
@@ -43,5 +41,5 @@ func ErrorsToError(errs []error) error {
 }
 
 func MakeValidationError(field, rule string) error {
-	return utils.MakeValidationError(field, rule)
+	return errors.Errorf("%s failed on validation '%s'", field, rule)
 }

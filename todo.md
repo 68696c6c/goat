@@ -9,10 +9,11 @@ x R&D generic repos & controllers
 - validation error responder (RespondValidationError takes a map instead of an error so it doesn't match the ErrorResponder interface)
 - more utils
 x upgrade to gorm v2
-- upgrade validator to v10 (github.com/go-playground/validator)
-- context
-- ENV var: currently only used to assume HTTP_DEBUG based on env, remove in favor of just setting HTTP_DEBUG
-- export goatDB.ConnectionConfig
+x upgrade validator to v10 (github.com/go-playground/validator)
+  - no longer using validator in favor of repo methods like Create and Update
+x context
+x ENV var: currently only used to assume HTTP_DEBUG based on env, remove in favor of just setting HTTP_DEBUG
+x export goatDB.ConnectionConfig
 
 
 
