@@ -77,6 +77,9 @@ const (
 func readConfig() (Config, error) {
 	viper.AutomaticEnv()
 
+	// Enable viper.Get type inferring; needed by the utils.EnvDefault helper.
+	viper.SetTypeByDefaultValue(true)
+
 	viper.SetDefault(keyDbDebug, false)
 	viper.SetDefault(keyLogLevel, "info")
 	viper.SetDefault(keyLogStacktrace, false)
