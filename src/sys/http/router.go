@@ -100,9 +100,7 @@ func newEngine(c Config, l log.Service) *gin.Engine {
 
 // validPort returns an error if the port is already in use.
 func validPort(port int) error {
-	p := strconv.Itoa(port)
-	println("PORT: ", p)
-	ln, err := net.Listen("tcp", ":"+p)
+	ln, err := net.Listen("tcp", ":"+strconv.Itoa(port))
 	if err != nil {
 		return errors.Errorf("port %v is already in use", port)
 	}

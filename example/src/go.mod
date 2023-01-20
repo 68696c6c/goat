@@ -16,7 +16,7 @@ require (
 )
 
 require (
-	github.com/68696c6c/girraph v0.1.0 // indirect
+	github.com/68696c6c/girraph v0.1.1 // indirect
 	github.com/corpix/uarand v0.0.0-20170903190822-2b8494104d86 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fatih/color v1.13.0 // indirect

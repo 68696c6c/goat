@@ -16,15 +16,18 @@ type Config struct {
 }
 
 type Service interface {
-	GetLogger() *zap.SugaredLogger
-	GetStrictLogger() *zap.Logger
+	Logger() *zap.SugaredLogger
+	StrictLogger() *zap.Logger
 	GinLogger() gin.HandlerFunc
 	GinRecovery() gin.HandlerFunc
 	GormLogger() gormlog.Interface
 }
 
 func NewService(c Config) (Service, error) {
-	logger, err := initLogger(c)
+	config := zap.NewProductionConfig()
+	config.Level = c.Level
+	config.DisableStacktrace = !c.Stacktrace
+	logger, err := config.Build()
 	if err != nil {
 		return nil, err
 	}
@@ -39,11 +42,11 @@ type service struct {
 	logger *zap.Logger
 }
 
-func (s service) GetLogger() *zap.SugaredLogger {
+func (s service) Logger() *zap.SugaredLogger {
 	return s.logger.Sugar()
 }
 
-func (s service) GetStrictLogger() *zap.Logger {
+func (s service) StrictLogger() *zap.Logger {
 	return s.logger
 }
 
@@ -59,15 +62,4 @@ func (s service) GormLogger() gormlog.Interface {
 	logger := gormzap.New(s.logger)
 	logger.SetAsDefault()
 	return logger
-}
-
-func initLogger(c Config) (*zap.Logger, error) {
-	config := zap.NewProductionConfig()
-	config.Level = c.Level
-	config.DisableStacktrace = !c.Stacktrace
-	logger, err := config.Build()
-	if err != nil {
-		return nil, err
-	}
-	return logger, nil
 }

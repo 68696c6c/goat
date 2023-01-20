@@ -4,9 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/google/uuid"
-	"github.com/pkg/errors"
-
 	"github.com/68696c6c/girraph"
 )
 
@@ -19,6 +16,8 @@ const (
 	LessThanEqualTo    Operator = "<="
 	GreaterThanEqualTo Operator = ">="
 	NotEqual           Operator = "!="
+	NotLike            Operator = "NOT LIKE"
+	NotIn              Operator = "NOT IN"
 	Like               Operator = "LIKE"
 	In                 Operator = "IN"
 )
@@ -28,55 +27,50 @@ type Logic string
 const (
 	And Logic = "AND"
 	Or  Logic = "OR"
-	Not Logic = "NOT"
 )
 
 type Filter interface {
 	girraph.Tree[Filter]
-	fmt.Stringer
 
-	SetLogic(logic Logic) Filter
-	GetLogic() Logic
-	SetCondition(condition Condition) Filter
-	GetCondition() Condition
-	Where(field string, op Operator, value any) Filter
+	addChild() Filter
+	addCondition(logic Logic, condition *condition) Filter
+	setLogic(logic Logic) Filter
+	getLogic() Logic
+	setCondition(condition *condition) Filter
+
+	Generate() (string, []any)
+
 	And(field string, op Operator, value any) Filter
+	AndEq(field string, value any) Filter
+	AndLike(field string, value any) Filter
+	AndIn(field string, value any) Filter
+	AndLt(field string, value any) Filter
+	AndLtEq(field string, value any) Filter
+	AndGt(field string, value any) Filter
+	AndGtEq(field string, value any) Filter
+	AndNotEq(field string, value any) Filter
+	AndNotLike(field string, value any) Filter
+	AndNotIn(field string, value any) Filter
+
 	Or(field string, op Operator, value any) Filter
+	OrEq(field string, value any) Filter
+	OrLike(field string, value any) Filter
+	OrIn(field string, value any) Filter
+	OrLt(field string, value any) Filter
+	OrLtEq(field string, value any) Filter
+	OrGt(field string, value any) Filter
+	OrGtEq(field string, value any) Filter
+	OrNotEq(field string, value any) Filter
+	OrNotLike(field string, value any) Filter
+	OrNotIn(field string, value any) Filter
+
 	AndGroup(conditions Filter) Filter
 	OrGroup(conditions Filter) Filter
-	NotGroup(conditions Filter) Filter
-	Generate() (string, []any, error)
-
-	WhereEq(field string, value any) Filter
-	WhereLike(field string, value any) Filter
-	WhereIn(field string, value any) Filter
-	WhereLt(field string, value any) Filter
-	WhereLtEq(field string, value any) Filter
-	WhereGt(field string, value any) Filter
-	WhereGtEq(field string, value any) Filter
-	WhereNotEq(field string, value any) Filter
-
-	OrWhereEq(field string, value any) Filter
-	OrWhereLike(field string, value any) Filter
-	OrWhereIn(field string, value any) Filter
-	OrWhereLt(field string, value any) Filter
-	OrWhereLtEq(field string, value any) Filter
-	OrWhereGt(field string, value any) Filter
-	OrWhereGtEq(field string, value any) Filter
-	OrWhereNotEq(field string, value any) Filter
-}
-
-// TODO: add this to girraph!
-func makeTreeTemp[T any]() *girraph.TreeNode[T] {
-	return &girraph.TreeNode[T]{
-		ID:       uuid.New().String(),
-		Children: []girraph.Tree[T]{},
-	}
 }
 
 func NewFilter() Filter {
 	result := &filter{
-		TreeNode: makeTreeTemp[Filter](),
+		TreeNode: girraph.MakeTreeNode[Filter](),
 	}
 	result.SetMeta(result)
 	return result
@@ -86,38 +80,50 @@ func Where(field string, op Operator, value any) Filter {
 	return NewFilter().And(field, op, value)
 }
 
-type filter struct {
-	*girraph.TreeNode[Filter]
-	condition Condition
-	logic     Logic
+func WhereEq(field string, value any) Filter {
+	return NewFilter().AndEq(field, value)
 }
 
-func (f *filter) String() string {
-	if f == nil {
-		return ""
-	}
+func WhereLike(field string, value any) Filter {
+	return NewFilter().AndLike(field, value)
+}
 
-	conditionString := ""
-	if f.condition != nil {
-		conditionString = f.condition.String()
-	}
+func WhereIn(field string, value any) Filter {
+	return NewFilter().AndIn(field, value)
+}
 
-	logicString := string(f.logic)
+func WhereLt(field string, value any) Filter {
+	return NewFilter().AndLt(field, value)
+}
 
-	var children []string
-	for _, child := range f.GetChildren() {
-		c := child.GetMeta()
-		children = append(children, c.String())
-	}
-	childrenString := strings.Join(children, "\n ")
+func WhereLtEq(field string, value any) Filter {
+	return NewFilter().AndLtEq(field, value)
+}
 
-	parentString := ""
-	parent := f.GetParent()
-	if parent != nil {
-		parentString = parent.GetMeta().String()
-	}
+func WhereGt(field string, value any) Filter {
+	return NewFilter().AndGt(field, value)
+}
 
-	return fmt.Sprintf("condition: %v\n logic: %v\n children: %v\n parent: %v\n", conditionString, logicString, childrenString, parentString)
+func WhereGtEq(field string, value any) Filter {
+	return NewFilter().AndGtEq(field, value)
+}
+
+func WhereNotEq(field string, value any) Filter {
+	return NewFilter().AndNotEq(field, value)
+}
+
+func WhereNotLike(field string, value any) Filter {
+	return NewFilter().AndNotLike(field, value)
+}
+
+func WhereNotIn(field string, value any) Filter {
+	return NewFilter().AndNotIn(field, value)
+}
+
+type filter struct {
+	*girraph.TreeNode[Filter]
+	condition *condition
+	logic     Logic
 }
 
 func (f *filter) addChild() Filter {
@@ -127,161 +133,155 @@ func (f *filter) addChild() Filter {
 	return child
 }
 
-func (f *filter) addCondition(logic Logic, condition Condition) Filter {
-	child := f.addChild().SetLogic(logic).SetCondition(condition)
+func (f *filter) addCondition(logic Logic, condition *condition) Filter {
+	child := f.addChild().setLogic(logic).setCondition(condition)
 	return child
 }
 
-func (f *filter) SetLogic(logic Logic) Filter {
+func (f *filter) setLogic(logic Logic) Filter {
 	f.logic = logic
 	return f
 }
 
-func (f *filter) GetLogic() Logic {
+func (f *filter) getLogic() Logic {
 	return f.logic
 }
 
-func (f *filter) SetCondition(condition Condition) Filter {
+func (f *filter) setCondition(condition *condition) Filter {
 	f.condition = condition
 	return f
-}
-
-func (f *filter) GetCondition() Condition {
-	return f.condition
 }
 
 // And conditions
 
 func (f *filter) And(field string, op Operator, value any) Filter {
-	f.addCondition(And, NewCondition(field, op, value))
+	f.addCondition(And, newCondition(field, op, value))
 	return f
 }
 
-func (f *filter) Where(field string, op Operator, value any) Filter {
-	return f.And(field, op, value)
-}
-
-func (f *filter) WhereEq(field string, value any) Filter {
+func (f *filter) AndEq(field string, value any) Filter {
 	return f.And(field, Equals, value)
 }
 
-func (f *filter) WhereLike(field string, value any) Filter {
+func (f *filter) AndLike(field string, value any) Filter {
 	return f.And(field, Like, value)
 }
 
-func (f *filter) WhereIn(field string, value any) Filter {
+func (f *filter) AndIn(field string, value any) Filter {
 	return f.And(field, In, value)
 }
 
-func (f *filter) WhereLt(field string, value any) Filter {
+func (f *filter) AndLt(field string, value any) Filter {
 	return f.And(field, LessThan, value)
 }
 
-func (f *filter) WhereLtEq(field string, value any) Filter {
+func (f *filter) AndLtEq(field string, value any) Filter {
 	return f.And(field, LessThanEqualTo, value)
 }
 
-func (f *filter) WhereGt(field string, value any) Filter {
+func (f *filter) AndGt(field string, value any) Filter {
 	return f.And(field, GreaterThan, value)
 }
 
-func (f *filter) WhereGtEq(field string, value any) Filter {
+func (f *filter) AndGtEq(field string, value any) Filter {
 	return f.And(field, GreaterThanEqualTo, value)
 }
 
-func (f *filter) WhereNotEq(field string, value any) Filter {
+func (f *filter) AndNotEq(field string, value any) Filter {
 	return f.And(field, NotEqual, value)
+}
+
+func (f *filter) AndNotLike(field string, value any) Filter {
+	return f.And(field, NotLike, value)
+}
+
+func (f *filter) AndNotIn(field string, value any) Filter {
+	return f.And(field, NotIn, value)
 }
 
 // Or conditions
 
 func (f *filter) Or(field string, op Operator, value any) Filter {
-	f.addCondition(Or, NewCondition(field, op, value))
+	f.addCondition(Or, newCondition(field, op, value))
 	return f
 }
 
-func (f *filter) OrWhereEq(field string, value any) Filter {
+func (f *filter) OrEq(field string, value any) Filter {
 	return f.Or(field, Equals, value)
 }
 
-func (f *filter) OrWhereLike(field string, value any) Filter {
+func (f *filter) OrLike(field string, value any) Filter {
 	return f.Or(field, Like, value)
 }
 
-func (f *filter) OrWhereIn(field string, value any) Filter {
+func (f *filter) OrIn(field string, value any) Filter {
 	return f.Or(field, In, value)
 }
 
-func (f *filter) OrWhereLt(field string, value any) Filter {
+func (f *filter) OrLt(field string, value any) Filter {
 	return f.Or(field, LessThan, value)
 }
 
-func (f *filter) OrWhereLtEq(field string, value any) Filter {
+func (f *filter) OrLtEq(field string, value any) Filter {
 	return f.Or(field, LessThanEqualTo, value)
 }
 
-func (f *filter) OrWhereGt(field string, value any) Filter {
+func (f *filter) OrGt(field string, value any) Filter {
 	return f.Or(field, GreaterThan, value)
 }
 
-func (f *filter) OrWhereGtEq(field string, value any) Filter {
+func (f *filter) OrGtEq(field string, value any) Filter {
 	return f.Or(field, GreaterThanEqualTo, value)
 }
 
-func (f *filter) OrWhereNotEq(field string, value any) Filter {
+func (f *filter) OrNotEq(field string, value any) Filter {
 	return f.Or(field, NotEqual, value)
+}
+
+func (f *filter) OrNotLike(field string, value any) Filter {
+	return f.Or(field, NotLike, value)
+}
+
+func (f *filter) OrNotIn(field string, value any) Filter {
+	return f.Or(field, NotIn, value)
 }
 
 // Condition groups
 
 func (f *filter) AndGroup(conditions Filter) Filter {
-	conditions.SetLogic(And).SetParent(f)
+	conditions.setLogic(And).SetParent(f)
 	f.AddChild(conditions)
 	return f
 }
 
 func (f *filter) OrGroup(conditions Filter) Filter {
-	conditions.SetLogic(Or).SetParent(f)
+	conditions.setLogic(Or).SetParent(f)
 	f.AddChild(conditions)
 	return f
 }
 
-func (f *filter) NotGroup(conditions Filter) Filter {
-	conditions.SetLogic(Not).SetParent(f)
-	f.AddChild(conditions)
-	return f
-}
-
-func (f *filter) Generate() (string, []any, error) {
+func (f *filter) Generate() (string, []any) {
 	children := f.GetChildren()
 	hasChildren := len(children) > 0
 
 	result := ""
 	var params []any
-	if f.condition != nil && hasChildren {
-		return "", nil, errors.New("cannot have both a direct filter and children")
-	}
 
 	if f.condition != nil {
 		conditionBody, conditionParams := f.condition.Generate()
 		result += conditionBody
 		params = append(params, conditionParams...)
-	}
-
-	if hasChildren {
+	} else if hasChildren {
 		result += "("
 		first := true
 		for _, child := range children {
 			c := child.GetMeta()
-			applied, ps, err := c.Generate()
-			if err != nil {
-				return "", nil, errors.Wrap(err, "failed to apply filter children")
-			}
+			applied, ps := c.Generate()
 
 			if first {
 				result += applied
 			} else {
-				result += fmt.Sprintf(" %s %s", c.GetLogic(), applied)
+				result += fmt.Sprintf(" %s %s", c.getLogic(), applied)
 			}
 
 			params = append(params, ps...)
@@ -290,5 +290,27 @@ func (f *filter) Generate() (string, []any, error) {
 		result += ")"
 	}
 
-	return strings.TrimSpace(result), params, nil
+	return strings.TrimSpace(result), params
+}
+
+func newCondition(f string, op Operator, value any) *condition {
+	return &condition{
+		field:    f,
+		operator: op,
+		value:    value,
+	}
+}
+
+type condition struct {
+	field    string
+	operator Operator
+	value    any
+}
+
+func (c *condition) Generate() (string, []any) {
+	params := []any{c.value}
+	if c.operator == In || c.operator == NotIn {
+		return fmt.Sprintf("%s %s (?)", c.field, c.operator), params
+	}
+	return fmt.Sprintf("%s %s ?", c.field, c.operator), params
 }

@@ -4,7 +4,6 @@ import (
 	"github.com/68696c6c/goat"
 	"github.com/68696c6c/goat/controller"
 	"github.com/68696c6c/goat/query"
-	"github.com/68696c6c/goat/resource"
 	"github.com/gin-gonic/gin"
 
 	"github.com/68696c6c/example/app/models"
@@ -26,10 +25,8 @@ func NewOrganizationsController(repo repos.OrganizationsRepo) OrganizationsContr
 }
 
 func (c organizations) List(cx *gin.Context) {
-	queryString := cx.Request.URL.Query()
-	q := query.NewQueryFromUrl(queryString)
-	p := resource.NewPaginationFromUrl(queryString)
-	controller.HandleList[*models.Organization](cx, c.repo, goat.GetUrl(models.OrganizationLinkKey), q, p)
+	q := query.NewQueryFromUrl(cx.Request.URL.Query())
+	controller.HandleList[*models.Organization](cx, c.repo, goat.GetUrl(models.OrganizationLinkKey), q)
 }
 
 func (c organizations) View(cx *gin.Context) {

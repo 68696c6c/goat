@@ -2,41 +2,45 @@ package goat
 
 import (
 	"net/url"
-	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 
+	"github.com/68696c6c/goat/hal"
 	"github.com/68696c6c/goat/query"
-	"github.com/68696c6c/goat/resource"
 	"github.com/68696c6c/goat/sys"
+	"github.com/68696c6c/goat/sys/database"
 	"github.com/68696c6c/goat/sys/http"
 )
 
-// type ResourceLinks map[string]*url.URL
-
 var g sys.Goat
 
-// var _links = make(ResourceLinks)
-
 // Init initializes the Goat runtime services.
-// Goat has four primary concerns:
+// Goat has three primary concerns, each encapsulated by their own service:
 // - logging
 // - database connections
-// - request handling
-// - response hypermedia (linking)
-// These concerns are encapsulated inside of services that are bootstrapped when goat.Init() is called.
-func Init() {
+// - route-based response hypermedia (linking)
+func Init() error {
 	if g != (sys.Goat{}) {
-		return
+		return nil
 	}
-	g = sys.Init()
+	var err error
+	g, err = sys.Init()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-// Global functions for calling encapsulated services.
+func MustInit() {
+	err := Init()
+	if err != nil {
+		panic(err)
+	}
+}
 
 type Router http.Router
 
@@ -45,96 +49,80 @@ func InitRouter() Router {
 }
 
 func GetLogger() *zap.SugaredLogger {
-	return g.Log.GetLogger()
+	return g.Log.Logger()
 }
 
 func GetStrictLogger() *zap.Logger {
-	return g.Log.GetStrictLogger()
-}
-
-// GenerateToken returns a random string that can be used as a Basic Auth token.
-// TODO: does it really?
-func GenerateToken() string {
-	u := uuid.New().String()
-	return strings.Replace(u, "-", "", -1)
+	return g.Log.StrictLogger()
 }
 
 func GetUrl(key ...string) *url.URL {
 	return g.HTTP.GetUrl(key...)
 }
 
-func MakeResourceLinks(key, path string) *resource.Links {
-	return resource.MakeResourceLinks(g.HTTP.GetUrl(key).JoinPath(path).String())
+func NewResourceLinks(key, path string) *hal.ResourceLinks {
+	return hal.NewResourceLinks(g.HTTP.GetUrl(key).JoinPath(path).String())
 }
 
-// TODO: find a final resting place for these
-
-func QueryFromGin(cx *gin.Context) query.Builder {
-	if cx == nil {
-		return query.NewQuery()
-	}
-	return query.NewQueryFromUrl(cx.Request.URL.Query())
+func GetMainDB() (*gorm.DB, error) {
+	return g.DB.GetMainDB()
 }
 
-func PaginationFromGin(cx *gin.Context) resource.Pagination {
-	if cx == nil {
-		return resource.NewPagination()
-	}
-	return resource.NewPaginationFromUrl(cx.Request.URL.Query())
+type DatabaseConfig database.Config
+
+func GetDB(c DatabaseConfig) (*gorm.DB, error) {
+	return g.DB.GetConnection(database.Config(c))
 }
 
-// includes limit and offset, use for general purpose querying
-func ApplyQueryToGorm(g *gorm.DB, q query.Builder) (*gorm.DB, error) {
-	where, params, err := q.GetWhere()
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to apply filter")
-	}
-
+func ApplyQueryToGorm(db *gorm.DB, q query.Builder, paginate bool) {
+	where, params := q.GetWhere()
 	if where != "" {
-		g = g.Where(where, params...)
+		db = db.Where(where, params...)
 	}
 
-	order := q.GetOrder()
+	order := q.GetOrderBy()
 	if order != "" {
-		g = g.Order(order)
-	}
-
-	limit := q.GetLimit()
-	if limit > 0 {
-		g = g.Limit(limit)
-	}
-
-	offset := q.GetOffset()
-	if offset > 0 {
-		g = g.Offset(offset)
+		db = db.Order(order)
 	}
 
 	for _, p := range q.GetPreload() {
-		g = g.Preload(p)
+		db = db.Preload(p.Query, p.Args...)
 	}
 
-	return g, nil
+	if paginate {
+		limit := q.GetLimit()
+		if limit > 0 {
+			db = db.Limit(limit)
+		}
+
+		offset := q.GetOffset()
+		if offset > 0 {
+			db = db.Offset(offset)
+		}
+	}
 }
 
-// does not set limit or offset, use for filtering
-func ApplyQueryToGormNoLimitOffset(g *gorm.DB, q query.Builder) (*gorm.DB, error) {
-	where, params, err := q.GetWhere()
+// BindRequest returns a T with values set by binding the request JSON from the provided Gin context.
+func BindRequest[T any](cx *gin.Context) (T, error) {
+	var result T
+	err := cx.ShouldBindWith(&result, binding.JSON)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to apply filter")
+		return result, err
 	}
+	return result, nil
+}
 
-	if where != "" {
-		g = g.Where(where, params...)
+type ParamParser[T any] func(string) (T, error)
+
+func ParseParam[T any](cx *gin.Context, key string, parser ParamParser[T]) (T, error) {
+	param := cx.Param(key)
+	result, err := parser(param)
+	if err != nil {
+		return result, errors.Wrapf(err, "failed to parse request param '%s' from value '%s'", key, param)
 	}
+	return result, nil
+}
 
-	order := q.GetOrder()
-	if order != "" {
-		g = g.Order(order)
-	}
-
-	for _, p := range q.GetPreload() {
-		g = g.Preload(p)
-	}
-
-	return g, nil
+func GetIDParam(cx *gin.Context) (ID, error) {
+	return ParseParam[ID](cx, "id", ParseID)
 }

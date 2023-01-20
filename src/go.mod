@@ -3,7 +3,7 @@ module github.com/68696c6c/goat
 go 1.19
 
 require (
-	github.com/68696c6c/girraph v0.1.0
+	github.com/68696c6c/girraph v0.1.1
 	github.com/fatih/color v1.13.0
 	github.com/gin-contrib/zap v0.1.0
 	github.com/gin-gonic/gin v1.8.2

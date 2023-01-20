@@ -1,0 +1,44 @@
+version: "3.6"
+
+volumes:
+  pkg:
+  db-volume:
+
+services:
+  test:
+    image: goat:test
+    command: wait-for-it -s -t 60 test-db:3306 -- go test ./... -cover -coverprofile=cover.out
+    depends_on:
+    - test-db
+    volumes:
+    - pkg:/go/pkg
+    - ./:/src
+    working_dir: /src
+#  app:
+#    image: example:dev
+#    command: wait-for-it -s -t 60 db:3306 -- ./example server 8000
+#    depends_on:
+#    - db
+#    volumes:
+#    - pkg:/go/pkg
+#    - ./:/app
+#    working_dir: /app/src
+#    ports:
+#    - "8000:8000"
+#    env_file:
+#    - .app.env
+#    environment:
+#      HTTP_PORT: 8000
+#      MIGRATION_PATH: /app/src/database
+
+  test-db:
+    platform: linux/amd64
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: goat
+    ports:
+    - "${HOST_DB_PORT:-3309}:3306"
+    volumes:
+    - db-volume:/var/lib/mysql
+#    - .docker/setup.sql:/docker-entrypoint-initdb.d/setup.sql

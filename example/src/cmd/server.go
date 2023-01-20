@@ -22,12 +22,6 @@ func init() {
 
 			router := goat.InitRouter()
 
-			// v, err := router.GetValidator()
-			// if err != nil {
-			// 	goat.ExitError(errors.Wrap(err, "error getting request validator"))
-			// }
-			// v.RegisterStructValidation(services.UsersRepo.ValidateCreate, models.UserRequest{})
-
 			router.GET(goat.HealthHandler("/health"))
 			router.GET(goat.VersionHandler("/version", services.Version))
 

@@ -7,7 +7,6 @@ import (
 )
 
 type Config struct {
-	// TODO: move this to goat
 	Version string
 }
 
@@ -25,7 +24,7 @@ func GetConfig() (Config, error) {
 func validateConfig(c Config) error {
 	var errs []error
 	if c.Version == "" {
-		errs = append(errs, errors.New("invalid version number"))
+		errs = append(errs, errors.New("invalid build_tag"))
 	}
 	return goat.ErrorsToError(errs)
 }

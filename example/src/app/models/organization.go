@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 
 	"github.com/68696c6c/goat"
+	"github.com/68696c6c/goat/hal"
 	"github.com/68696c6c/goat/model"
-	"github.com/68696c6c/goat/resource"
 )
 
 const OrganizationLinkKey = "organizations"
@@ -19,7 +19,7 @@ type Organization struct {
 
 	*model.Timestamps
 	*model.SoftDelete
-	*resource.Embedded[*OrganizationEmbeds]
+	*hal.ResourceEmbeds[*OrganizationEmbeds]
 }
 
 type OrganizationRequest struct {
@@ -42,22 +42,22 @@ func MakeOrganization() *Organization {
 }
 
 // getEmbedded returns nil if the embedded Users array is empty to avoid rending JSON values like `"_embedded": {}`
-func (m *Organization) getEmbedded() *resource.Embedded[*OrganizationEmbeds] {
-	if m.Embedded == nil || len(m.Embedded.Embeds.Users) == 0 {
+func (m *Organization) getEmbedded() *hal.ResourceEmbeds[*OrganizationEmbeds] {
+	if m.Embeds == nil || len(m.Embeds.Users) == 0 {
 		return nil
 	}
-	return m.Embedded
+	return m.ResourceEmbeds
 }
 
 func (m *Organization) MarshalJSON() ([]byte, error) {
 	type Alias Organization
 	return json.Marshal(&struct {
 		*Alias
-		*resource.Embedded[*OrganizationEmbeds]
-		*resource.Links
+		*hal.ResourceEmbeds[*OrganizationEmbeds]
+		*hal.ResourceLinks
 	}{
-		Alias:    (*Alias)(m),
-		Embedded: m.getEmbedded(),
-		Links:    goat.MakeResourceLinks(OrganizationLinkKey, m.ID.String()),
+		Alias:          (*Alias)(m),
+		ResourceEmbeds: m.getEmbedded(),
+		ResourceLinks:  goat.NewResourceLinks(OrganizationLinkKey, m.ID.String()),
 	})
 }

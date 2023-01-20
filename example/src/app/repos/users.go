@@ -7,7 +7,6 @@ import (
 	"github.com/68696c6c/goat"
 	"github.com/68696c6c/goat/query"
 	"github.com/68696c6c/goat/repo"
-	"github.com/68696c6c/goat/resource"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
@@ -39,26 +38,26 @@ func (r usersRepo) Create(cx context.Context, u models.UserRequest) (*models.Use
 	m := r.Make()
 	var errs []error
 	if u.OrganizationId == nil {
-		errs = append(errs, goat.MakeValidationError("organizationId", "required"))
+		errs = append(errs, goat.NewValidationError("organizationId", "required"))
 	} else {
 		m.OrganizationId = *u.OrganizationId
 	}
 	if u.Level == nil {
-		errs = append(errs, goat.MakeValidationError("level", "required"))
+		errs = append(errs, goat.NewValidationError("level", "required"))
 	} else {
 		m.Level = *u.Level
 	}
 	if u.Name == nil {
-		errs = append(errs, goat.MakeValidationError("name", "required"))
+		errs = append(errs, goat.NewValidationError("name", "required"))
 	} else {
 		m.Name = *u.Name
 	}
 	if u.Email == nil {
-		errs = append(errs, goat.MakeValidationError("email", "required"))
+		errs = append(errs, goat.NewValidationError("email", "required"))
 	} else {
 		_, err := repo.First[models.User](r.db.WithContext(cx), "email = ?", u.Email)
 		if !goat.RecordNotFound(err) {
-			errs = append(errs, goat.MakeValidationError("email", "unique"))
+			errs = append(errs, goat.NewValidationError("email", "unique"))
 		} else {
 			m.Email = *u.Email
 		}
@@ -80,14 +79,9 @@ func (r usersRepo) Update(cx context.Context, id goat.ID, u models.UserRequest) 
 	return m, nil
 }
 
-// TODO: context???
-func (r usersRepo) getBaseQuery() *gorm.DB {
-	return r.db.Model(&models.User{})
-}
-
-func (r usersRepo) Filter(cx context.Context, q query.Builder, p resource.Pagination) ([]*models.User, resource.Pagination, error) {
+func (r usersRepo) Filter(cx context.Context, q query.Builder) ([]*models.User, query.Builder, error) {
 	base := r.db.WithContext(cx).Model(&models.User{})
-	return repo.Filter[models.User](base, q, p)
+	return repo.Filter[models.User](base, q)
 }
 
 func (r usersRepo) ApplyFilterForUser(q query.Builder, user *models.User) error {
@@ -97,12 +91,10 @@ func (r usersRepo) ApplyFilterForUser(q query.Builder, user *models.User) error 
 		break
 	case enums.UserLevelCustomer:
 		// Customers can only see themselves.
-		q.WhereEq("id", user.ID)
-		// q.Where("id", query2.Equals, user.ID)
+		q.AndEq("id", user.ID)
 	default:
 		// Admin and normal users can only see users in their own org.
-		q.WhereEq("organization_id", user.OrganizationId)
-		// q.Where("organization_id", query2.Equals, user.OrganizationId)
+		q.AndEq("organization_id", user.OrganizationId)
 	}
 	return nil
 }
@@ -134,8 +126,7 @@ func (r usersRepo) FilterStrings(q query.Builder, fields map[string][]string) er
 			fallthrough
 		case "name":
 			if len(values) > 0 {
-				q.WhereLike(fieldName, fmt.Sprintf("%%%s%%", values[0]))
-				// q.Where(fieldName, query2.Like, fmt.Sprintf("%%%s%%", values[0]))
+				q.AndLike(fieldName, fmt.Sprintf("%%%s%%", values[0]))
 			}
 		}
 	}

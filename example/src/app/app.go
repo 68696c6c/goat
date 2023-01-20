@@ -33,7 +33,7 @@ func GetApp(db *gorm.DB, config Config) (App, error) {
 }
 
 func InitApp() (App, error) {
-	goat.Init()
+	goat.MustInit()
 
 	db, err := goat.GetMainDB()
 	if err != nil {

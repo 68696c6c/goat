@@ -3,6 +3,7 @@ package enums
 import (
 	"database/sql/driver"
 
+	"github.com/68696c6c/goat"
 	"github.com/pkg/errors"
 )
 
@@ -30,7 +31,7 @@ func UserLevelFromString(value string) (UserLevel, error) {
 }
 
 func (t *UserLevel) Scan(value any) error {
-	stringValue, err := valueToString(value)
+	stringValue, err := goat.ValueToString(value)
 	if err != nil {
 		return err
 	}
@@ -42,10 +43,10 @@ func (t *UserLevel) Scan(value any) error {
 	return nil
 }
 
-func (t UserLevel) Value() (driver.Value, error) {
-	return string(t), nil
+func (t *UserLevel) Value() (driver.Value, error) {
+	return string(*t), nil
 }
 
-func (t UserLevel) String() string {
-	return string(t)
+func (t *UserLevel) String() string {
+	return string(*t)
 }

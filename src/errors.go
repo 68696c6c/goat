@@ -40,6 +40,6 @@ func ErrorsToError(errs []error) error {
 	return errors.New(strings.Join(msg, "; "))
 }
 
-func MakeValidationError(field, rule string) error {
+func NewValidationError(field, rule string) error {
 	return errors.Errorf("%s failed on validation '%s'", field, rule)
 }

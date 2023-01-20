@@ -6,7 +6,6 @@ import (
 
 	"github.com/68696c6c/goat"
 	"github.com/68696c6c/goat/query"
-	"github.com/68696c6c/goat/resource"
 	"github.com/icrowley/fake"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -19,8 +18,7 @@ import (
 
 func Test_OrganizationsRepo_Filter(t *testing.T) {
 	q := query.NewQuery()
-	p := resource.NewPagination()
-	result, _, err := tc.organizationsRepo.Filter(context.Background(), q, p)
+	result, _, err := tc.organizationsRepo.Filter(context.Background(), q)
 	require.Nil(t, err, "unexpected error")
 	assert.Len(t, result, len(f.organizations), "unexpected number of rows returned")
 }
@@ -30,7 +28,7 @@ func Test_OrganizationsRepo_GetById(t *testing.T) {
 	result, err := tc.organizationsRepo.GetById(context.Background(), id)
 	require.Nil(t, err, "unexpected error")
 	assert.Equal(t, id, result.ID, "unexpected record returned")
-	assert.Nil(t, result.Embedded, "should not have loaded relations")
+	assert.Nil(t, result.ResourceEmbeds, "should not have loaded relations")
 }
 
 func Test_OrganizationsRepo_GetById_Preload(t *testing.T) {
@@ -38,7 +36,7 @@ func Test_OrganizationsRepo_GetById_Preload(t *testing.T) {
 	result, err := tc.organizationsRepo.GetById(context.Background(), id, true)
 	require.Nil(t, err, "unexpected error")
 	assert.Equal(t, id, result.ID, "unexpected record returned")
-	assert.NotNil(t, result.Embedded, "should have loaded relations")
+	assert.NotNil(t, result.ResourceEmbeds, "should have loaded relations")
 }
 
 func Test_OrganizationsRepo_GetById_NotFound(t *testing.T) {

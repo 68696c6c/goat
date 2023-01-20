@@ -4,7 +4,6 @@ import (
 	"github.com/68696c6c/goat"
 	"github.com/68696c6c/goat/controller"
 	"github.com/68696c6c/goat/query"
-	"github.com/68696c6c/goat/resource"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 
@@ -29,7 +28,6 @@ func NewUsersController(repo repos.UsersRepo) UsersController {
 func (c users) List(cx *gin.Context) {
 	queryString := cx.Request.URL.Query()
 	q := query.NewQueryFromUrl(queryString)
-	p := resource.NewPaginationFromUrl(queryString)
 
 	currentUser, ok := getCurrentUser(cx)
 	if !ok || currentUser == nil {
@@ -46,7 +44,7 @@ func (c users) List(cx *gin.Context) {
 		goat.RespondServerError(cx, err)
 		return
 	}
-	controller.HandleList[*models.User](cx, c.repo, goat.GetUrl(models.UserLinkKey), q, p)
+	controller.HandleList[*models.User](cx, c.repo, goat.GetUrl(models.UserLinkKey), q)
 }
 
 func (c users) View(cx *gin.Context) {

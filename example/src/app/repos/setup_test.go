@@ -23,16 +23,15 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	goat.Init()
+	goat.MustInit()
 
-	tdb := mustInitTestDb(goat.DatabaseConnection{
-		Debug:           goat.EnvBool("TEST_DB_DEBUG", true),
-		Host:            goat.EnvString("TEST_DB_HOST", "db"),
-		Port:            goat.EnvInt("TEST_DB_PORT", 3306),
-		Database:        goat.EnvString("TEST_DB_DATABASE", "example_test_repos"),
-		Username:        goat.EnvString("TEST_DB_USERNAME", "root"),
-		Password:        url.QueryEscape(goat.EnvString("TEST_DB_PASSWORD", "secret")),
-		MultiStatements: false,
+	tdb := mustInitTestDb(goat.DatabaseConfig{
+		Debug:    goat.EnvOrDefault[bool]("TEST_DB_DEBUG", true),
+		Host:     goat.EnvOrDefault[string]("TEST_DB_HOST", "db"),
+		Port:     goat.EnvOrDefault[int]("TEST_DB_PORT", 3306),
+		Database: goat.EnvOrDefault[string]("TEST_DB_DATABASE", "example_test_repos"),
+		Username: goat.EnvOrDefault[string]("TEST_DB_USERNAME", "root"),
+		Password: url.QueryEscape(goat.EnvOrDefault[string]("TEST_DB_PASSWORD", "secret")),
 	})
 	tc = newTestContainer(tdb)
 	f = mustGetPersistedFixtures(tc.db)
@@ -110,8 +109,8 @@ func mustPersistFixture[T any](db *gorm.DB, m T) {
 	}
 }
 
-func mustInitTestDb(connectionConfig goat.DatabaseConnection) *gorm.DB {
-	tdb, err := goat.GetCustomDB(connectionConfig)
+func mustInitTestDb(connectionConfig goat.DatabaseConfig) *gorm.DB {
+	tdb, err := goat.GetDB(connectionConfig)
 	if err != nil {
 		panic(errors.Wrap(err, "failed to initialize test db connection"))
 	}

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 
 	"github.com/68696c6c/goat"
+	"github.com/68696c6c/goat/hal"
 	"github.com/68696c6c/goat/model"
-	"github.com/68696c6c/goat/resource"
 
 	"github.com/68696c6c/example/app/enums"
 )
@@ -22,7 +22,7 @@ type User struct {
 
 	*model.Timestamps
 	*model.SoftDelete
-	*resource.Embedded[*UserEmbeds]
+	*hal.ResourceEmbeds[*UserEmbeds]
 }
 
 type UserRequest struct {
@@ -50,9 +50,9 @@ func (m *User) MarshalJSON() ([]byte, error) {
 	type Alias User
 	return json.Marshal(&struct {
 		*Alias
-		*resource.Links
+		*hal.ResourceLinks
 	}{
-		Alias: (*Alias)(m),
-		Links: goat.MakeResourceLinks(UserLinkKey, m.ID.String()),
+		Alias:         (*Alias)(m),
+		ResourceLinks: goat.NewResourceLinks(UserLinkKey, m.ID.String()),
 	})
 }

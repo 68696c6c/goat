@@ -6,7 +6,6 @@ import (
 	"github.com/68696c6c/goat"
 	"github.com/68696c6c/goat/query"
 	"github.com/68696c6c/goat/repo"
-	"github.com/68696c6c/goat/resource"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
@@ -48,13 +47,9 @@ func (r organizationsRepo) Update(cx context.Context, id goat.ID, u models.Organ
 	return m, nil
 }
 
-func (r organizationsRepo) getBaseQuery() *gorm.DB {
-	return r.db.Model(&models.Organization{})
-}
-
-func (r organizationsRepo) Filter(cx context.Context, q query.Builder, p resource.Pagination) ([]*models.Organization, resource.Pagination, error) {
+func (r organizationsRepo) Filter(cx context.Context, q query.Builder) ([]*models.Organization, query.Builder, error) {
 	base := r.db.WithContext(cx).Model(&models.Organization{})
-	return repo.Filter[models.Organization](base, q, p)
+	return repo.Filter[models.Organization](base, q)
 }
 
 func (r organizationsRepo) GetById(cx context.Context, id goat.ID, loadRelations ...bool) (*models.Organization, error) {

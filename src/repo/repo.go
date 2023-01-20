@@ -8,7 +8,6 @@ import (
 
 	"github.com/68696c6c/goat"
 	"github.com/68696c6c/goat/query"
-	"github.com/68696c6c/goat/resource"
 )
 
 type CRUD[Model, Request any] interface {
@@ -34,7 +33,7 @@ type Identifier[Model any] interface {
 }
 
 type Filterer[Model any] interface {
-	Filter(cx context.Context, q query.Builder, pagination resource.Pagination) ([]Model, resource.Pagination, error)
+	Filter(cx context.Context, q query.Builder) ([]Model, query.Builder, error)
 }
 
 type Creator[Model any, Request any] interface {
@@ -49,34 +48,30 @@ type Deleter[Model any] interface {
 	Delete(cx context.Context, m Model) error
 }
 
-func Filter[M any](db *gorm.DB, queryFilter query.Builder, p resource.Pagination) ([]*M, resource.Pagination, error) {
+func Filter[M any](db *gorm.DB, q query.Builder) ([]*M, query.Builder, error) {
 	var result []*M
+	goat.ApplyQueryToGorm(db, q, false)
 
-	dbQuery, err := goat.ApplyQueryToGormNoLimitOffset(db, queryFilter)
+	pagination, err := paginate(db, q.GetPagination())
 	if err != nil {
-		return result, p, errors.Wrap(err, "failed to build filter query")
+		return []*M{}, q, errors.Wrap(err, "failed get pagination total count")
 	}
 
-	pagination, err := paginate(dbQuery, p)
+	result, err = filter[M](db)
 	if err != nil {
-		return []*M{}, pagination, errors.Wrap(err, "failed get pagination total count")
+		return result, q, err
 	}
 
-	result, err = filter[M](dbQuery)
-	if err != nil {
-		return result, pagination, err
-	}
-
-	return result, pagination, nil
+	return result, q.Pagination(pagination), nil
 }
 
-func paginate(db *gorm.DB, p resource.Pagination) (resource.Pagination, error) {
+func paginate(db *gorm.DB, p *query.Pagination) (*query.Pagination, error) {
 	var count int64
 	err := db.Count(&count).Error
 	if err != nil {
 		return p, err
 	}
-	return resource.NewPaginationFromValues(p.Page, p.PageSize, count), nil
+	return query.NewPagination().SetPage(p.GetPage()).SetPageSize(p.GetPageSize()).SetTotal(int(count)), nil
 }
 
 func filter[M any](db *gorm.DB) ([]*M, error) {
@@ -97,14 +92,6 @@ func First[M any](db *gorm.DB, where ...any) (*M, error) {
 	return &result, nil
 }
 
-func handleGormErrors(db *gorm.DB) error {
-	err := db.Error
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func Create[M any](db *gorm.DB, input M) error {
 	return handleGormErrors(db.Create(input))
 }
@@ -115,4 +102,12 @@ func Update[M any](db *gorm.DB, input M) error {
 
 func Delete[M any](db *gorm.DB, input M) error {
 	return handleGormErrors(db.Delete(input))
+}
+
+func handleGormErrors(db *gorm.DB) error {
+	err := db.Error
+	if err != nil {
+		return err
+	}
+	return nil
 }

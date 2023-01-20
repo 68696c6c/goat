@@ -1,111 +1,368 @@
 package query
 
-import (
-	"net/url"
-	"strings"
-)
+import "net/url"
 
 type Builder interface {
-	// Join()
-	// Where()
-	Filter
-	Order(field string, dir Direction) Builder
-	// GroupBy()
-	Limit(int) Builder
-	Offset(int) Builder
+	// Filter methods
 
-	Preload(preload string) Builder
-	GetPreload() []string
-	GetWhere() (string, []any, error)
-	GetOrder() string
+	Where(field string, op Operator, value any) Builder
+	WhereEq(field string, value any) Builder
+	WhereLike(field string, value any) Builder
+	WhereIn(field string, value any) Builder
+	WhereLt(field string, value any) Builder
+	WhereLtEq(field string, value any) Builder
+	WhereGt(field string, value any) Builder
+	WhereGtEq(field string, value any) Builder
+	WhereNotEq(field string, value any) Builder
+	WhereNotLike(field string, value any) Builder
+	WhereNotIn(field string, value any) Builder
+
+	And(field string, op Operator, value any) Builder
+	AndEq(field string, value any) Builder
+	AndLike(field string, value any) Builder
+	AndIn(field string, value any) Builder
+	AndLt(field string, value any) Builder
+	AndLtEq(field string, value any) Builder
+	AndGt(field string, value any) Builder
+	AndGtEq(field string, value any) Builder
+	AndNotEq(field string, value any) Builder
+	AndNotLike(field string, value any) Builder
+	AndNotIn(field string, value any) Builder
+
+	Or(field string, op Operator, value any) Builder
+	OrEq(field string, value any) Builder
+	OrLike(field string, value any) Builder
+	OrIn(field string, value any) Builder
+	OrLt(field string, value any) Builder
+	OrLtEq(field string, value any) Builder
+	OrGt(field string, value any) Builder
+	OrGtEq(field string, value any) Builder
+	OrNotEq(field string, value any) Builder
+	OrNotLike(field string, value any) Builder
+	OrNotIn(field string, value any) Builder
+
+	AndGroup(conditions Filter) Builder
+	OrGroup(conditions Filter) Builder
+
+	GetWhere() (string, []any)
+
+	// Order methods
+
+	Order(field string, dir ...Direction) Builder
+	GetOrderBy() string
+	GetOrder() *Order
+
+	// Pagination methods
+
+	Limit(int) Builder
 	GetLimit() int
+	Offset(int) Builder
 	GetOffset() int
+	Pagination(p *Pagination) Builder
+	GetPagination() *Pagination
+
+	// Preload methods
+
+	Preload(query string, args ...any) Builder
+	GetPreload() []Preload
+
+	build() queryResult
 }
 
 type query struct {
-	Filter
-	sort    []Sort
-	preload []string
-	limit   int
-	offset  int
+	filter     Filter
+	order      *Order
+	pagination *Pagination
+	preload    []Preload
 }
 
 func NewQuery() Builder {
 	return &query{
-		Filter:  NewFilter(),
-		sort:    []Sort{},
-		preload: []string{},
-		limit:   -1,
-		offset:  -1,
+		filter:     NewFilter(),
+		order:      NewOrder(),
+		pagination: NewPagination(),
+		preload:    []Preload{},
 	}
 }
 
 func NewQueryFromUrl(q url.Values) Builder {
-	result := NewQuery()
-
 	if q == nil {
-		return result
+		return NewQuery()
 	}
-
-	sortField := q.Get(sortKey)
-	if sortField == "" {
-		sortField = defaultSortField
+	return &query{
+		filter:     NewFilter(),
+		order:      NewOrderFromUrl(q),
+		pagination: NewPaginationFromUrl(q),
+		preload:    []Preload{},
 	}
-
-	sortDir, err := DirectionFromString(q.Get(sortDirKey))
-	if err != nil {
-		sortDir = Descending
-	}
-
-	result.Order(sortField, sortDir)
-
-	return result
 }
 
-func (q *query) Order(field string, dir Direction) Builder {
-	q.sort = append(q.sort, NewSort().By(field).Dir(dir))
+// Where aliases
+// These methods are just sugar that allow for starting a query with a more natural Where() instead of And().
+
+func (q *query) Where(field string, op Operator, value any) Builder {
+	q.filter.And(field, op, value)
+	return q
+}
+
+func (q *query) WhereEq(field string, value any) Builder {
+	q.filter.AndEq(field, value)
+	return q
+}
+
+func (q *query) WhereLike(field string, value any) Builder {
+	q.filter.AndLike(field, value)
+	return q
+}
+
+func (q *query) WhereIn(field string, value any) Builder {
+	q.filter.AndIn(field, value)
+	return q
+}
+
+func (q *query) WhereLt(field string, value any) Builder {
+	q.filter.AndLt(field, value)
+	return q
+}
+
+func (q *query) WhereLtEq(field string, value any) Builder {
+	q.filter.AndLtEq(field, value)
+	return q
+}
+
+func (q *query) WhereGt(field string, value any) Builder {
+	q.filter.AndGt(field, value)
+	return q
+}
+
+func (q *query) WhereGtEq(field string, value any) Builder {
+	q.filter.AndGtEq(field, value)
+	return q
+}
+
+func (q *query) WhereNotEq(field string, value any) Builder {
+	q.filter.AndNotEq(field, value)
+	return q
+}
+
+func (q *query) WhereNotLike(field string, value any) Builder {
+	q.filter.AndNotLike(field, value)
+	return q
+}
+
+func (q *query) WhereNotIn(field string, value any) Builder {
+	q.filter.AndNotIn(field, value)
+	return q
+}
+
+// And conditions
+
+func (q *query) And(field string, op Operator, value any) Builder {
+	q.filter.And(field, op, value)
+	return q
+}
+
+func (q *query) AndEq(field string, value any) Builder {
+	q.filter.AndEq(field, value)
+	return q
+}
+
+func (q *query) AndLike(field string, value any) Builder {
+	q.filter.AndLike(field, value)
+	return q
+}
+
+func (q *query) AndIn(field string, value any) Builder {
+	q.filter.AndIn(field, value)
+	return q
+}
+
+func (q *query) AndLt(field string, value any) Builder {
+	q.filter.AndLt(field, value)
+	return q
+}
+
+func (q *query) AndLtEq(field string, value any) Builder {
+	q.filter.AndLtEq(field, value)
+	return q
+}
+
+func (q *query) AndGt(field string, value any) Builder {
+	q.filter.AndGt(field, value)
+	return q
+}
+
+func (q *query) AndGtEq(field string, value any) Builder {
+	q.filter.AndGtEq(field, value)
+	return q
+}
+
+func (q *query) AndNotEq(field string, value any) Builder {
+	q.filter.AndNotEq(field, value)
+	return q
+}
+
+func (q *query) AndNotLike(field string, value any) Builder {
+	q.filter.AndNotLike(field, value)
+	return q
+}
+
+func (q *query) AndNotIn(field string, value any) Builder {
+	q.filter.AndNotIn(field, value)
+	return q
+}
+
+// Or conditions
+
+func (q *query) Or(field string, op Operator, value any) Builder {
+	q.filter.Or(field, op, value)
+	return q
+}
+
+func (q *query) OrEq(field string, value any) Builder {
+	q.filter.OrEq(field, value)
+	return q
+}
+
+func (q *query) OrLike(field string, value any) Builder {
+	q.filter.OrLike(field, value)
+	return q
+}
+
+func (q *query) OrIn(field string, value any) Builder {
+	q.filter.OrIn(field, value)
+	return q
+}
+
+func (q *query) OrLt(field string, value any) Builder {
+	q.filter.OrLt(field, value)
+	return q
+}
+
+func (q *query) OrLtEq(field string, value any) Builder {
+	q.filter.OrLtEq(field, value)
+	return q
+}
+
+func (q *query) OrGt(field string, value any) Builder {
+	q.filter.OrGt(field, value)
+	return q
+}
+
+func (q *query) OrGtEq(field string, value any) Builder {
+	q.filter.OrGtEq(field, value)
+	return q
+}
+
+func (q *query) OrNotEq(field string, value any) Builder {
+	q.filter.OrNotEq(field, value)
+	return q
+}
+
+func (q *query) OrNotLike(field string, value any) Builder {
+	q.filter.OrNotLike(field, value)
+	return q
+}
+
+func (q *query) OrNotIn(field string, value any) Builder {
+	q.filter.OrNotIn(field, value)
+	return q
+}
+
+// Condition groups
+
+func (q *query) AndGroup(conditions Filter) Builder {
+	q.filter.AndGroup(conditions)
+	return q
+}
+
+func (q *query) OrGroup(conditions Filter) Builder {
+	q.filter.OrGroup(conditions)
+	return q
+}
+
+// Order methods
+
+func (q *query) Order(field string, dir ...Direction) Builder {
+	q.order.By(field, dir...)
 	return q
 }
 
 func (q *query) Limit(limit int) Builder {
-	q.limit = limit
+	q.pagination.SetPageSize(limit)
 	return q
 }
 
 func (q *query) GetLimit() int {
-	return q.limit
+	return q.pagination.GetPageSize()
 }
 
 func (q *query) Offset(offset int) Builder {
-	q.offset = offset
+	q.pagination.setOffset(offset)
 	return q
 }
 
 func (q *query) GetOffset() int {
-	return q.offset
+	return q.pagination.getOffset()
 }
 
-// TODO: should probably accept the same params as gorm Preload
-func (q *query) Preload(preload string) Builder {
-	q.preload = append(q.preload, preload)
+func (q *query) Pagination(p *Pagination) Builder {
+	q.pagination = p
 	return q
 }
 
-func (q *query) GetPreload() []string {
+func (q *query) GetPagination() *Pagination {
+	return q.pagination
+}
+
+type Preload struct {
+	Query string
+	Args  []any
+}
+
+func (q *query) Preload(query string, args ...any) Builder {
+	q.preload = append(q.preload, Preload{
+		Query: query,
+		Args:  args,
+	})
+	return q
+}
+
+func (q *query) GetPreload() []Preload {
 	return q.preload
 }
 
-func (q *query) GetOrder() string {
-	if len(q.sort) == 0 {
-		return ""
-	}
-	var result []string
-	for _, s := range q.sort {
-		result = append(result, s.Generate())
-	}
-	return strings.Join(result, ", ")
+func (q *query) GetOrderBy() string {
+	return q.order.Generate()
 }
 
-func (q *query) GetWhere() (string, []any, error) {
-	return q.Filter.Generate()
+func (q *query) GetOrder() *Order {
+	return q.order
+}
+
+func (q *query) GetWhere() (string, []any) {
+	return q.filter.Generate()
+}
+
+// TODO: these are currently only used in tests...
+
+type queryResult struct {
+	where   string
+	params  []any
+	order   string
+	preload []Preload
+	limit   int
+	offset  int
+}
+
+func (q *query) build() queryResult {
+	where, params := q.GetWhere()
+	return queryResult{
+		where:   where,
+		params:  params,
+		order:   q.GetOrderBy(),
+		preload: q.GetPreload(),
+		limit:   q.GetLimit(),
+		offset:  q.GetOffset(),
+	}
 }

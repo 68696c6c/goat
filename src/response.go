@@ -6,16 +6,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/68696c6c/goat/resource"
+	"github.com/68696c6c/goat/hal"
 )
 
-type ApiProblem resource.ApiProblem
+type ApiProblem hal.ApiProblem
 
-type Resource resource.Resource
+type Resource hal.Resource
 
-type Collection[T any] resource.Collection[T]
-
-type MessageResponse resource.MessageResponse
+type Collection[T any] hal.Collection[T]
 
 func debugError(err error) error {
 	if g.HTTP.DebugEnabled() {
@@ -51,35 +49,35 @@ func RespondCreated(cx *gin.Context, data any) {
 func RespondNotFound(cx *gin.Context, err error) {
 	status := http.StatusNotFound
 	logHandlerError(cx, err)
-	cx.AbortWithStatusJSON(status, resource.NewApiProblem(status, "not found", debugError(err)))
+	cx.AbortWithStatusJSON(status, hal.NewApiProblem(status, debugError(err)))
 }
 
 func RespondBadRequest(cx *gin.Context, err error) {
 	status := http.StatusBadRequest
 	logHandlerError(cx, err)
-	cx.AbortWithStatusJSON(status, resource.NewApiProblem(status, "invalid request", debugError(err)))
+	cx.AbortWithStatusJSON(status, hal.NewApiProblem(status, debugError(err)))
 }
 
 func RespondValidationError(cx *gin.Context, err error) {
 	status := http.StatusBadRequest
 	logHandlerError(cx, err)
-	cx.AbortWithStatusJSON(status, resource.NewApiProblem(status, "invalid request", err))
+	cx.AbortWithStatusJSON(status, hal.NewApiProblem(status, err))
 }
 
 func RespondUnauthorized(cx *gin.Context, err error) {
 	status := http.StatusUnauthorized
 	logHandlerError(cx, err)
-	cx.AbortWithStatusJSON(status, resource.NewApiProblem(status, "unauthorized", debugError(err)))
+	cx.AbortWithStatusJSON(status, hal.NewApiProblem(status, debugError(err)))
 }
 
 func RespondForbidden(cx *gin.Context, err error) {
 	status := http.StatusForbidden
 	logHandlerError(cx, err)
-	cx.AbortWithStatusJSON(status, resource.NewApiProblem(status, "authentication error", debugError(err)))
+	cx.AbortWithStatusJSON(status, hal.NewApiProblem(status, debugError(err)))
 }
 
 func RespondServerError(cx *gin.Context, err error) {
 	status := http.StatusInternalServerError
 	logHandlerError(cx, err)
-	cx.AbortWithStatusJSON(status, resource.NewApiProblem(status, "internal server error", debugError(err)))
+	cx.AbortWithStatusJSON(status, hal.NewApiProblem(status, debugError(err)))
 }

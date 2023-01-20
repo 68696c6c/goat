@@ -19,20 +19,20 @@ type Goat struct {
 	Log  log.Service
 }
 
-func Init() Goat {
+func Init() (Goat, error) {
 	config, err := readConfig()
 	if err != nil {
-		panic(err)
+		return Goat{}, errors.Wrapf(err, "failed to read config")
 	}
 	logService, err := log.NewService(config.Log)
 	if err != nil {
-		panic(err)
+		return Goat{}, errors.Wrapf(err, "failed to initialize log service")
 	}
 	return Goat{
 		DB:   database.NewService(config.DB, logService),
 		HTTP: http.NewService(config.HTTP, logService),
 		Log:  logService,
-	}
+	}, nil
 }
 
 type Config struct {
@@ -63,7 +63,7 @@ const (
 func readConfig() (Config, error) {
 	viper.AutomaticEnv()
 
-	// Enable viper.Get type inferring; needed by the utils.EnvDefault helper.
+	// Enable viper.Get type inferring; needed by the utils.EnvOrDefault function.
 	viper.SetTypeByDefaultValue(true)
 
 	viper.SetDefault(keyDbDebug, false)
@@ -84,7 +84,7 @@ func readConfig() (Config, error) {
 
 	baseUrl, err := url.Parse(viper.GetString(keyBaseUrl))
 	if err != nil {
-		return Config{}, errors.Wrapf(err, "missing %s", keyBaseUrl)
+		return Config{}, errors.Wrapf(err, "env var '%s' is not set", keyBaseUrl)
 	}
 
 	return Config{
