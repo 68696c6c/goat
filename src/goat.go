@@ -2,11 +2,14 @@ package goat
 
 import (
 	"net/url"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
+	"gopkg.in/gin-contrib/cors.v1"
 	"gorm.io/gorm"
 
 	"github.com/68696c6c/goat/hal"
@@ -14,9 +17,11 @@ import (
 	"github.com/68696c6c/goat/sys"
 	"github.com/68696c6c/goat/sys/database"
 	"github.com/68696c6c/goat/sys/http"
+	"github.com/68696c6c/goat/sys/log"
 )
 
 var g sys.Goat
+var once sync.Once
 
 // Init initializes the Goat runtime services.
 // Goat has three primary concerns, each encapsulated by their own service:
@@ -24,11 +29,14 @@ var g sys.Goat
 // - database connections
 // - route-based response hypermedia (linking)
 func Init() error {
-	if g != (sys.Goat{}) {
-		return nil
-	}
 	var err error
-	g, err = sys.Init()
+	once.Do(func() {
+		config, err := readConfig()
+		if err != nil {
+			return
+		}
+		g, err = sys.Init(config)
+	})
 	if err != nil {
 		return err
 	}
@@ -40,6 +48,71 @@ func MustInit() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+const (
+	keyBaseUrl              = "base_url"
+	keyDbDebug              = "db_debug"
+	keyDbHost               = "db_host"
+	keyDbPort               = "db_port"
+	keyDbDatabase           = "db_database"
+	keyDbUsername           = "db_username"
+	keyDbPassword           = "db_password"
+	keyLogLevel             = "log_level"
+	keyLogStacktrace        = "log_stacktrace"
+	keyHttpDebug            = "http_debug"
+	keyHttpHost             = "http_host"
+	keyHttpPort             = "http_port"
+	keyHttpAllowOrigins     = "http_allow_origins"
+	keyHttpAllowHeaders     = "http_allow_headers"
+	keyHttpAllowMethods     = "http_allow_methods"
+	keyHttpAllowCredentials = "http_allow_credentials"
+)
+
+func readConfig() (sys.Config, error) {
+	viper.AutomaticEnv()
+
+	// Default to info-level logging.
+	level, err := zap.ParseAtomicLevel(viper.GetString(keyLogLevel))
+	if err != nil {
+		level = zap.NewAtomicLevelAt(zap.InfoLevel)
+	}
+
+	// Allow an empty base url but return an error if it is non-empty and not a valid URL.
+	var baseUrl *url.URL = nil
+	if viper.IsSet(keyBaseUrl) {
+		baseUrl, err = url.Parse(viper.GetString(keyBaseUrl))
+		if err != nil {
+			return sys.Config{}, errors.Wrapf(err, "failed to parse env var '%s'", keyBaseUrl)
+		}
+	}
+
+	return sys.Config{
+		DB: database.Config{
+			Debug:    EnvBool(keyDbDebug, false),
+			Host:     EnvString(keyDbHost, ""),
+			Port:     EnvInt(keyDbPort, 3306),
+			Database: EnvString(keyDbDatabase, ""),
+			Username: EnvString(keyDbUsername, ""),
+			Password: EnvString(keyDbPassword, ""),
+		},
+		HTTP: http.Config{
+			BaseUrl: baseUrl,
+			Debug:   EnvBool(keyHttpDebug, false),
+			Host:    EnvString(keyHttpHost, ""),
+			Port:    EnvInt(keyHttpPort, 80),
+			CORS: cors.Config{
+				AllowOrigins:     EnvStringSlice(keyHttpAllowOrigins, []string{"*"}),
+				AllowMethods:     EnvStringSlice(keyHttpAllowMethods, []string{"*"}),
+				AllowHeaders:     EnvStringSlice(keyHttpAllowHeaders, []string{"*"}),
+				AllowCredentials: EnvBool(keyHttpAllowCredentials, true),
+			},
+		},
+		Log: log.Config{
+			Level:      level,
+			Stacktrace: EnvBool(keyLogStacktrace, true),
+		},
+	}, nil
 }
 
 type Router http.Router
