@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/68696c6c/girraph v0.1.1
+	github.com/68696c6c/zapgorm2 v1.3.1
 	github.com/fatih/color v1.13.0
 	github.com/gin-contrib/zap v0.1.0
 	github.com/gin-gonic/gin v1.8.2
@@ -18,7 +19,6 @@ require (
 	gopkg.in/gin-contrib/cors.v1 v1.0.0-20170318125340-cf4846e6a636
 	gorm.io/driver/mysql v1.4.4
 	gorm.io/gorm v1.24.2
-	moul.io/zapgorm2 v1.2.0
 )
 
 require (

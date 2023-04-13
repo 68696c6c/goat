@@ -3,11 +3,11 @@ package log
 import (
 	"time"
 
+	gormzap "github.com/68696c6c/zapgorm2"
 	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	gormlog "gorm.io/gorm/logger"
-	gormzap "moul.io/zapgorm2"
 )
 
 type Config struct {
