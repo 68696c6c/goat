@@ -11,17 +11,12 @@ import (
 )
 
 type CRUD[Model, Request any] interface {
-	Maker[Model]
 	Saver[Model]
 	Identifier[Model]
 	Filterer[Model]
 	Creator[Model, Request]
 	Updater[Model, Request]
 	Deleter[Model]
-}
-
-type Maker[Model any] interface {
-	Make() Model
 }
 
 type Saver[Model any] interface {
