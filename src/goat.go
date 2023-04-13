@@ -28,6 +28,7 @@ var once sync.Once
 // - logging
 // - database connections
 // - route-based response hypermedia (linking)
+// This function only needs to be called if you intend to use the database, http, or log services.
 func Init() error {
 	var err error
 	once.Do(func() {
@@ -117,8 +118,17 @@ func readConfig() (sys.Config, error) {
 
 type Router http.Router
 
-func InitRouter() Router {
-	return g.HTTP.InitRouter()
+func InitRouter(baseUrl ...string) (Router, error) {
+	if len(baseUrl) > 0 {
+		err := g.HTTP.SetBaseUrl(baseUrl[0])
+		if err != nil {
+			return nil, err
+		}
+	}
+	if g.HTTP.GetBaseUrl() == nil {
+		return nil, errors.Errorf("router base url is not set")
+	}
+	return g.HTTP.InitRouter(), nil
 }
 
 func GetLogger() *zap.SugaredLogger {
