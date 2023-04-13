@@ -29,8 +29,11 @@ func (c Config) GetCors() cors.Config {
 }
 
 type Service interface {
+	SetBaseUrl(baseUrl string) error
+	GetBaseUrl() *url.URL
 	InitRouter() Router
 	GetUrl(key ...string) *url.URL
+	SetUrl(key string, value *url.URL)
 	DebugEnabled() bool
 }
 
@@ -59,8 +62,25 @@ func (s *service) InitRouter() Router {
 	return s.initRouter()
 }
 
+func (s *service) SetBaseUrl(baseUrl string) error {
+	u, err := url.Parse(baseUrl)
+	if err != nil {
+		return err
+	}
+	s.config.BaseUrl = u
+	return nil
+}
+
+func (s *service) GetBaseUrl() *url.URL {
+	return s.config.BaseUrl
+}
+
 func (s *service) GetUrl(key ...string) *url.URL {
 	return s.initRouter().GetUrl(key...)
+}
+
+func (s *service) SetUrl(key string, value *url.URL) {
+	s.initRouter().SetUrl(key, value)
 }
 
 func (s *service) DebugEnabled() bool {

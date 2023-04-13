@@ -25,6 +25,7 @@ type Router interface {
 
 	Group(path string, handlers ...gin.HandlerFunc) *Group
 	GetUrl(key ...string) *url.URL
+	SetUrl(key string, value *url.URL)
 	Run() error
 }
 
@@ -40,7 +41,6 @@ func NewRouter(c Config, l log.Service) Router {
 
 type router struct {
 	*gin.Engine
-	baseUrl string
 	host    string
 	port    int
 	address string
@@ -57,6 +57,10 @@ func (r *router) Run() error {
 
 func (r *router) GetUrl(key ...string) *url.URL {
 	return r.links.GetUrl(key...)
+}
+
+func (r *router) SetUrl(key string, value *url.URL) {
+	r.links.SetUrl(key, value)
 }
 
 func (r *router) Group(relativePath string, handlers ...gin.HandlerFunc) *Group {

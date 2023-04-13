@@ -60,6 +60,10 @@ func GetUrl(key ...string) *url.URL {
 	return g.HTTP.GetUrl(key...)
 }
 
+func SetUrl(key string, value *url.URL) {
+	g.HTTP.SetUrl(key, value)
+}
+
 func NewResourceLinks(key, path string) *hal.ResourceLinks {
 	return hal.NewResourceLinks(g.HTTP.GetUrl(key).JoinPath(path).String())
 }
