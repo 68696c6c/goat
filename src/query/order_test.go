@@ -44,8 +44,8 @@ func Test_Order_NewOrderFromUrl(t *testing.T) {
 	testCases := []testCase[url.Values, string]{
 		{input: mustMakeQuery(""), expected: ""},
 		{input: mustMakeQuery("sort=a"), expected: "a ASC"},
-		{input: mustMakeQuery("sort=a&sortDir=asc"), expected: "a ASC"},
-		{input: mustMakeQuery("sort=a&sortDir=desc"), expected: "a DESC"},
+		{input: mustMakeQuery("sort=a&dir=asc"), expected: "a ASC"},
+		{input: mustMakeQuery("sort=a&dir=desc"), expected: "a DESC"},
 	}
 	for _, testCase := range testCases {
 		result := NewOrderFromUrl(testCase.input).Generate()

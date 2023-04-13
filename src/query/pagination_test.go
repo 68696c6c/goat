@@ -20,7 +20,7 @@ func Test_Pagination_NewPaginationFromUrl(t *testing.T) {
 			},
 		},
 		{
-			input: mustMakeQuery("page=10&pageSize=5"),
+			input: mustMakeQuery("page=10&size=5"),
 			expected: Pagination{
 				Page:       10,
 				PageSize:   5,
@@ -29,7 +29,7 @@ func Test_Pagination_NewPaginationFromUrl(t *testing.T) {
 			},
 		},
 		{
-			input: mustMakeQuery("sort=a&sortDir=desc&page=19&pageSize=6"),
+			input: mustMakeQuery("sort=a&dir=desc&page=19&size=6"),
 			expected: Pagination{
 				Page:       19,
 				PageSize:   6,
@@ -38,7 +38,7 @@ func Test_Pagination_NewPaginationFromUrl(t *testing.T) {
 			},
 		},
 		{
-			input: mustMakeQuery("page=42&pageSize=17&total=257"),
+			input: mustMakeQuery("page=42&size=17&total=257"),
 			expected: Pagination{
 				Page:       42,
 				PageSize:   17,
@@ -197,7 +197,6 @@ func Test_Pagination_First(t *testing.T) {
 		{
 			input: NewPagination().SetPageSize(5).setOffset(64),
 			expected: Pagination{
-				// Page:       13,
 				Page:       1,
 				PageSize:   5,
 				Total:      0,
@@ -207,7 +206,6 @@ func Test_Pagination_First(t *testing.T) {
 		{
 			input: NewPagination().SetPageSize(29).setOffset(46),
 			expected: Pagination{
-				// Page:       2,
 				Page:       1,
 				PageSize:   29,
 				Total:      0,
@@ -217,7 +215,6 @@ func Test_Pagination_First(t *testing.T) {
 		{
 			input: NewPagination().SetPage(14).SetPageSize(8).SetTotal(491),
 			expected: Pagination{
-				// Page:       13,
 				Page:       1,
 				PageSize:   8,
 				Total:      491,

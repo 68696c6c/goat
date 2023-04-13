@@ -3,6 +3,7 @@ package query
 import "net/url"
 
 type Builder interface {
+
 	// Filter methods
 
 	Where(field string, op Operator, value any) Builder
@@ -61,19 +62,19 @@ type Builder interface {
 	Pagination(p *Pagination) Builder
 	GetPagination() *Pagination
 
-	// Preload methods
+	// Join methods
 
-	Preload(query string, args ...any) Builder
-	GetPreload() []Preload
+	Join(query string, args ...any) Builder
+	GetJoins() []Join
 
-	build() queryResult
+	Build() Template
 }
 
 type query struct {
 	filter     Filter
 	order      *Order
 	pagination *Pagination
-	preload    []Preload
+	joins      []Join
 }
 
 func NewQuery() Builder {
@@ -81,7 +82,7 @@ func NewQuery() Builder {
 		filter:     NewFilter(),
 		order:      NewOrder(),
 		pagination: NewPagination(),
-		preload:    []Preload{},
+		joins:      []Join{},
 	}
 }
 
@@ -93,7 +94,7 @@ func NewQueryFromUrl(q url.Values) Builder {
 		filter:     NewFilter(),
 		order:      NewOrderFromUrl(q),
 		pagination: NewPaginationFromUrl(q),
-		preload:    []Preload{},
+		joins:      []Join{},
 	}
 }
 
@@ -315,21 +316,21 @@ func (q *query) GetPagination() *Pagination {
 	return q.pagination
 }
 
-type Preload struct {
+type Join struct {
 	Query string
 	Args  []any
 }
 
-func (q *query) Preload(query string, args ...any) Builder {
-	q.preload = append(q.preload, Preload{
+func (q *query) Join(query string, args ...any) Builder {
+	q.joins = append(q.joins, Join{
 		Query: query,
 		Args:  args,
 	})
 	return q
 }
 
-func (q *query) GetPreload() []Preload {
-	return q.preload
+func (q *query) GetJoins() []Join {
+	return q.joins
 }
 
 func (q *query) GetOrderBy() string {
@@ -344,25 +345,23 @@ func (q *query) GetWhere() (string, []any) {
 	return q.filter.Generate()
 }
 
-// TODO: these are currently only used in tests...
-
-type queryResult struct {
-	where   string
-	params  []any
-	order   string
-	preload []Preload
-	limit   int
-	offset  int
+type Template struct {
+	Where   string
+	Params  []any
+	OrderBy string
+	Joins   []Join
+	Limit   int
+	Offset  int
 }
 
-func (q *query) build() queryResult {
+func (q *query) Build() Template {
 	where, params := q.GetWhere()
-	return queryResult{
-		where:   where,
-		params:  params,
-		order:   q.GetOrderBy(),
-		preload: q.GetPreload(),
-		limit:   q.GetLimit(),
-		offset:  q.GetOffset(),
+	return Template{
+		Where:   where,
+		Params:  params,
+		OrderBy: q.GetOrderBy(),
+		Joins:   q.GetJoins(),
+		Limit:   q.GetLimit(),
+		Offset:  q.GetOffset(),
 	}
 }

@@ -9,61 +9,61 @@ import (
 )
 
 func Test_Query_NewQueryFromUrl(t *testing.T) {
-	testCases := []testCase[url.Values, queryResult]{
+	testCases := []testCase[url.Values, Template]{
 		{
 			input: nil,
-			expected: queryResult{
-				where:   "",
-				params:  nil,
-				order:   "",
-				preload: []Preload{},
-				limit:   0,
-				offset:  0,
+			expected: Template{
+				Where:   "",
+				Params:  nil,
+				OrderBy: "",
+				Joins:   []Join{},
+				Limit:   0,
+				Offset:  0,
 			},
 		},
 		{
-			input: mustMakeQuery("sort=a&sortDir=desc"),
-			expected: queryResult{
-				where:   "",
-				params:  nil,
-				order:   "a DESC",
-				preload: []Preload{},
-				limit:   0,
-				offset:  0,
+			input: mustMakeQuery("sort=a&dir=desc"),
+			expected: Template{
+				Where:   "",
+				Params:  nil,
+				OrderBy: "a DESC",
+				Joins:   []Join{},
+				Limit:   0,
+				Offset:  0,
 			},
 		},
 		{
-			input: mustMakeQuery("sort=a&sortDir=desc&page=10&pageSize=5"),
-			expected: queryResult{
-				where:   "",
-				params:  nil,
-				order:   "a DESC",
-				preload: []Preload{},
-				limit:   5,
-				offset:  45,
+			input: mustMakeQuery("sort=a&dir=desc&page=10&size=5"),
+			expected: Template{
+				Where:   "",
+				Params:  nil,
+				OrderBy: "a DESC",
+				Joins:   []Join{},
+				Limit:   5,
+				Offset:  45,
 			},
 		},
 	}
 	for _, testCase := range testCases {
-		result := NewQueryFromUrl(testCase.input).build()
-		assert.Equal(t, testCase.expected.where, result.where, "unexpected where")
-		assert.Equal(t, testCase.expected.params, result.params, "unexpected params")
-		assert.Equal(t, testCase.expected.order, result.order, "unexpected order")
-		assert.Equal(t, testCase.expected.preload, result.preload, "unexpected preload")
-		assert.Equal(t, testCase.expected.limit, result.limit, "unexpected limit")
-		assert.Equal(t, testCase.expected.offset, result.offset, "unexpected offset")
+		result := NewQueryFromUrl(testCase.input).Build()
+		assert.Equal(t, testCase.expected.Where, result.Where, "unexpected where")
+		assert.Equal(t, testCase.expected.Params, result.Params, "unexpected params")
+		assert.Equal(t, testCase.expected.OrderBy, result.OrderBy, "unexpected order")
+		assert.Equal(t, testCase.expected.Joins, result.Joins, "unexpected preload")
+		assert.Equal(t, testCase.expected.Limit, result.Limit, "unexpected limit")
+		assert.Equal(t, testCase.expected.Offset, result.Offset, "unexpected offset")
 	}
 }
 
-func Test_Query_build(t *testing.T) {
-	result := NewQuery().Order("a", "desc").Preload("RelationA", "args").AndEq("a", "example").Limit(3).Offset(6).build()
-	assert.Equal(t, "(a = ?)", result.where)
-	assert.Equal(t, []any{"example"}, result.params)
-	assert.Equal(t, "a DESC", result.order)
-	assert.Equal(t, "RelationA", result.preload[0].Query)
-	assert.Equal(t, []any{"args"}, result.preload[0].Args)
-	assert.Equal(t, 3, result.limit)
-	assert.Equal(t, 6, result.offset)
+func Test_Query_Build(t *testing.T) {
+	result := NewQuery().Order("a", "desc").Join("RelationA", "args").AndEq("a", "example").Limit(3).Offset(6).Build()
+	assert.Equal(t, "(a = ?)", result.Where)
+	assert.Equal(t, []any{"example"}, result.Params)
+	assert.Equal(t, "a DESC", result.OrderBy)
+	assert.Equal(t, "RelationA", result.Joins[0].Query)
+	assert.Equal(t, []any{"args"}, result.Joins[0].Args)
+	assert.Equal(t, 3, result.Limit)
+	assert.Equal(t, 6, result.Offset)
 }
 
 func Test_Query_FilterExample(t *testing.T) {
@@ -204,7 +204,7 @@ func Test_Query_Pagination(t *testing.T) {
 		Total:      1,
 		TotalPages: 1,
 	}
-	result := NewQueryFromUrl(mustMakeQuery("page=42&pageSize=17&total=257")).Pagination(&input).GetPagination()
+	result := NewQueryFromUrl(mustMakeQuery("page=42&size=17&total=257")).Pagination(&input).GetPagination()
 	assert.Equal(t, input.Page, result.GetPage())
 	assert.Equal(t, input.PageSize, result.GetPageSize())
 	assert.Equal(t, input.Total, result.GetTotal())
@@ -212,7 +212,7 @@ func Test_Query_Pagination(t *testing.T) {
 }
 
 func Test_Query_GetPagination(t *testing.T) {
-	input := mustMakeQuery("page=42&pageSize=17&total=257")
+	input := mustMakeQuery("page=42&size=17&total=257")
 	expected := Pagination{
 		Page:       42,
 		PageSize:   17,
@@ -227,7 +227,7 @@ func Test_Query_GetPagination(t *testing.T) {
 }
 
 func Test_Query_GetOrder(t *testing.T) {
-	input := mustMakeQuery("sort=a&sortDir=desc")
+	input := mustMakeQuery("sort=a&dir=desc")
 	expected := sort{field: "a", direction: "DESC"}
 	result := NewQueryFromUrl(input).GetOrder()
 	require.Len(t, result.sort, 1)

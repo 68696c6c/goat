@@ -16,7 +16,7 @@ const (
 	defaultSortDir           = Ascending
 
 	sortKey    = "sort"
-	sortDirKey = "sortDir"
+	sortDirKey = "dir"
 )
 
 func DirectionFromString(input string) (Direction, error) {
