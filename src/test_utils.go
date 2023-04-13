@@ -8,6 +8,7 @@ import (
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gorm.io/gorm"
 )
 
 func AssertValidID(t *testing.T, id ID) {
@@ -39,6 +40,12 @@ func RequireDecimalEqual(t *testing.T, exp, act any, msgAndArgs ...any) {
 	require.True(t, ok, msg+"\n not a decimal: %s", exp)
 
 	require.True(t, expDec.Equal(actDec), msg+"\n expected %s to equal %s", actDec, expDec)
+}
+
+func AssertRecordDeleted[M any](t *testing.T, db *gorm.DB, input M, msg string) {
+	err := db.First(input).Error
+	assert.NotNil(t, err)
+	assert.True(t, RecordNotFound(err), msg)
 }
 
 func messageFromMsgAndArgs(msgAndArgs ...any) string {
