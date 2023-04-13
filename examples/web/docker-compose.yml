@@ -1,0 +1,44 @@
+version: "3.6"
+
+networks:
+  default:
+    external:
+      name: docker-dev
+
+volumes:
+  pkg:
+  db-volume:
+  goat:
+
+services:
+  app:
+    image: web:dev
+#    command: wait-for-it -s -t 60 db:3306 -- ./web server 8000
+    command: wait-for-it -s -t 60 db:3306 -- air -c air.toml
+    depends_on:
+    - db
+    volumes:
+    - pkg:/go/pkg
+    - ./:/app
+    - ../../src:/goat
+    working_dir: /app/src
+    ports:
+    - "8000:8000"
+    env_file:
+    - .app.env
+    environment:
+      HTTP_PORT: 8000
+      MIGRATION_PATH: /app/src/database
+
+  db:
+    platform: linux/amd64
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: web
+    ports:
+    - "${HOST_DB_PORT:-3310}:3306"
+    volumes:
+    - db-volume:/var/lib/mysql
+    # This only runs when the volume is initially created.
+    - .docker/setup.sql:/docker-entrypoint-initdb.d/setup.sql

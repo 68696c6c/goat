@@ -1,0 +1,27 @@
+version: "3.6"
+
+volumes:
+  pkg:
+  db-volume:
+
+services:
+  test:
+    image: goat:test
+    command: wait-for-it -s -t 60 test-db:3306 -- go test ./... -cover -coverprofile=cover.out
+    depends_on:
+    - test-db
+    volumes:
+    - pkg:/go/pkg
+    - ./:/src
+    working_dir: /src
+
+  test-db:
+    platform: linux/amd64
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: goat
+    ports:
+    - "${HOST_DB_PORT:-3309}:3306"
+    volumes:
+    - db-volume:/var/lib/mysql

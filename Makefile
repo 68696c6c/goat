@@ -3,13 +3,16 @@
 	@echo
 	@echo '    deps    install dependencies'
 	@echo '    test    run unit tests'
+	@echo '    build   build the package'
 	@echo
 
 default: .DEFAULT
 
 deps:
-	go mod tidy
-	go mod vendor
+	make -C src deps
 
 test:
-	go test ./... -cover
+	make -C src test
+
+build:
+	make -C src build

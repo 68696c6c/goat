@@ -1,27 +1,33 @@
 package sys
 
 import (
-	"github.com/68696c6c/goat/src/cmd"
-	db "github.com/68696c6c/goat/src/database"
-	"github.com/68696c6c/goat/src/http"
-	log "github.com/68696c6c/goat/src/logging"
+	"github.com/pkg/errors"
+
+	"github.com/68696c6c/goat/sys/database"
+	"github.com/68696c6c/goat/sys/http"
+	"github.com/68696c6c/goat/sys/log"
 )
 
 type Goat struct {
-	config Config
-	CMD    cmd.Service
-	DB     db.Service
-	HTTP   http.Service
-	Log    log.Service
+	DB   database.Service
+	HTTP http.Service
+	Log  log.Service
 }
 
-func Init() Goat {
-	config := mustGetConfig()
-	return Goat{
-		config: config,
-		CMD:    cmd.NewServiceCobra(config.CMD),
-		DB:     db.NewServiceGORM(config.DB),
-		HTTP:   http.NewServiceGin(config.HTTP),
-		Log:    log.NewServiceLogrus(config.Log),
+func Init(config Config) (Goat, error) {
+	logService, err := log.NewService(config.Log)
+	if err != nil {
+		return Goat{}, errors.Wrapf(err, "failed to initialize log service")
 	}
+	return Goat{
+		DB:   database.NewService(config.DB, logService),
+		HTTP: http.NewService(config.HTTP, logService),
+		Log:  logService,
+	}, nil
+}
+
+type Config struct {
+	DB   database.Config
+	HTTP http.Config
+	Log  log.Config
 }

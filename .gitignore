@@ -7,3 +7,4 @@ demo/logs/*
 logs/*
 logs/.gitkeep
 goat
+cover.out
