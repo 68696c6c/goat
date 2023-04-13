@@ -75,29 +75,22 @@ func GetDB(c DatabaseConfig) (*gorm.DB, error) {
 }
 
 func ApplyQueryToGorm(db *gorm.DB, q query.Builder, paginate bool) {
-	where, params := q.GetWhere()
-	if where != "" {
-		db = db.Where(where, params...)
+	t := q.Build()
+	if t.Where != "" {
+		db = db.Where(t.Where, t.Params...)
 	}
-
-	order := q.GetOrderBy()
-	if order != "" {
-		db = db.Order(order)
-	}
-
-	for _, p := range q.GetPreload() {
+	for _, p := range t.Joins {
 		db = db.Preload(p.Query, p.Args...)
 	}
-
+	if t.OrderBy != "" {
+		db = db.Order(t.OrderBy)
+	}
 	if paginate {
-		limit := q.GetLimit()
-		if limit > 0 {
-			db = db.Limit(limit)
+		if t.Limit > 0 {
+			db = db.Limit(t.Limit)
 		}
-
-		offset := q.GetOffset()
-		if offset > 0 {
-			db = db.Offset(offset)
+		if t.Offset > 0 {
+			db = db.Offset(t.Offset)
 		}
 	}
 }
