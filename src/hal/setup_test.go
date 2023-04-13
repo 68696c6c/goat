@@ -8,7 +8,7 @@ import (
 )
 
 type user struct {
-	Id   int    `json:"id"`
+	ID   int    `json:"id"`
 	Name string `json:"name"`
 	*ResourceEmbeds[userEmbeds]
 }
@@ -29,7 +29,7 @@ func (m *user) MarshalJSON() ([]byte, error) {
 	}{
 		Alias:          (*Alias)(m),
 		ResourceEmbeds: m.getEmbedded(),
-		ResourceLinks:  NewLinks().AddLink("self", NewLink(fmt.Sprintf("%s/%s", exampleUsersUrl, strconv.Itoa(m.Id)))),
+		ResourceLinks:  NewLinks().AddLink("self", NewLink(fmt.Sprintf("%s/%s", exampleUsersUrl, strconv.Itoa(m.ID)))),
 	})
 }
 
@@ -37,9 +37,9 @@ type userEmbeds struct {
 	Phones []phone `json:"phones,omitempty"`
 }
 
-func makeUserEmbeds(phoneIds ...int) *ResourceEmbeds[userEmbeds] {
+func makeUserEmbeds(phoneIDs ...int) *ResourceEmbeds[userEmbeds] {
 	var phones []phone
-	for _, id := range phoneIds {
+	for _, id := range phoneIDs {
 		phones = append(phones, makePhone(id))
 	}
 	return &ResourceEmbeds[userEmbeds]{
@@ -50,7 +50,7 @@ func makeUserEmbeds(phoneIds ...int) *ResourceEmbeds[userEmbeds] {
 }
 
 type phone struct {
-	Id    int    `json:"id"`
+	ID    int    `json:"id"`
 	Phone string `json:"phone"`
 }
 
@@ -61,7 +61,7 @@ func makePhone(id int) phone {
 		digits = append(digits, digit)
 	}
 	return phone{
-		Id:    id,
+		ID:    id,
 		Phone: strings.Join(digits, ""),
 	}
 }

@@ -10,7 +10,7 @@ type ApiProblem struct {
 	Title       string `json:"title"`                // a brief title for the error condition (required)
 	HttpStatus  int    `json:"httpStatus,omitempty"` // the HTTP status code for the current request (optional)
 	Details     string `json:"details,omitempty"`    // error details specific to this request (optional)
-	SupportId   string `json:"supportId,omitempty"`  // a URL to the specific problem occurrence (e.g., to a log message) (optional)
+	SupportID   string `json:"supportId,omitempty"`  // a URL to the specific problem occurrence (e.g., to a log message) (optional)
 }
 
 func NewApiProblem(statusCode int, err error) ApiProblem {

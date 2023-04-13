@@ -59,7 +59,7 @@ func HandleView[M any](cx *gin.Context, r repo.Identifier[M], accessChecker ...A
 		return
 	}
 
-	m, err := r.GetById(cx.Request.Context(), id, true)
+	m, err := r.GetByID(cx.Request.Context(), id, true)
 	if err != nil {
 		if goat.RecordNotFound(err) {
 			goat.RespondNotFound(cx, errors.New("resource does not exist"))
@@ -182,7 +182,7 @@ func HandleDelete[M any](cx *gin.Context, r repoDelete[M], accessChecker ...Acce
 		return
 	}
 
-	m, err := r.GetById(ctx, id)
+	m, err := r.GetByID(ctx, id)
 	if err != nil {
 		if goat.RecordNotFound(err) {
 			goat.RespondNotFound(cx, errors.New("resource does not exist"))

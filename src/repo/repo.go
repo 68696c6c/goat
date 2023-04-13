@@ -24,7 +24,7 @@ type Saver[Model any] interface {
 }
 
 type Identifier[Model any] interface {
-	GetById(cx context.Context, id goat.ID, loadRelations ...bool) (Model, error)
+	GetByID(cx context.Context, id goat.ID, loadRelations ...bool) (Model, error)
 }
 
 type Filterer[Model any] interface {
