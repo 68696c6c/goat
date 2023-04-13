@@ -1,5 +1,7 @@
 package goat
 
+// TODO: update these tests to work with the new implementation.
+
 // import (
 // 	"net/http"
 // 	"testing"
@@ -26,10 +28,14 @@ package goat
 // 	Data []httpTestModel `json:"data"`
 // }
 //
-// func getTestRouter(setRoutes func(Router)) Router {
+// func mustGetTestRouter(setRoutes func(Router)) Router {
 // 	if !initialized {
-// 		Init()
-// 		_router = InitRouter()
+// 		MustInit()
+// 		r, err := InitRouter("https://example.test")
+// 		if err != nil {
+// 			panic(err)
+// 		}
+// 		_router = r
 // 		setRoutes(_router)
 // 		initialized = true
 // 	}
@@ -78,7 +84,7 @@ package goat
 // }
 //
 // func TestHandlerTest_Simple(t *testing.T) {
-// 	tr := getTestRouter(setTestRoutes)
+// 	tr := mustGetTestRouter(setTestRoutes)
 //
 // 	h := NewHandlerTest(tr)
 // 	r := h.Get("/ping").Send()
@@ -87,7 +93,7 @@ package goat
 // }
 //
 // func TestHandlerTest_Headers(t *testing.T) {
-// 	tr := getTestRouter(setTestRoutes)
+// 	tr := mustGetTestRouter(setTestRoutes)
 //
 // 	c := NewHandlerTest(tr)
 // 	h := map[string]string{
@@ -102,7 +108,7 @@ package goat
 // }
 //
 // func TestHandlerTest_Post(t *testing.T) {
-// 	tr := getTestRouter(setTestRoutes)
+// 	tr := mustGetTestRouter(setTestRoutes)
 //
 // 	c := NewHandlerTest(tr)
 // 	data := &map[string]any{
@@ -119,7 +125,7 @@ package goat
 // }
 //
 // func TestHandlerTest_Get(t *testing.T) {
-// 	tr := getTestRouter(setTestRoutes)
+// 	tr := mustGetTestRouter(setTestRoutes)
 //
 // 	c := NewHandlerTest(tr)
 // 	r := c.GetF("/get/%v", 1).Send()
@@ -130,7 +136,7 @@ package goat
 // }
 //
 // func TestHandlerTest_List(t *testing.T) {
-// 	tr := getTestRouter(setTestRoutes)
+// 	tr := mustGetTestRouter(setTestRoutes)
 //
 // 	c := NewHandlerTest(tr)
 // 	r := c.Get("/list").Send()
@@ -142,7 +148,7 @@ package goat
 // }
 //
 // func TestHandlerTest_Put(t *testing.T) {
-// 	tr := getTestRouter(setTestRoutes)
+// 	tr := mustGetTestRouter(setTestRoutes)
 //
 // 	c := NewHandlerTest(tr)
 // 	data := &map[string]any{
@@ -159,7 +165,7 @@ package goat
 // }
 //
 // func TestHandlerTest_Delete(t *testing.T) {
-// 	tr := getTestRouter(setTestRoutes)
+// 	tr := mustGetTestRouter(setTestRoutes)
 //
 // 	c := NewHandlerTest(tr)
 // 	r := c.Delete("/delete").Send()
