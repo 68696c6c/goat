@@ -41,16 +41,18 @@ type Deleter interface {
 }
 
 func HandleList[M any](cx *gin.Context, r repo.Filterer[M], baseUrl *url.URL, q query.Builder) {
-	resources, pagination, err := r.Filter(cx.Request.Context(), q)
+	resources, queryBuilder, err := r.Filter(cx.Request.Context(), q)
 	if err != nil {
 		goat.RespondServerError(cx, errors.Wrap(err, "failed to list resources"))
 		return
 	}
 
-	goat.RespondOk(cx, hal.NewCollection[M](resources, pagination, baseUrl))
+	goat.RespondOk(cx, hal.NewCollection[M](resources, queryBuilder, baseUrl))
 }
 
-func HandleView[M any](cx *gin.Context, r repo.Identifier[M]) {
+type AccessChecker[M any] func(m M) error
+
+func HandleView[M any](cx *gin.Context, r repo.Identifier[M], accessChecker ...AccessChecker[M]) {
 	id, err := goat.GetIDParam(cx)
 	if err != nil {
 		goat.RespondBadRequest(cx, err)
@@ -68,6 +70,14 @@ func HandleView[M any](cx *gin.Context, r repo.Identifier[M]) {
 		}
 	}
 
+	if len(accessChecker) > 0 {
+		err := accessChecker[0](m)
+		if err != nil {
+			goat.RespondForbidden(cx, err)
+			return
+		}
+	}
+
 	goat.RespondOk(cx, m)
 }
 
@@ -77,7 +87,7 @@ type repoCreate[Model, Request any] interface {
 	repo.Creator[Model, Request]
 }
 
-func HandleCreate[M any, U any](cx *gin.Context, r repoCreate[M, U]) {
+func HandleCreate[M any, U any](cx *gin.Context, r repoCreate[M, U], accessChecker ...AccessChecker[M]) {
 	ctx := cx.Request.Context()
 
 	req, err := goat.BindRequest[U](cx)
@@ -90,6 +100,14 @@ func HandleCreate[M any, U any](cx *gin.Context, r repoCreate[M, U]) {
 	if err != nil {
 		goat.RespondValidationError(cx, err)
 		return
+	}
+
+	if len(accessChecker) > 0 {
+		err := accessChecker[0](m)
+		if err != nil {
+			goat.RespondForbidden(cx, err)
+			return
+		}
 	}
 
 	err = r.Save(ctx, m)
@@ -107,7 +125,7 @@ type repoUpdate[M any, U any] interface {
 	repo.Updater[M, U]
 }
 
-func HandleUpdate[M any, U any](cx *gin.Context, r repoUpdate[M, U]) {
+func HandleUpdate[M any, U any](cx *gin.Context, r repoUpdate[M, U], accessChecker ...AccessChecker[M]) {
 	ctx := cx.Request.Context()
 
 	id, err := goat.GetIDParam(cx)
@@ -133,6 +151,14 @@ func HandleUpdate[M any, U any](cx *gin.Context, r repoUpdate[M, U]) {
 		}
 	}
 
+	if len(accessChecker) > 0 {
+		err := accessChecker[0](m)
+		if err != nil {
+			goat.RespondForbidden(cx, err)
+			return
+		}
+	}
+
 	err = r.Save(ctx, m)
 	if err != nil {
 		goat.RespondServerError(cx, errors.Wrap(err, "failed to save resource"))
@@ -147,7 +173,7 @@ type repoDelete[M any] interface {
 	repo.Deleter[M]
 }
 
-func HandleDelete[M any](cx *gin.Context, r repoDelete[M]) {
+func HandleDelete[M any](cx *gin.Context, r repoDelete[M], accessChecker ...AccessChecker[M]) {
 	ctx := cx.Request.Context()
 
 	id, err := goat.GetIDParam(cx)
@@ -163,6 +189,14 @@ func HandleDelete[M any](cx *gin.Context, r repoDelete[M]) {
 			return
 		} else {
 			goat.RespondServerError(cx, errors.Wrap(err, "failed to load resource"))
+			return
+		}
+	}
+
+	if len(accessChecker) > 0 {
+		err := accessChecker[0](m)
+		if err != nil {
+			goat.RespondForbidden(cx, err)
 			return
 		}
 	}
