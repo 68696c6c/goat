@@ -1,0 +1,6 @@
+.DS_Store
+.idea
+vendor
+.app.env
+*/cli
+todo.md

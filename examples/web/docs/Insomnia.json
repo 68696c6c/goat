@@ -1,0 +1,716 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2023-04-12T21:18:06.867Z",
+  "__export_source": "insomnia.desktop.app:v2023.1.0",
+  "resources": [
+    {
+      "_id": "req_addb41299be04518a0b1348fda918f48",
+      "parentId": "wrk_fa6d12440bec44388e84d5dd57006484",
+      "modified": 1672164323969,
+      "created": 1672164293311,
+      "url": "{{ _.baseUrl }}/health",
+      "name": "Health",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1668780918961,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "wrk_fa6d12440bec44388e84d5dd57006484",
+      "parentId": null,
+      "modified": 1672164293266,
+      "created": 1672164293266,
+      "name": "Goat Example",
+      "description": "",
+      "scope": "collection",
+      "_type": "workspace"
+    },
+    {
+      "_id": "req_ba65e748bcb7496bb87bf103711c87fc",
+      "parentId": "wrk_fa6d12440bec44388e84d5dd57006484",
+      "modified": 1672164293310,
+      "created": 1672164293310,
+      "url": "{{ _.baseUrl }}/version",
+      "name": "Version",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1668780918911,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_6fea75890a58489b9706027a53dd9a69",
+      "parentId": "fld_c508b4d6f03a4c4c805d1a8e0ce667c5",
+      "modified": 1681334088759,
+      "created": 1681225745182,
+      "url": "{{ _.baseUrl }}/api/tokens/authorize",
+      "name": "Create Access Code",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/x-www-form-urlencoded",
+        "params": [
+          {
+            "id": "pair_9af0ab006cfc418fbf53b089e5809671",
+            "name": "grant_type",
+            "value": "authorization_code",
+            "description": ""
+          },
+          {
+            "id": "pair_89fdb2b8708a4b6ea9713f805e0fe2e9",
+            "name": "username",
+            "value": "super1@example1.com",
+            "description": ""
+          },
+          {
+            "id": "pair_c2b2f14928eb45d0aaa7bdd43b99cf73",
+            "name": "response_type",
+            "value": "code",
+            "description": ""
+          },
+          {
+            "id": "pair_71a378dd2bbc43f2a21cb8e57c177d77",
+            "name": "redirect_uri",
+            "value": "{{ _.auth.redirectUrl }}",
+            "description": ""
+          },
+          {
+            "id": "pair_b1ef83c52fa94e77a56ac9a5ef21e18a",
+            "name": "client_id",
+            "value": "{{ _.auth.clientId }}",
+            "description": ""
+          }
+        ]
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/x-www-form-urlencoded"
+        }
+      ],
+      "authentication": {
+        "type": "oauth2",
+        "grantType": "client_credentials",
+        "accessTokenUrl": "{{ _.auth.accessTokenUrl }}",
+        "clientId": "{{ _.auth.clientId }}",
+        "clientSecret": "{{ _.auth.clientSecret }}",
+        "credentialsInBody": true,
+        "disabled": true
+      },
+      "metaSortKey": -1678280970371.5156,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_c508b4d6f03a4c4c805d1a8e0ce667c5",
+      "parentId": "wrk_fa6d12440bec44388e84d5dd57006484",
+      "modified": 1681333717916,
+      "created": 1681143857648,
+      "name": "Auth",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1668780815553,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_1803ecc6704f4a93abbea7998ee6f5c1",
+      "parentId": "fld_c508b4d6f03a4c4c805d1a8e0ce667c5",
+      "modified": 1681334133756,
+      "created": 1681226036106,
+      "url": "{{ _.baseUrl }}/api/tokens/exchange",
+      "name": "Exchange Code for JWT",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/x-www-form-urlencoded",
+        "params": [
+          {
+            "id": "pair_49f68e7c09a444ff98b56069f8a0c4f8",
+            "name": "grant_type",
+            "value": "authorization_code",
+            "description": ""
+          },
+          {
+            "id": "pair_5ff654df174444d997ef6ccc7fdc6943",
+            "name": "client_id",
+            "value": "{{ _.auth.clientId }}",
+            "description": ""
+          },
+          {
+            "id": "pair_2e7adb3be48a4e6a87d6f654e7fc5e0a",
+            "name": "redirect_uri",
+            "value": "{{ _.auth.redirectUrl }}",
+            "description": ""
+          },
+          {
+            "id": "pair_131b21f5c0b34875b4aa193520a89cbd",
+            "name": "code",
+            "value": "YTGZOWQZN2UTZGQYNC0ZYMQ4LTG5MDYTMDK2MDGZZGUWZJCW",
+            "description": ""
+          }
+        ]
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/x-www-form-urlencoded"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1678071489637.1875,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_822edae77faa4589a16ec3eec15cf53d",
+      "parentId": "fld_c508b4d6f03a4c4c805d1a8e0ce667c5",
+      "modified": 1681333685971,
+      "created": 1681225700045,
+      "url": "{{ _.baseUrl }}/api/tokens",
+      "name": "View JWT",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "oauth2",
+        "grantType": "authorization_code",
+        "credentialsInBody": "true",
+        "accessTokenUrl": "{{ _.auth.accessTokenUrl }}",
+        "clientId": "{{ _.auth.clientId }}",
+        "clientSecret": "{{ _.auth.clientSecret }}",
+        "disabled": false,
+        "authorizationUrl": "{{ _.auth.authorizationUrl }}",
+        "redirectUrl": "{{ _.auth.redirectUrl }}",
+        "username": "user1@example1.com",
+        "password": "test",
+        "usePkce": true
+      },
+      "metaSortKey": -1677373220606.0938,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_cabd49fc56574a2eb239a7806ca6c5b4",
+      "parentId": "fld_bd1f888473b24f1f88125f2797291ece",
+      "modified": 1681332852753,
+      "created": 1672164293286,
+      "url": "{{ _.baseUrl }}/api/organizations",
+      "name": "Create Organization",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n\t\"name\": \"Example Org\",\n\t\"website\": \"https://example.com\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "id": "pair_d34e1f6a5bdd429192bffcdee83ec18d"
+        },
+        {
+          "id": "pair_355064cf3688498f94f49273f7996793",
+          "name": "",
+          "value": "",
+          "description": ""
+        }
+      ],
+      "authentication": {
+        "type": "oauth2",
+        "grantType": "authorization_code",
+        "accessTokenUrl": "{{ _.auth.accessTokenUrl }}",
+        "clientId": "{{ _.auth.clientId }}",
+        "clientSecret": "{{ _.auth.clientSecret }}",
+        "credentialsInBody": "true",
+        "disabled": false,
+        "authorizationUrl": "{{ _.auth.authorizationUrl }}",
+        "usePkce": true,
+        "redirectUrl": "{{ _.auth.redirectUrl }}"
+      },
+      "metaSortKey": -1665978685777.125,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_bd1f888473b24f1f88125f2797291ece",
+      "parentId": "wrk_fa6d12440bec44388e84d5dd57006484",
+      "modified": 1672164358615,
+      "created": 1672164293282,
+      "name": "Organizations",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1668780806028,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_9f5dab4157fd4252857572e397062899",
+      "parentId": "fld_bd1f888473b24f1f88125f2797291ece",
+      "modified": 1681333271062,
+      "created": 1672164293288,
+      "url": "{{ _.baseUrl }}/api/organizations/d5c9c8d6-8207-4703-9ca8-edd4ea498299",
+      "name": "Update Organization",
+      "description": "",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n\t\"name\": \"Updated Org\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "oauth2",
+        "grantType": "authorization_code",
+        "accessTokenUrl": "{{ _.auth.accessTokenUrl }}",
+        "clientId": "{{ _.auth.clientId }}",
+        "clientSecret": "{{ _.auth.clientSecret }}",
+        "credentialsInBody": "true",
+        "disabled": false,
+        "authorizationUrl": "{{ _.auth.authorizationUrl }}",
+        "usePkce": true,
+        "redirectUrl": "{{ _.auth.redirectUrl }}"
+      },
+      "metaSortKey": -1665978685752.125,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_2019585dbc3b4b448645604eca3d8938",
+      "parentId": "fld_bd1f888473b24f1f88125f2797291ece",
+      "modified": 1681331636751,
+      "created": 1672164293283,
+      "url": "{{ _.baseUrl }}/api/organizations",
+      "name": "List Organizations",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "oauth2",
+        "grantType": "authorization_code",
+        "authorizationUrl": "{{ _.auth.authorizationUrl }}",
+        "accessTokenUrl": "{{ _.auth.accessTokenUrl }}",
+        "clientId": "{{ _.auth.clientId }}",
+        "clientSecret": "{{ _.auth.clientSecret }}",
+        "credentialsInBody": "true",
+        "disabled": false,
+        "usePkce": true,
+        "redirectUrl": "{{ _.auth.redirectUrl }}"
+      },
+      "metaSortKey": -1665978685727.125,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_afd4a2aa0fd7495987a4711e31fe2a04",
+      "parentId": "fld_bd1f888473b24f1f88125f2797291ece",
+      "modified": 1681332763132,
+      "created": 1672164293284,
+      "url": "{{ _.baseUrl }}/api/organizations/87c3cd85-2849-41b3-ae5e-afeee71c875c",
+      "name": "View Organization",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "oauth2",
+        "grantType": "authorization_code",
+        "accessTokenUrl": "{{ _.auth.accessTokenUrl }}",
+        "clientId": "{{ _.auth.clientId }}",
+        "clientSecret": "{{ _.auth.clientSecret }}",
+        "credentialsInBody": "true",
+        "disabled": false,
+        "authorizationUrl": "{{ _.auth.authorizationUrl }}",
+        "usePkce": true,
+        "redirectUrl": "{{ _.auth.redirectUrl }}"
+      },
+      "metaSortKey": -1665568451331.1875,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_81af8eff82884adb8bd6f1d810bce0c4",
+      "parentId": "fld_bd1f888473b24f1f88125f2797291ece",
+      "modified": 1681333540033,
+      "created": 1672164293287,
+      "url": "{{ _.baseUrl }}/api/organizations/8ee0d831-e986-4a31-aa87-bd797c219201",
+      "name": "Delete Organization",
+      "description": "",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "oauth2",
+        "grantType": "authorization_code",
+        "accessTokenUrl": "{{ _.auth.accessTokenUrl }}",
+        "clientId": "{{ _.auth.clientId }}",
+        "clientSecret": "{{ _.auth.clientSecret }}",
+        "credentialsInBody": "true",
+        "disabled": false,
+        "authorizationUrl": "{{ _.auth.authorizationUrl }}",
+        "usePkce": true,
+        "redirectUrl": "{{ _.auth.redirectUrl }}"
+      },
+      "metaSortKey": -1664542865366.3438,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_b132dd6aec7344d4ade2dac05444e0a9",
+      "parentId": "fld_c2bad830731d4d969cc4f5be45194ced",
+      "modified": 1681330986881,
+      "created": 1672164293276,
+      "url": "{{ _.baseUrl }}/api/users",
+      "name": "Create User",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"organizationId\": \"87c3cd85-2849-41b3-ae5e-afeee71c875c\",\n  \"level\": \"user\",\n  \"name\": \"Example User\",\n  \"email\": \"user@example1.com\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "id": "pair_d34e1f6a5bdd429192bffcdee83ec18d"
+        },
+        {
+          "id": "pair_355064cf3688498f94f49273f7996793",
+          "name": "",
+          "value": "",
+          "description": ""
+        }
+      ],
+      "authentication": {
+        "type": "oauth2",
+        "grantType": "authorization_code",
+        "accessTokenUrl": "{{ _.auth.accessTokenUrl }}",
+        "clientId": "{{ _.auth.clientId }}",
+        "clientSecret": "{{ _.auth.clientSecret }}",
+        "credentialsInBody": "true",
+        "disabled": false,
+        "authorizationUrl": "{{ _.auth.authorizationUrl }}",
+        "usePkce": true,
+        "redirectUrl": "{{ _.auth.redirectUrl }}"
+      },
+      "metaSortKey": -1668780731245,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_c2bad830731d4d969cc4f5be45194ced",
+      "parentId": "wrk_fa6d12440bec44388e84d5dd57006484",
+      "modified": 1672164396419,
+      "created": 1672164293275,
+      "name": "Users",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1668780722482,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_ff1ef6890d1e45ecbb78389d16fd9f02",
+      "parentId": "fld_c2bad830731d4d969cc4f5be45194ced",
+      "modified": 1681331143125,
+      "created": 1672164293280,
+      "url": "{{ _.baseUrl }}/api/users/11919df8-daed-40f6-805d-b5fa996659c2",
+      "name": "Update User",
+      "description": "",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"level\": \"admin\"\n}\n"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "oauth2",
+        "grantType": "authorization_code",
+        "accessTokenUrl": "{{ _.auth.accessTokenUrl }}",
+        "clientId": "{{ _.auth.clientId }}",
+        "clientSecret": "{{ _.auth.clientSecret }}",
+        "credentialsInBody": "true",
+        "disabled": false,
+        "authorizationUrl": "{{ _.auth.authorizationUrl }}",
+        "usePkce": true,
+        "redirectUrl": "{{ _.auth.redirectUrl }}"
+      },
+      "metaSortKey": -1668780731220,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_bd0f72ea49594ece83ec49a1bae77365",
+      "parentId": "fld_c2bad830731d4d969cc4f5be45194ced",
+      "modified": 1681326220055,
+      "created": 1681234829222,
+      "url": "{{ _.baseUrl }}/api/users",
+      "name": "List Users",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "oauth2",
+        "grantType": "authorization_code",
+        "credentialsInBody": "true",
+        "accessTokenUrl": "{{ _.auth.accessTokenUrl }}",
+        "clientId": "{{ _.auth.clientId }}",
+        "clientSecret": "{{ _.auth.clientSecret }}",
+        "disabled": false,
+        "authorizationUrl": "{{ _.auth.authorizationUrl }}",
+        "redirectUrl": "{{ _.auth.redirectUrl }}",
+        "username": "user1@example1.com",
+        "password": "test",
+        "usePkce": true
+      },
+      "metaSortKey": -1668285337038.5,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_82e8b122b4294901af9c38987eaa0989",
+      "parentId": "fld_c2bad830731d4d969cc4f5be45194ced",
+      "modified": 1681326305044,
+      "created": 1672164293278,
+      "url": "{{ _.baseUrl }}/api/users/d5eed2d6-d679-4f4c-a955-d15e05942caa",
+      "name": "View User",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "oauth2",
+        "grantType": "authorization_code",
+        "accessTokenUrl": "{{ _.auth.accessTokenUrl }}",
+        "clientId": "{{ _.auth.clientId }}",
+        "clientSecret": "{{ _.auth.clientSecret }}",
+        "credentialsInBody": "true",
+        "disabled": false,
+        "authorizationUrl": "{{ _.auth.authorizationUrl }}",
+        "usePkce": true,
+        "redirectUrl": "{{ _.auth.redirectUrl }}"
+      },
+      "metaSortKey": -1667789942857,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_ba9a5e15e830403ca6bf18fe961a9416",
+      "parentId": "fld_c2bad830731d4d969cc4f5be45194ced",
+      "modified": 1681331384129,
+      "created": 1672164293281,
+      "url": "{{ _.baseUrl }}/api/users/cfc834c7-f723-41da-b311-33155a0f452b",
+      "name": "Delete User",
+      "description": "",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "oauth2",
+        "grantType": "authorization_code",
+        "accessTokenUrl": "{{ _.auth.accessTokenUrl }}",
+        "clientId": "{{ _.auth.clientId }}",
+        "clientSecret": "{{ _.auth.clientSecret }}",
+        "credentialsInBody": "true",
+        "disabled": false,
+        "authorizationUrl": "{{ _.auth.authorizationUrl }}",
+        "usePkce": true,
+        "redirectUrl": "{{ _.auth.redirectUrl }}"
+      },
+      "metaSortKey": -1667789942807,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "env_5238faab24fc4839b125b74474562ce7",
+      "parentId": "wrk_fa6d12440bec44388e84d5dd57006484",
+      "modified": 1672164293267,
+      "created": 1672164293267,
+      "name": "Base Environment",
+      "data": {},
+      "dataPropertyOrder": {},
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 1666799146330,
+      "_type": "environment"
+    },
+    {
+      "_id": "jar_9a305cbe4f824d32a628a7207cbec79f",
+      "parentId": "wrk_fa6d12440bec44388e84d5dd57006484",
+      "modified": 1672164293272,
+      "created": 1672164293272,
+      "name": "Default Jar",
+      "cookies": [],
+      "_type": "cookie_jar"
+    },
+    {
+      "_id": "spc_f5e8753be2aa44949d77afa0673750e0",
+      "parentId": "wrk_fa6d12440bec44388e84d5dd57006484",
+      "modified": 1672164293316,
+      "created": 1672164293274,
+      "fileName": "Goat Example",
+      "contents": "",
+      "contentType": "yaml",
+      "_type": "api_spec"
+    },
+    {
+      "_id": "env_0f74a6e0b39b465284efd11caa83aa97",
+      "parentId": "env_5238faab24fc4839b125b74474562ce7",
+      "modified": 1681334168213,
+      "created": 1672164489881,
+      "name": "Goat Example - Local",
+      "data": {
+        "baseUrl": "http://localhost:8000",
+        "auth": {
+          "authorizationUrl": "http://localhost:8000/api/tokens/new",
+          "accessTokenUrl": "http://localhost:8000/api/tokens/exchange",
+          "redirectUrl": "http://localhost:8000/api/tokens/callback",
+          "clientId": "test_client_id",
+          "clientSecret": "test_client_secret"
+        }
+      },
+      "dataPropertyOrder": {
+        "&": [
+          "baseUrl",
+          "auth"
+        ],
+        "&~|auth": [
+          "authorizationUrl",
+          "accessTokenUrl",
+          "redirectUrl",
+          "clientId",
+          "clientSecret"
+        ]
+      },
+      "color": "#ffaa00",
+      "isPrivate": false,
+      "metaSortKey": 1668781113879,
+      "_type": "environment"
+    }
+  ]
+}

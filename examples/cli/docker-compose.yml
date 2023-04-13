@@ -1,0 +1,21 @@
+version: "3.6"
+
+networks:
+  default:
+    external:
+      name: docker-dev
+
+volumes:
+  pkg:
+  db-volume:
+  goat:
+
+services:
+  app:
+    image: cli:dev
+    volumes:
+    - pkg:/go/pkg
+    - ./:/app
+    - ../../src:/goat
+    working_dir: /app/src
+
