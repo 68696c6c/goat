@@ -12,12 +12,6 @@ deps:
 	go mod tidy
 	go mod vendor
 
-#test:
-#	go test ./... -cover
-
-image:
-	docker build . --target dev -t goat:test
-
 build:
 	go build
 
@@ -26,3 +20,12 @@ test:
 
 coverage:
 	go tool cover -html=cover.out
+
+image:
+	docker build . --target dev -t goat:test
+
+db:
+	docker-compose run --rm db
+
+down:
+	docker-compose down
