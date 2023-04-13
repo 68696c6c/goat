@@ -43,28 +43,5 @@ func setupDbTest(t *testing.T, c Config) Service {
 		Stacktrace: false,
 	})
 	require.Nil(t, err)
-
-	// TODO: this isn't needed here, use in sys.app test
-	// viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	// viper.AutomaticEnv()
-	//
-	// err = os.Setenv("DB_DEBUG", "1")
-	// require.Nil(t, err, fmt.Sprintf("failed to set env variable 'db_debug'"))
-	//
-	// err = os.Setenv("DB_HOST", c.Host)
-	// require.Nil(t, err, fmt.Sprintf("failed to set env variable 'db_host'"))
-	//
-	// err = os.Setenv("DB_PORT", "3306")
-	// require.Nil(t, err, fmt.Sprintf("failed to set env variable 'db_port'"))
-	//
-	// err = os.Setenv("DB_DATABASE", c.Database)
-	// require.Nil(t, err, fmt.Sprintf("failed to set env variable 'db_database'"))
-	//
-	// err = os.Setenv("DB_USERNAME", c.Username)
-	// require.Nil(t, err, fmt.Sprintf("failed to set env variable 'db_username'"))
-	//
-	// err = os.Setenv("DB_PASSWORD", c.Password)
-	// require.Nil(t, err, fmt.Sprintf("failed to set env variable 'db_password'"))
-
 	return NewService(c, l)
 }
