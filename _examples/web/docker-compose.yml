@@ -13,14 +13,13 @@ volumes:
 services:
   app:
     image: web:dev
-#    command: wait-for-it -s -t 60 db:3306 -- ./web server 8000
     command: wait-for-it -s -t 60 db:3306 -- air -c air.toml
     depends_on:
     - db
     volumes:
     - pkg:/go/pkg
     - ./:/app
-    - ../../src:/goat
+    - ../../:/goat
     working_dir: /app/src
     ports:
     - "8000:8000"

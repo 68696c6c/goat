@@ -9,10 +9,23 @@
 default: .DEFAULT
 
 deps:
-	make -C src deps
-
-test:
-	make -C src test
+	go mod tidy
+	go mod vendor
 
 build:
-	make -C src build
+	go build
+
+test:
+	docker-compose run --rm test
+
+coverage:
+	go tool cover -html=cover.out
+
+image:
+	docker build . --target dev -t goat:test
+
+db:
+	docker-compose run --rm db
+
+down:
+	docker-compose down

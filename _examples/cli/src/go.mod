@@ -10,6 +10,7 @@ require (
 
 require (
 	github.com/68696c6c/girraph v0.1.1 // indirect
+	github.com/68696c6c/zapgorm2 v1.3.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
@@ -62,7 +63,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gorm.io/driver/mysql v1.4.4 // indirect
 	gorm.io/gorm v1.24.2 // indirect
-	moul.io/zapgorm2 v1.2.0 // indirect
 )
 
 replace github.com/68696c6c/goat v0.1.31 => ../../goat

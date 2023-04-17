@@ -16,6 +16,6 @@ services:
     volumes:
     - pkg:/go/pkg
     - ./:/app
-    - ../../src:/goat
+    - ../../:/goat
     working_dir: /app/src
 
