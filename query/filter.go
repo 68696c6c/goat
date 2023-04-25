@@ -20,6 +20,8 @@ const (
 	NotIn              Operator = "NOT IN"
 	Like               Operator = "LIKE"
 	In                 Operator = "IN"
+	Is                 Operator = "IS"
+	IsNot              Operator = "IS NOT"
 )
 
 type Logic string
