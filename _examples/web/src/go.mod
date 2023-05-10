@@ -3,7 +3,7 @@ module github.com/68696c6c/web
 go 1.19
 
 require (
-	github.com/68696c6c/goat v0.1.31
+	github.com/68696c6c/goat v0.2.1
 	github.com/gin-gonic/gin v1.8.2
 	github.com/go-oauth2/oauth2/v4 v4.5.2
 	github.com/go-sql-driver/mysql v1.7.0
@@ -78,4 +78,4 @@ require (
 	gorm.io/driver/mysql v1.4.4 // indirect
 )
 
-replace github.com/68696c6c/goat v0.1.31 => ../../goat
+replace github.com/68696c6c/goat v0.2.1 => ../../goat

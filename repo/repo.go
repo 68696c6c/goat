@@ -45,7 +45,10 @@ type Deleter[Model any] interface {
 
 func Filter[M any](db *gorm.DB, q query.Builder) ([]*M, query.Builder, error) {
 	var result []*M
-	goat.ApplyQueryToGorm(db, q, false)
+	err := goat.ApplyQueryToGorm(db, q, false)
+	if err != nil {
+		return []*M{}, q, errors.Wrap(err, "failed get build query")
+	}
 
 	pagination, err := paginate(db, q.GetPagination())
 	if err != nil {

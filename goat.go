@@ -161,8 +161,11 @@ func GetDB(c DatabaseConfig) (*gorm.DB, error) {
 	return g.DB.GetConnection(database.Config(c))
 }
 
-func ApplyQueryToGorm(db *gorm.DB, q query.Builder, paginate bool) {
-	t := q.Build()
+func ApplyQueryToGorm(db *gorm.DB, q query.Builder, paginate bool) error {
+	t, err := q.Build()
+	if err != nil {
+		return err
+	}
 	if t.Where != "" {
 		db = db.Where(t.Where, t.Params...)
 	}
@@ -180,6 +183,7 @@ func ApplyQueryToGorm(db *gorm.DB, q query.Builder, paginate bool) {
 			db = db.Offset(t.Offset)
 		}
 	}
+	return nil
 }
 
 // BindRequest returns a T with values set by binding the request JSON from the provided Gin context.
