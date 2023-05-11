@@ -1,28 +1,43 @@
 package goat
 
-import "github.com/fatih/color"
+import (
+	"fmt"
 
-func PrintSuccess(s string) {
-	color.Green(s)
+	"github.com/fatih/color"
+)
+
+func Print(s string, a ...any) {
+	println(getPrintOutput(s, a...))
 }
 
-func PrintInfo(s string) {
-	color.Blue(s)
+func PrintSuccess(s string, a ...any) {
+	color.Green(s, a...)
 }
 
-func PrintFail(s string) {
-	color.Red(s)
+func PrintInfo(s string, a ...any) {
+	color.Blue(s, a...)
 }
 
-func PrintWarning(s string) {
-	color.Yellow(s)
+func PrintWarning(s string, a ...any) {
+	color.Yellow(s, a...)
 }
 
-func PrintHeading(s string) {
-	d := color.New(color.FgHiWhite, color.Bold)
-	d.Println(s)
+func PrintDanger(s string, a ...any) {
+	color.Red(s, a...)
 }
 
-func PrintIndent(s string) {
-	println("    " + s)
+func PrintHeading(s string, a ...any) {
+	d := color.New(color.Bold)
+	d.Println(getPrintOutput(s, a...))
+}
+
+func PrintIndent(s string, a ...any) {
+	println("    " + getPrintOutput(s, a...))
+}
+
+func getPrintOutput(s string, a ...any) string {
+	if len(a) > 0 {
+		return fmt.Sprintf(s, a...)
+	}
+	return s
 }
