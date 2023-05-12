@@ -1,6 +1,10 @@
 package query
 
-import "net/url"
+import (
+	"fmt"
+	"net/url"
+	"strings"
+)
 
 type Builder interface {
 
@@ -80,6 +84,12 @@ type Builder interface {
 	GetJoins() []Join
 
 	Build() (Template, error)
+
+	// Raw SQL methods
+
+	ToSQL() (string, []any, error)
+	Select(fields ...string) Builder
+	From(tableName string) Builder
 }
 
 type query struct {
@@ -87,6 +97,8 @@ type query struct {
 	order      *Order
 	pagination *Pagination
 	joins      []Join
+	fields     []string
+	from       string
 }
 
 func NewQuery() Builder {
@@ -95,6 +107,8 @@ func NewQuery() Builder {
 		order:      NewOrder(),
 		pagination: NewPagination(),
 		joins:      []Join{},
+		fields:     []string{},
+		from:       "",
 	}
 }
 
@@ -354,12 +368,26 @@ func (q *query) OrGroup(conditions Filter) Builder {
 	return q
 }
 
+func (q *query) GetWhere() (string, []any, error) {
+	return q.filter.Generate()
+}
+
 // Order methods
 
 func (q *query) Order(field string, dir ...Direction) Builder {
 	q.order.By(field, dir...)
 	return q
 }
+
+func (q *query) GetOrderBy() string {
+	return q.order.Generate()
+}
+
+func (q *query) GetOrder() *Order {
+	return q.order
+}
+
+// Pagination methods
 
 func (q *query) Limit(limit int) Builder {
 	q.pagination.SetPageSize(limit)
@@ -388,6 +416,8 @@ func (q *query) GetPagination() *Pagination {
 	return q.pagination
 }
 
+// Join methods
+
 type Join struct {
 	Query string
 	Args  []any
@@ -405,19 +435,9 @@ func (q *query) GetJoins() []Join {
 	return q.joins
 }
 
-func (q *query) GetOrderBy() string {
-	return q.order.Generate()
-}
-
-func (q *query) GetOrder() *Order {
-	return q.order
-}
-
-func (q *query) GetWhere() (string, []any, error) {
-	return q.filter.Generate()
-}
-
 type Template struct {
+	Fields  []string
+	From    string
 	Where   string
 	Params  []any
 	OrderBy string
@@ -432,6 +452,8 @@ func (q *query) Build() (Template, error) {
 		return Template{}, err
 	}
 	return Template{
+		Fields:  q.fields,
+		From:    q.from,
 		Where:   where,
 		Params:  params,
 		OrderBy: q.GetOrderBy(),
@@ -439,4 +461,54 @@ func (q *query) Build() (Template, error) {
 		Limit:   q.GetLimit(),
 		Offset:  q.GetOffset(),
 	}, nil
+}
+
+// Raw SQL methods
+
+// ToSQL builds the query into raw SQL and parameters that can be used with GORM's db.Raw()
+func (q *query) ToSQL() (string, []any, error) {
+	t, err := q.Build()
+	if err != nil {
+		return "", []any{}, err
+	}
+	var clauses []string
+	var sqlParams []any
+	if len(t.Fields) > 0 {
+		clauses = append(clauses, fmt.Sprintf("SELECT %s", strings.Join(t.Fields, ", ")))
+	}
+	var from []string
+	if t.From != "" {
+		from = append(from, t.From)
+	}
+	for _, j := range t.Joins {
+		from = append(from, j.Query)
+		sqlParams = append(sqlParams, j.Args...)
+	}
+	if len(from) > 0 {
+		clauses = append(clauses, fmt.Sprintf("FROM %s", strings.Join(from, " ")))
+	}
+	if t.Where != "" {
+		clauses = append(clauses, fmt.Sprintf("WHERE %s", t.Where))
+		sqlParams = append(sqlParams, t.Params...)
+	}
+	if t.OrderBy != "" {
+		clauses = append(clauses, fmt.Sprintf("ORDER BY %s", t.OrderBy))
+	}
+	if t.Limit > 0 {
+		clauses = append(clauses, fmt.Sprintf("LIMIT %d", t.Limit))
+	}
+	if t.Offset > 0 {
+		clauses = append(clauses, fmt.Sprintf("OFFSET %d", t.Offset))
+	}
+	return strings.Join(clauses, " "), sqlParams, nil
+}
+
+func (q *query) Select(fields ...string) Builder {
+	q.fields = append(q.fields, fields...)
+	return q
+}
+
+func (q *query) From(tableName string) Builder {
+	q.from = tableName
+	return q
 }
