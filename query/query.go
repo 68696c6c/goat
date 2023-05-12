@@ -7,6 +7,7 @@ import (
 )
 
 type Builder interface {
+	WhereSQL(sql string, values ...any) Builder
 
 	// Filter methods
 
@@ -122,6 +123,11 @@ func NewQueryFromUrl(q url.Values) Builder {
 		pagination: NewPaginationFromUrl(q),
 		joins:      []Join{},
 	}
+}
+
+func (q *query) WhereSQL(sql string, values ...any) Builder {
+	q.filter.WhereSQL(sql, values...)
+	return q
 }
 
 // Where aliases

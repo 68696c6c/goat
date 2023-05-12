@@ -45,6 +45,8 @@ type Filter interface {
 
 	Generate() (string, []any, error)
 
+	WhereSQL(sql string, values ...any) Filter
+
 	And(field string, op Operator, value any) Filter
 	AndEq(field string, value any) Filter
 	AndNotEq(field string, value any) Filter
@@ -178,6 +180,14 @@ func (f *filter) getLogic() Logic {
 
 func (f *filter) setCondition(condition *condition) Filter {
 	f.condition = condition
+	return f
+}
+
+func (f *filter) WhereSQL(sql string, values ...any) Filter {
+	f.addChild().setCondition(&condition{
+		sql:       sql,
+		sqlValues: values,
+	})
 	return f
 }
 
@@ -369,12 +379,17 @@ func newCondition(f string, op Operator, value any) *condition {
 }
 
 type condition struct {
-	field    string
-	operator Operator
-	value    any
+	field     string
+	operator  Operator
+	value     any
+	sql       string
+	sqlValues []any
 }
 
 func (c *condition) Generate() (string, []any, error) {
+	if c.sql != "" {
+		return c.sql, c.sqlValues, nil
+	}
 	if c.operator == Between || c.operator == NotBetween {
 		params, ok := c.value.([]any)
 		if !ok {
