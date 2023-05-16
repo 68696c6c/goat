@@ -1,12 +1,14 @@
 package goat
 
 import (
+	"database/sql"
 	"net/url"
 	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/pkg/errors"
+	"github.com/pressly/goose/v3"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"gopkg.in/gin-contrib/cors.v1"
@@ -159,6 +161,39 @@ type DatabaseConfig database.Config
 
 func GetDB(c DatabaseConfig) (*gorm.DB, error) {
 	return g.DB.GetConnection(database.Config(c))
+}
+
+func GetMigrationDB(db *gorm.DB) (*sql.DB, error) {
+	err := goose.SetDialect("mysql")
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to set sql dialect")
+	}
+
+	sqlDB, err := db.DB()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get sql db")
+	}
+
+	return sqlDB, nil
+}
+
+func ResetDB(db *gorm.DB) error {
+	sqlDB, err := GetMigrationDB(db)
+	if err != nil {
+		return errors.Wrap(err, "failed to get sql db")
+	}
+
+	err = goose.Run("down-to", sqlDB, ".", "0")
+	if err != nil {
+		return errors.Wrap(err, "failed to reset database schema")
+	}
+
+	err = goose.Run("up", sqlDB, ".")
+	if err != nil {
+		return errors.Wrap(err, "failed to migrate database")
+	}
+
+	return nil
 }
 
 func ApplyQueryToGorm(db *gorm.DB, q query.Builder, paginate bool) error {
