@@ -9,12 +9,12 @@ import (
 )
 
 type SoftDelete struct {
-	DeletedAt *time.Time `json:"deletedAt"`
+	DeletedAt gorm.DeletedAt `json:"deleted_at"`
 }
 
 type Timestamps struct {
-	CreatedAt time.Time  `json:"createdAt"`
-	UpdatedAt *time.Time `json:"updatedAt" gorm:"<-:update"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt *time.Time `json:"updated_at" gorm:"<-:update"`
 }
 
 func (m *Timestamps) BeforeUpdate(tx *gorm.DB) error {
