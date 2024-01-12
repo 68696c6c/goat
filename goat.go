@@ -2,6 +2,7 @@ package goat
 
 import (
 	"net/url"
+	"strconv"
 	"sync"
 
 	"github.com/gin-gonic/gin"
@@ -52,7 +53,11 @@ func MustInit() {
 }
 
 const (
-	keyBaseUrl              = "base_url"
+	defaultHost = "localhost"
+	defaultPort = 8080
+)
+
+const (
 	keyDbDebug              = "db_debug"
 	keyDbHost               = "db_host"
 	keyDbPort               = "db_port"
@@ -81,13 +86,24 @@ func readConfig() (sys.Config, error) {
 
 	// Allow an empty base url but return an error if it is non-empty and not a valid URL.
 	var baseUrl *url.URL = nil
-	if viper.IsSet(keyBaseUrl) {
-		baseUrl, err = url.Parse(viper.GetString(keyBaseUrl))
+	var host string = defaultHost
+	var port int = defaultPort
+	if viper.IsSet(keyHttpHost) {
+		host = viper.GetString(keyHttpHost)
+	}
+	if viper.IsSet(keyHttpPort) {
+		portString := viper.GetString(keyHttpPort)
+		port, err = strconv.Atoi(portString)
 		if err != nil {
-			return sys.Config{}, errors.Wrapf(err, "failed to parse env var '%s'", keyBaseUrl)
+			return sys.Config{}, errors.Wrapf(err, "failed to parse port: %v", port)
 		}
 	}
 
+	baseUrl, err = url.Parse(http.ParseBind(host, port))
+	if err != nil {
+		return sys.Config{}, errors.Wrapf(err, "failed to construct a base url from the provided host: %s and port: %v", host, port)
+	}
+	
 	return sys.Config{
 		DB: database.Config{
 			Debug:    EnvBool(keyDbDebug, false),
@@ -100,8 +116,6 @@ func readConfig() (sys.Config, error) {
 		HTTP: http.Config{
 			BaseUrl: baseUrl,
 			Debug:   EnvBool(keyHttpDebug, false),
-			Host:    EnvString(keyHttpHost, ""),
-			Port:    EnvInt(keyHttpPort, 80),
 			CORS: cors.Config{
 				AllowOrigins:     EnvStringSlice(keyHttpAllowOrigins, []string{"*"}),
 				AllowMethods:     EnvStringSlice(keyHttpAllowMethods, []string{"*"}),
@@ -118,16 +132,36 @@ func readConfig() (sys.Config, error) {
 
 type Router http.Router
 
-func InitRouter(baseUrl ...string) (Router, error) {
-	if len(baseUrl) > 0 {
-		err := g.HTTP.SetBaseUrl(baseUrl[0])
-		if err != nil {
-			return nil, err
-		}
+
+func InitRouterAndBind(host string, port int) (Router, error) {
+	r, err := InitRouter()
+	if err != nil {
+		return nil, err
 	}
+	Bind(host, port)
+	return r, err
+}
+
+func Bind(host string, port int) (error) {
+	// check inputs
+	if host == "" {
+		return errors.Errorf("router host is not set")
+	}
+	// bind
+	err := g.HTTP.Bind(host, port)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func InitRouter() (Router, error) {
+	// check BaseURL
 	if g.HTTP.GetBaseUrl() == nil {
+		// shouldn't get here with default host and port
 		return nil, errors.Errorf("router base url is not set")
 	}
+	// return router
 	return g.HTTP.InitRouter(), nil
 }
 

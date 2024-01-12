@@ -29,20 +29,22 @@ type Router interface {
 	Run() error
 }
 
-func NewRouter(c Config, l log.Service) Router {
+func NewRouter(config Config, log log.Service) Router {
+	host :=  config.BaseUrl.Hostname()
+	port :=  config.BaseUrl.Port()
 	return &router{
-		Engine:  newEngine(c, l),
-		host:    c.Host,
-		port:    c.Port,
-		address: fmt.Sprintf("%s:%d", c.Host, c.Port),
-		links:   links.NewService(c.BaseUrl),
+		Engine:  newEngine(config, log),
+		host:   host,
+		port:    port,
+		address: fmt.Sprintf("%s:%s", host, port),
+		links:   links.NewService(config.BaseUrl),
 	}
 }
 
 type router struct {
 	*gin.Engine
 	host    string
-	port    int
+	port    string
 	address string
 	links   links.Service
 }
@@ -103,8 +105,12 @@ func newEngine(c Config, l log.Service) *gin.Engine {
 }
 
 // validPort returns an error if the port is already in use.
-func validPort(port int) error {
-	ln, err := net.Listen("tcp", ":"+strconv.Itoa(port))
+func validPort(port string) error {
+	_, err := strconv.Atoi(port)
+	if err != nil {
+		return errors.Errorf("port %v is not an integer", port)
+	}
+	ln, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		return errors.Errorf("port %v is already in use", port)
 	}
