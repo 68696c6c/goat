@@ -1,6 +1,7 @@
 package database
 
 import (
+	"github.com/stretchr/testify/assert"
 	"net/url"
 	"testing"
 
@@ -49,6 +50,32 @@ func Test_Service_ConnectionStringTLS(t *testing.T) {
 
 			require.NoError(t, err)
 			require.Equal(t, testCase.expectedValue, parsed.Query().Get("tls"))
+		})
+	}
+}
+
+func Test_ServiceConfigString(t *testing.T) {
+	cases := []struct {
+		name          string
+		mode          TLSMode
+		expectedValue string
+	}{
+		{"default tls", TLSMode(""), "Host: h, Port: 3306, Database: d, Username: u, Password: p, Debug: false, TLS: "},
+		{"strict", TLSModeStrict, "Host: h, Port: 3306, Database: d, Username: u, Password: p, Debug: false, TLS: true"},
+		{"skip verify", TLSModeSkipVerify, "Host: h, Port: 3306, Database: d, Username: u, Password: p, Debug: false, TLS: skip-verify"},
+		{"preferred", TLSModePreferred, "Host: h, Port: 3306, Database: d, Username: u, Password: p, Debug: false, TLS: preferred"},
+		{"off", TLSModeOff, "Host: h, Port: 3306, Database: d, Username: u, Password: p, Debug: false, TLS: false"},
+	}
+
+	for _, testCase := range cases {
+		t.Run(testCase.name, func(t *testing.T) {
+			conf := Config{Host: "h", Port: 3306, Database: "d", Username: "u", Password: "p", Debug: false}
+			if testCase.mode != "" {
+				conf.TLS = testCase.mode
+			}
+
+			result := conf.String()
+			assert.Equal(t, testCase.expectedValue, result)
 		})
 	}
 }

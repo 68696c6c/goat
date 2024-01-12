@@ -32,7 +32,7 @@ type Config struct {
 }
 
 func (c Config) String() string {
-	return fmt.Sprintf("Host: %v, Port: %v, Database: %v, Username: %v, Password: %v, Debug: %v", c.Host, c.Port, c.Database, c.Username, c.Password, c.Debug)
+	return fmt.Sprintf("Host: %v, Port: %v, Database: %v, Username: %v, Password: %v, Debug: %v, TLS: %v", c.Host, c.Port, c.Database, c.Username, c.Password, c.Debug, c.TLS)
 }
 
 func (c Config) ConnectionString() string {
