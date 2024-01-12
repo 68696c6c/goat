@@ -11,6 +11,16 @@ import (
 	"github.com/68696c6c/goat/sys/log"
 )
 
+type TLSMode string
+
+const (
+	TLSModeNone       = ""
+	TLSModeSkipVerify = "skip-verify"
+	TLSModePreferred  = "preferred"
+	TLSModeStrict     = "true"
+	TLSModeOff        = "false"
+)
+
 type Config struct {
 	Debug    bool
 	Host     string
@@ -18,6 +28,7 @@ type Config struct {
 	Database string
 	Username string
 	Password string
+	TLS      TLSMode
 }
 
 func (c Config) String() string {
@@ -25,7 +36,12 @@ func (c Config) String() string {
 }
 
 func (c Config) ConnectionString() string {
-	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=true", c.Username, c.Password, c.Host, c.Port, c.Database)
+	base := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=true", c.Username, c.Password, c.Host, c.Port, c.Database)
+	if c.TLS != "" {
+		base += fmt.Sprintf("&tls=%s", string(c.TLS))
+	}
+
+	return base
 }
 
 type Service interface {
