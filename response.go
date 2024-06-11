@@ -1,7 +1,6 @@
 package goat
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -23,7 +22,11 @@ func debugError(err error) error {
 }
 
 func logHandlerError(cx *gin.Context, err error) {
-	GetLogger().Error(fmt.Sprintf("%s | %s", cx.HandlerName(), err))
+	GetLogger().With("error", err, "handler", cx.HandlerName).Errorf("%s | %s", cx.HandlerName(), err)
+}
+
+func logHandlerWarn(cx *gin.Context, err error) {
+	GetLogger().With("error", err, "handler", cx.HandlerName).Warnf("%s | %s", cx.HandlerName(), err)
 }
 
 func RespondOk(cx *gin.Context, data any) {
@@ -48,31 +51,31 @@ func RespondCreated(cx *gin.Context, data any) {
 
 func RespondNotFound(cx *gin.Context, err error) {
 	status := http.StatusNotFound
-	logHandlerError(cx, err)
+	logHandlerWarn(cx, err)
 	cx.AbortWithStatusJSON(status, hal.NewApiProblem(status, debugError(err)))
 }
 
 func RespondBadRequest(cx *gin.Context, err error) {
 	status := http.StatusBadRequest
-	logHandlerError(cx, err)
+	logHandlerWarn(cx, err)
 	cx.AbortWithStatusJSON(status, hal.NewApiProblem(status, debugError(err)))
 }
 
 func RespondValidationError(cx *gin.Context, err error) {
 	status := http.StatusBadRequest
-	logHandlerError(cx, err)
+	logHandlerWarn(cx, err)
 	cx.AbortWithStatusJSON(status, hal.NewApiProblem(status, err))
 }
 
 func RespondUnauthorized(cx *gin.Context, err error) {
 	status := http.StatusUnauthorized
-	logHandlerError(cx, err)
+	logHandlerWarn(cx, err)
 	cx.AbortWithStatusJSON(status, hal.NewApiProblem(status, debugError(err)))
 }
 
 func RespondForbidden(cx *gin.Context, err error) {
 	status := http.StatusForbidden
-	logHandlerError(cx, err)
+	logHandlerWarn(cx, err)
 	cx.AbortWithStatusJSON(status, hal.NewApiProblem(status, debugError(err)))
 }
 
