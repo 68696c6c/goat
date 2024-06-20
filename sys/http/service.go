@@ -1,6 +1,7 @@
 package http
 
 import (
+	"fmt"
 	"net/url"
 
 	"gopkg.in/gin-contrib/cors.v1"
@@ -12,8 +13,8 @@ type Config struct {
 	CORS    cors.Config
 	BaseUrl *url.URL
 	Debug   bool
-	Host    string
-	Port    int
+	// Host    string
+	// Port    int
 }
 
 func (c Config) GetCors() cors.Config {
@@ -29,8 +30,9 @@ func (c Config) GetCors() cors.Config {
 }
 
 type Service interface {
-	SetBaseUrl(baseUrl string) error
+	setBaseUrl(host string) error
 	GetBaseUrl() *url.URL
+	Bind(host string, port int) error
 	InitRouter() Router
 	GetUrl(key ...string) *url.URL
 	SetUrl(key string, value *url.URL)
@@ -62,7 +64,11 @@ func (s *service) InitRouter() Router {
 	return s.initRouter()
 }
 
-func (s *service) SetBaseUrl(baseUrl string) error {
+func (s *service) Bind(host string, port int) error {
+	return s.setBaseUrl(ParseBind(host, port))
+}
+
+func (s *service) setBaseUrl(baseUrl string) error {
 	u, err := url.Parse(baseUrl)
 	if err != nil {
 		return err
@@ -85,4 +91,8 @@ func (s *service) SetUrl(key string, value *url.URL) {
 
 func (s *service) DebugEnabled() bool {
 	return s.config.Debug
+}
+
+func ParseBind(host string, port int) string {
+	return fmt.Sprintf("http://%s:%v", host, port)
 }
