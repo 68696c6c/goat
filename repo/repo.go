@@ -6,8 +6,6 @@ import (
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 
-	"github.com/jinzhu/copier"
-
 	"github.com/68696c6c/goat"
 	"github.com/68696c6c/goat/query"
 )
@@ -46,23 +44,18 @@ type Deleter[Model any] interface {
 }
 
 func Filter[M any](db *gorm.DB, q query.Builder) ([]*M, query.Builder, error) {
-	var countDB *gorm.DB
-	err := copier.Copy(countDB, db)
+	var result []*M
+	err := goat.ApplyQueryToGorm(db, q, true)
 	if err != nil {
-		return []*M{}, q, errors.Wrap(err, "failed to build count query")
+		return []*M{}, q, errors.Wrap(err, "failed get build query")
 	}
 
-	err = goat.ApplyQueryToGorm(db, q, true)
-	if err != nil {
-		return []*M{}, q, errors.Wrap(err, "failed to build result query")
-	}
-
-	pagination, err := paginate(countDB, q.GetPagination())
+	pagination, err := paginate(db, q.GetPagination())
 	if err != nil {
 		return []*M{}, q, errors.Wrap(err, "failed get pagination total count")
 	}
 
-	result, err := filter[M](db)
+	result, err = filter[M](db)
 	if err != nil {
 		return result, q, err
 	}
