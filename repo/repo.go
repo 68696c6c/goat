@@ -45,16 +45,24 @@ type Deleter[Model any] interface {
 
 func Filter[M any](db *gorm.DB, q query.Builder) ([]*M, query.Builder, error) {
 	var result []*M
-	err := goat.ApplyQueryToGorm(db, q, true)
+	err, t := goat.ApplyQueryToGorm(db, q, false)
 	if err != nil {
 		return []*M{}, q, errors.Wrap(err, "failed get build query")
 	}
 
+	// Run the pagination count query will all filters applied but without the limit and offset.
 	pagination, err := paginate(db, q.GetPagination())
 	if err != nil {
 		return []*M{}, q, errors.Wrap(err, "failed get pagination total count")
 	}
 
+	// Apply the limit and offset only to the results query.
+	if t.Limit > 0 {
+		db = db.Limit(t.Limit)
+	}
+	if t.Offset > 0 {
+		db = db.Offset(t.Offset)
+	}
 	result, err = filter[M](db)
 	if err != nil {
 		return result, q, err
