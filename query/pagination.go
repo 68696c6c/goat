@@ -98,6 +98,20 @@ func (p *Pagination) setTotalPages() *Pagination {
 	return p
 }
 
+func (p *Pagination) SetProperties(totalRows, pageSize, page int) *Pagination {
+	p.Total = totalRows
+	p.PageSize = pageSize
+	if p.PageSize > 0 {
+		p.TotalPages = ceilQuotient(p.Total, p.PageSize)
+	}
+	if page > p.TotalPages {
+		p.Page = p.TotalPages
+	} else {
+		p.Page = page
+	}
+	return p
+}
+
 func (p *Pagination) GetTotalPages() int {
 	return p.TotalPages
 }

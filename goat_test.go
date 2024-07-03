@@ -20,7 +20,7 @@ func Test_ApplyQueryToGorm(t *testing.T) {
 
 	result := db.ToSQL(func(tx *gorm.DB) *gorm.DB {
 		tdb := tx.Model(&testModel{})
-		err = ApplyQueryToGorm(tdb, query.NewQuery().WhereIs("a", nil), false)
+		err, _ = ApplyQueryToGorm(tdb, query.NewQuery().WhereIs("a", nil), false)
 		require.Nil(t, err)
 		temp := testModel{}
 		return tdb.Find(&temp)
