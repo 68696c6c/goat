@@ -77,7 +77,7 @@ func paginate(db *gorm.DB, p *query.Pagination) (*query.Pagination, error) {
 	if err != nil {
 		return p, err
 	}
-	return query.NewPagination().SetPage(p.GetPage()).SetPageSize(p.GetPageSize()).SetTotal(int(count)), nil
+	return query.NewPagination().SetProperties(int(count), p.GetPageSize(), p.GetPage()), nil
 }
 
 func filter[M any](db *gorm.DB) ([]*M, error) {
