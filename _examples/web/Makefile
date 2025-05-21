@@ -1,4 +1,4 @@
-DCR = docker-compose run --rm
+DCR = docker compose run --rm
 
 NETWORK_NAME ?= docker-dev
 APP_NAME = web
@@ -48,10 +48,10 @@ setup: setup-network image-local deps build
 	$(DCR) app ./$(APP_NAME) migrate up
 
 local: local-down build
-	NETWORK_NAME="$(NETWORK_NAME)" docker-compose up app
+	NETWORK_NAME="$(NETWORK_NAME)" docker compose up app
 
 local-down:
-	NETWORK_NAME="$(NETWORK_NAME)" docker-compose down
+	NETWORK_NAME="$(NETWORK_NAME)" docker compose down
 
 test:
 	$(DCR) app wait-for-it -s -t 60 db:3306 -- go test ./... -cover -coverprofile=../cover.out

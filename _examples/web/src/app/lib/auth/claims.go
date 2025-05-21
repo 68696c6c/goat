@@ -2,7 +2,7 @@ package auth
 
 import (
 	"github.com/68696c6c/goat"
-	"github.com/golang-jwt/jwt"
+	jwt "github.com/golang-jwt/jwt/v4"
 	"github.com/pkg/errors"
 
 	"github.com/68696c6c/web/app/enums"
