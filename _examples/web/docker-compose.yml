@@ -1,9 +1,7 @@
-version: "3.6"
-
 networks:
   default:
-    external:
-      name: docker-dev
+    name: docker-dev
+    external: true
 
 volumes:
   pkg:

@@ -12,7 +12,7 @@ import (
 	"github.com/68696c6c/goat/query"
 	"github.com/gin-gonic/gin"
 	"github.com/go-oauth2/oauth2/v4"
-	"github.com/golang-jwt/jwt"
+	jwt "github.com/golang-jwt/jwt/v4"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"

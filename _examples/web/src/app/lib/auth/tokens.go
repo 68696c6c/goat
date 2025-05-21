@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/go-oauth2/oauth2/v4"
-	"github.com/golang-jwt/jwt"
+	jwt "github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 )
