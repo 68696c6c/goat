@@ -1,4 +1,4 @@
-DCR = docker-compose run --rm
+DCR = docker compose run --rm
 
 NETWORK_NAME ?= docker-dev
 APP_NAME = cli

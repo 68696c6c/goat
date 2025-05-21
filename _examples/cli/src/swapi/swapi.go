@@ -73,7 +73,7 @@ type Swapi interface {
 }
 
 func NewSwapi() (Swapi, error) {
-	baseUrl, err := url.Parse("https://swapi.dev/api/")
+	baseUrl, err := url.Parse("https://swapi.tech/api/")
 	if err != nil {
 		return nil, err
 	}
