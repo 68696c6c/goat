@@ -2,6 +2,7 @@ package http
 
 import (
 	"fmt"
+	"html/template"
 	"net"
 	"net/http"
 	"net/url"
@@ -27,6 +28,9 @@ type Router interface {
 	GetUrl(key ...string) *url.URL
 	SetUrl(key string, value *url.URL)
 	Run() error
+	GetEngine() *gin.Engine
+	LoadTemplates(path string) (*template.Template, error)
+	GetTemplates() *template.Template
 }
 
 func NewRouter(c Config, l log.Service) Router {
@@ -41,10 +45,29 @@ func NewRouter(c Config, l log.Service) Router {
 
 type router struct {
 	*gin.Engine
-	host    string
-	port    int
-	address string
-	links   links.Service
+	host      string
+	port      int
+	address   string
+	links     links.Service
+	templates *template.Template
+}
+
+func (r *router) GetEngine() *gin.Engine {
+	return r.Engine
+}
+
+func (r *router) LoadTemplates(path string) (*template.Template, error) {
+	r.Engine.LoadHTMLGlob(path)
+	templates, err := template.ParseGlob(path)
+	if err != nil {
+		return nil, err
+	}
+	r.templates = templates
+	return r.templates, nil
+}
+
+func (r *router) GetTemplates() *template.Template {
+	return r.templates
 }
 
 func (r *router) Run() error {
