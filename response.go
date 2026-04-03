@@ -55,10 +55,18 @@ func RespondNotFound(cx *gin.Context, err error) {
 	cx.AbortWithStatusJSON(status, hal.NewApiProblem(status, debugError(err)))
 }
 
+func RenderNotFound(cx *gin.Context, path string, data gin.H) {
+	Render(cx, http.StatusNotFound, path, data)
+}
+
 func RespondBadRequest(cx *gin.Context, err error) {
 	status := http.StatusBadRequest
 	logHandlerWarn(cx, err)
 	cx.AbortWithStatusJSON(status, hal.NewApiProblem(status, debugError(err)))
+}
+
+func RenderBadRequest(cx *gin.Context, path string, data gin.H) {
+	Render(cx, http.StatusBadRequest, path, data)
 }
 
 func RespondValidationError(cx *gin.Context, err error) {
@@ -83,4 +91,14 @@ func RespondServerError(cx *gin.Context, err error) {
 	status := http.StatusInternalServerError
 	logHandlerError(cx, err)
 	cx.AbortWithStatusJSON(status, hal.NewApiProblem(status, debugError(err)))
+}
+
+func RespondConflict(cx *gin.Context, err error) {
+	status := http.StatusConflict
+	logHandlerError(cx, err)
+	cx.AbortWithStatusJSON(status, hal.NewApiProblem(status, debugError(err)))
+}
+
+func Render(cx *gin.Context, status int, path string, data gin.H) {
+	cx.HTML(status, path, data)
 }
