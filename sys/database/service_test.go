@@ -13,7 +13,7 @@ import (
 func Test_Service_GetMainDB(t *testing.T) {
 	subject := setupDbTest(t, Config{
 		Debug:    true,
-		Host:     "test-db",
+		Host:     "test-db-mysql",
 		Port:     3306,
 		Username: "root",
 		Password: "secret",
@@ -24,32 +24,79 @@ func Test_Service_GetMainDB(t *testing.T) {
 	require.NotNil(t, db)
 }
 
-func Test_Service_ConnectionStringTLS(t *testing.T) {
-	cases := []struct {
+func Test_Service_GetMainDB_Mysql(t *testing.T) {
+	subject := setupDbTest(t, Config{
+		Dialect:   DialectMysql,
+		Debug:     true,
+		Host:      "test-db-mysql",
+		Port:      3306,
+		Username:  "root",
+		Password:  "secret",
+		Database:  "goat",
+		BatchSize: 1000,
+	})
+
+	db, err := subject.GetMainDB()
+	require.Nil(t, err)
+	require.NotNil(t, db)
+}
+
+func Test_Service_GetMainDB_Postgres(t *testing.T) {
+	subject := setupDbTest(t, Config{
+		Dialect:   DialectPostgres,
+		Debug:     true,
+		Host:      "test-db-postgres",
+		Port:      5432,
+		Username:  "postgres",
+		Password:  "secret",
+		Database:  "goat",
+		BatchSize: 1000,
+	})
+
+	db, err := subject.GetMainDB()
+	require.Nil(t, err)
+	require.NotNil(t, db)
+}
+
+func Test_Service_ConnectionStringSSL(t *testing.T) {
+	cases := map[Dialect][]struct {
 		name          string
-		mode          TLSMode
+		mode          SSLMode
 		expectedValue string
 	}{
-		{"default tls", TLSMode(""), ""},
-		{"strict", TLSModeStrict, "true"},
-		{"skip verify", TLSModeSkipVerify, "skip-verify"},
-		{"preferred", TLSModePreferred, "preferred"},
-		{"off", TLSModeOff, "false"},
+		DialectMysql: {
+			{"mysql: default ssl", SSLMode(""), string(SSLModePreferred)},
+			{"mysql: strict", SSLModeStrict, "true"},
+			{"mysql: skip verify", SSLModeSkipVerify, "skip-verify"},
+			{"mysql: preferred", SSLModePreferred, "preferred"},
+			{"mysql: off", SSLModeOff, "false"},
+		},
+		DialectPostgres: {
+			{"postgres: default ssl", SSLMode(""), string(SSLModePrefer)},
+			{"postgres: disable", SSLModeDisable, "disable"},
+			{"postgres: allow", SSLModeAllow, "allow"},
+			{"postgres: require", SSLModeRequire, "require"},
+			{"postgres: verify-ca", SSLModeVerifyCA, "verify-ca"},
+			{"postgres: verify-full", SSLModeVerifyFull, "verify-full"},
+		},
 	}
 
-	for _, testCase := range cases {
-		t.Run(testCase.name, func(t *testing.T) {
-			conf := Config{Host: "h", Port: 3306, Username: "u", Password: "p", Database: "d"}
-			if testCase.mode != "" {
-				conf.TLS = testCase.mode
-			}
+	for dialect, testCases := range cases {
+		for _, testCase := range testCases {
+			t.Run(testCase.name, func(t *testing.T) {
+				conf := Config{Dialect: dialect, Host: "h", Port: 3306, Username: "u", Password: "p", Database: "d", SSL: testCase.mode}
 
-			dsn := conf.ConnectionString()
-			parsed, err := url.Parse(dsn)
+				dsn := conf.ConnectionString()
+				parsed, err := url.Parse(dsn)
+				require.NoError(t, err)
 
-			require.NoError(t, err)
-			require.Equal(t, testCase.expectedValue, parsed.Query().Get("tls"))
-		})
+				key := "tls"
+				if conf.Dialect == DialectPostgres {
+					key = "sslmode"
+				}
+				require.Equal(t, testCase.expectedValue, parsed.Query().Get(key))
+			})
+		}
 	}
 }
 

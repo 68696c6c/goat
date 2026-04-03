@@ -1,32 +1,46 @@
 volumes:
   pkg:
-  db-volume:
+  mysql-db:
+  postgres-db:
 
 services:
   test:
     image: goat:test
-    command: wait-for-it -s -t 60 test-db:3306 -- go test ./... -cover -coverprofile=cover.out
+    command: wait-for-it -s -t 60 test-db-mysql:3306 -- go test ./... -cover -coverprofile=cover.out
     depends_on:
-    - test-db
+    - test-db-mysql
+    - test-db-postgres
     volumes:
     - pkg:/go/pkg
     - ./:/src
     working_dir: /src
     environment:
       DB_DEBUG: 1
-      DB_HOST: test-db
+      DB_HOST: test-db-mysql
       DB_PORT: 3306
       DB_DATABASE: goat
       DB_USERNAME: root
       DB_PASSWORD: secret
 
-  test-db:
+  test-db-mysql:
     platform: linux/amd64
-    image: mysql:8.0
+    image: mysql:latest
     environment:
       MYSQL_ROOT_PASSWORD: secret
       MYSQL_DATABASE: goat
     ports:
-    - "${HOST_DB_PORT:-3309}:3306"
+    - "${HOST_DB_PORT:-3306}:3306"
     volumes:
-    - db-volume:/var/lib/mysql
+    - mysql-db:/var/lib/mysql
+
+  test-db-postgres:
+    platform: linux/amd64
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: goat
+    ports:
+    - "${HOST_DB_PORT:-5432}:5432"
+    volumes:
+    - postgres-db:/var/lib/postgresql/18/docker
