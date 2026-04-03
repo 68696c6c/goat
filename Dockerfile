@@ -1,4 +1,4 @@
-FROM golang:1.19-buster as env
+FROM golang:1.26-bookworm AS env
 
 ENV CGO_ENABLED=0
 ENV GOPROXY=https://proxy.golang.org,direct
@@ -10,16 +10,10 @@ WORKDIR /src
 
 
 # Local development stage.
-FROM env as dev
+FROM env AS dev
 
 RUN apt-get update && apt-get install wait-for-it
 
 RUN go install gotest.tools/gotestsum@latest
 
 COPY . ./
-
-## Pipeline stage for running unit tests, linters, etc.
-#FROM env as built
-#
-#COPY . ./
-#RUN go build -o example

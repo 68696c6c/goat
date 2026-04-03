@@ -1,4 +1,4 @@
-FROM golang:1.24-bookworm AS env
+FROM golang:1.26-bookworm AS env
 
 ENV CGO_ENABLED=0
 ENV GOPROXY=https://proxy.golang.org,direct
