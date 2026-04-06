@@ -32,12 +32,47 @@ const (
 	SSLModeVerifyFull SSLMode = "verify-full" // I want my data encrypted, and I accept the overhead. I want to be sure that I connect to a server I trust, and that it's the one I specify.
 )
 
+func SSLModeFromString(input string) (SSLMode, error) {
+	values := []SSLMode{
+		SSLModeDefault,
+		SSLModeSkipVerify,
+		SSLModePreferred,
+		SSLModeStrict,
+		SSLModeOff,
+		SSLModeDisable,
+		SSLModeAllow,
+		SSLModePrefer,
+		SSLModeRequire,
+		SSLModeVerifyCA,
+		SSLModeVerifyFull,
+	}
+	for _, v := range values {
+		if string(v) == input {
+			return SSLMode(input), nil
+		}
+	}
+	return "", errors.Errorf("'%s' is not a valid ssl mode", input)
+}
+
 type Dialect string
 
 const (
 	DialectMysql    Dialect = "mysql"
 	DialectPostgres Dialect = "postgres"
 )
+
+func DialectFromString(input string) (Dialect, error) {
+	values := []Dialect{
+		DialectMysql,
+		DialectPostgres,
+	}
+	for _, v := range values {
+		if string(v) == input {
+			return Dialect(input), nil
+		}
+	}
+	return "", errors.Errorf("'%s' is not a valid dialect", input)
+}
 
 type Config struct {
 	Dialect   Dialect
@@ -73,7 +108,6 @@ func (c Config) mysqlConnectionString() string {
 }
 
 func (c Config) postgresConnectionString() string {
-	// result := fmt.Sprintf("host=%v user=%v password=%v dbname=%v port=%v", c.Host, c.Username, c.Password, c.Database, c.Port)
 	result := fmt.Sprintf("postgres://%v:%v@%v:%v/%v", c.Username, c.Password, c.Host, c.Port, c.Database)
 	if c.SSL == "" {
 		result += fmt.Sprintf("?sslmode=%s", string(SSLModePrefer))

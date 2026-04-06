@@ -55,12 +55,15 @@ func MustInit() {
 
 const (
 	keyBaseUrl              = "base_url"
+	keyDbDialect            = "db_dialect"
 	keyDbDebug              = "db_debug"
 	keyDbHost               = "db_host"
 	keyDbPort               = "db_port"
 	keyDbDatabase           = "db_database"
 	keyDbUsername           = "db_username"
 	keyDbPassword           = "db_password"
+	keyDbSsl                = "db_ssl"
+	keyDbBatchSize          = "db_batch_size"
 	keyLogLevel             = "log_level"
 	keyLogStacktrace        = "log_stacktrace"
 	keyHttpDebug            = "http_debug"
@@ -71,6 +74,32 @@ const (
 	keyHttpAllowMethods     = "http_allow_methods"
 	keyHttpAllowCredentials = "http_allow_credentials"
 )
+
+func readDbConfig() (database.Config, error) {
+	var errs []error
+	dialect, err := database.DialectFromString(EnvString(keyDbDialect, ""))
+	if err != nil {
+		errs = append(errs, err)
+	}
+	ssl, err := database.SSLModeFromString(EnvString(keyDbSsl, ""))
+	if err != nil {
+		errs = append(errs, err)
+	}
+	if len(errs) > 0 {
+		return database.Config{}, ErrorsToError(errs)
+	}
+	return database.Config{
+		Dialect:   dialect,
+		Debug:     EnvBool(keyDbDebug, false),
+		Host:      EnvString(keyDbHost, ""),
+		Port:      EnvInt(keyDbPort, 3306),
+		Database:  EnvString(keyDbDatabase, ""),
+		Username:  EnvString(keyDbUsername, ""),
+		Password:  EnvString(keyDbPassword, ""),
+		SSL:       ssl,
+		BatchSize: EnvInt(keyDbBatchSize, 1000),
+	}, nil
+}
 
 func readConfig() (sys.Config, error) {
 	viper.AutomaticEnv()
@@ -90,15 +119,13 @@ func readConfig() (sys.Config, error) {
 		}
 	}
 
+	dbConfig, err := readDbConfig()
+	if err != nil {
+		return sys.Config{}, errors.Wrapf(err, "failed to parse db config")
+	}
+
 	return sys.Config{
-		DB: database.Config{
-			Debug:    EnvBool(keyDbDebug, false),
-			Host:     EnvString(keyDbHost, ""),
-			Port:     EnvInt(keyDbPort, 3306),
-			Database: EnvString(keyDbDatabase, ""),
-			Username: EnvString(keyDbUsername, ""),
-			Password: EnvString(keyDbPassword, ""),
-		},
+		DB: dbConfig,
 		HTTP: http.Config{
 			BaseUrl: baseUrl,
 			Debug:   EnvBool(keyHttpDebug, false),

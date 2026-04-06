@@ -15,6 +15,7 @@ services:
     - ./:/src
     working_dir: /src
     environment:
+      DB_DIALECT: mysql
       DB_DEBUG: 1
       DB_HOST: test-db-mysql
       DB_PORT: 3306
