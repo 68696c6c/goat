@@ -191,7 +191,7 @@ func GetDB(c DatabaseConfig) (*gorm.DB, error) {
 }
 
 func GetMigrationDB(db *gorm.DB) (*sql.DB, error) {
-	err := goose.SetDialect("mysql")
+	err := goose.SetDialect(db.Config.Dialector.Name())
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to set sql dialect")
 	}
