@@ -59,6 +59,7 @@ type Dialect string
 const (
 	DialectMysql    Dialect = "mysql"
 	DialectPostgres Dialect = "postgres"
+	DialectDefault          = DialectMysql
 )
 
 func DialectFromString(input string) (Dialect, error) {

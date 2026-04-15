@@ -33,12 +33,13 @@ var once sync.Once
 // This function only needs to be called if you intend to use the database, http, or log services.
 func Init() error {
 	var err error
+	var c sys.Config
 	once.Do(func() {
-		config, err := readConfig()
+		c, err = readConfig()
 		if err != nil {
 			return
 		}
-		g, err = sys.Init(config)
+		g, err = sys.Init(c)
 	})
 	if err != nil {
 		return err
@@ -77,11 +78,11 @@ const (
 
 func readDbConfig() (database.Config, error) {
 	var errs []error
-	dialect, err := database.DialectFromString(EnvString(keyDbDialect, ""))
+	dialect, err := database.DialectFromString(EnvString(keyDbDialect, string(database.DialectDefault)))
 	if err != nil {
 		errs = append(errs, err)
 	}
-	ssl, err := database.SSLModeFromString(EnvString(keyDbSsl, ""))
+	ssl, err := database.SSLModeFromString(EnvString(keyDbSsl, string(database.SSLModeDefault)))
 	if err != nil {
 		errs = append(errs, err)
 	}
