@@ -61,3 +61,8 @@ func messageFromMsgAndArgs(msgAndArgs ...any) string {
 	}
 	return ""
 }
+
+type TestCase[T any] struct {
+	Input    T
+	Expected T
+}

@@ -61,15 +61,30 @@ func ParseID(s string) (ID, error) {
 	return ID(id), err
 }
 
-func ParseAllIDs(s []string) ([]ID, error) {
+func MustParseID(input string) ID {
+	id, err := ParseID(input)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
+func ParseAllIDs(input []string) ([]ID, error) {
 	var ids []ID
-	for _, i := range s {
+	for _, i := range input {
 		parsed, err := ParseID(i)
 		if err != nil {
 			return nil, err
 		}
-
 		ids = append(ids, parsed)
 	}
 	return ids, nil
+}
+
+func MustParseAllIDs(input []string) []ID {
+	id, err := ParseAllIDs(input)
+	if err != nil {
+		panic(err)
+	}
+	return id
 }
