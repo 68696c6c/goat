@@ -196,6 +196,7 @@ func ResetDB(db *gorm.DB) error {
 	return nil
 }
 
+// TODO: change err to be the second return value
 func ApplyQueryToGorm(db *gorm.DB, q query.Builder, paginate bool) (error, query.Template) {
 	t, err := q.Build()
 	if err != nil {
