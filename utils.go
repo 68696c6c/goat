@@ -1,8 +1,6 @@
 package goat
 
-import (
-	"github.com/pkg/errors"
-)
+import "github.com/pkg/errors"
 
 // ValueOrDefault returns the value of input or defaultValue if input is nil.
 func ValueOrDefault[T any](input *T, defaultValue T) T {

@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/pkg/errors"
 	"gorm.io/driver/mysql"
@@ -76,15 +77,18 @@ func DialectFromString(input string) (Dialect, error) {
 }
 
 type Config struct {
-	Dialect   Dialect
-	Debug     bool
-	Host      string
-	Port      int
-	Database  string
-	Username  string
-	Password  string
-	SSL       SSLMode
-	BatchSize int
+	Dialect         Dialect
+	Debug           bool
+	Host            string
+	Port            int
+	Database        string
+	Username        string
+	Password        string
+	SSL             SSLMode
+	BatchSize       *int
+	MaxOpenConns    *int
+	MaxIdleConns    *int
+	MaxConnLifetime *time.Duration
 }
 
 func (c Config) String() string {
@@ -162,13 +166,32 @@ func (s service) GetConnection(c Config) (*gorm.DB, error) {
 	gormConfig := gorm.Config{
 		Logger: s.log.GormLogger().LogMode(logLevel),
 	}
-	if c.BatchSize > 0 {
-		gormConfig.CreateBatchSize = c.BatchSize
+	if c.BatchSize != nil && *c.BatchSize > 0 {
+		gormConfig.CreateBatchSize = *c.BatchSize
 	}
 
 	connection, err := gorm.Open(c.Dialector(), &gormConfig)
 	if err != nil {
 		return nil, err
+	}
+
+	haveMaxOpenConns := c.MaxOpenConns != nil && *c.MaxOpenConns > 0
+	haveMaxIdleConns := c.MaxIdleConns != nil && *c.MaxIdleConns > 0
+	haveMaxConnLifetime := c.MaxConnLifetime != nil && *c.MaxConnLifetime > 0
+	if haveMaxOpenConns || haveMaxIdleConns || haveMaxConnLifetime {
+		sqlDB, err := connection.DB()
+		if err != nil {
+			return nil, errors.Wrap(err, "db connection pool configuration: failed to load sql db")
+		}
+		if haveMaxOpenConns {
+			sqlDB.SetMaxOpenConns(*c.MaxOpenConns)
+		}
+		if haveMaxIdleConns {
+			sqlDB.SetMaxIdleConns(*c.MaxIdleConns)
+		}
+		if haveMaxConnLifetime {
+			sqlDB.SetConnMaxLifetime(*c.MaxConnLifetime)
+		}
 	}
 
 	return connection, nil

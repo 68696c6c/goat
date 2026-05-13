@@ -65,6 +65,9 @@ const (
 	keyDbPassword           = "db_password"
 	keyDbSsl                = "db_ssl"
 	keyDbBatchSize          = "db_batch_size"
+	keyDbMaxOpenConns       = "db_max_open_conns"
+	keyDbMaxIdleConns       = "db_max_idle_conns"
+	keyDbMaxConnLifetime    = "db_max_conn_lifetime"
 	keyLogLevel             = "log_level"
 	keyLogStacktrace        = "log_stacktrace"
 	keyHttpDebug            = "http_debug"
@@ -76,7 +79,7 @@ const (
 	keyHttpAllowCredentials = "http_allow_credentials"
 )
 
-func readDbConfig() (database.Config, error) {
+func ReadDBConfig() (database.Config, error) {
 	var errs []error
 	dialect, err := database.DialectFromString(EnvString(keyDbDialect, string(database.DialectDefault)))
 	if err != nil {
@@ -90,16 +93,54 @@ func readDbConfig() (database.Config, error) {
 		return database.Config{}, ErrorsToError(errs)
 	}
 	return database.Config{
-		Dialect:   dialect,
-		Debug:     EnvBool(keyDbDebug, false),
-		Host:      EnvString(keyDbHost, ""),
-		Port:      EnvInt(keyDbPort, 3306),
-		Database:  EnvString(keyDbDatabase, ""),
-		Username:  EnvString(keyDbUsername, ""),
-		Password:  EnvString(keyDbPassword, ""),
-		SSL:       ssl,
-		BatchSize: EnvInt(keyDbBatchSize, 1000),
+		Dialect:         dialect,
+		Debug:           EnvBool(keyDbDebug, false),
+		Host:            EnvString(keyDbHost, ""),
+		Port:            EnvInt(keyDbPort, 3306),
+		Database:        EnvString(keyDbDatabase, ""),
+		Username:        EnvString(keyDbUsername, ""),
+		Password:        EnvString(keyDbPassword, ""),
+		SSL:             ssl,
+		BatchSize:       EnvIntOrNil(keyDbBatchSize, Ref(1000)),
+		MaxOpenConns:    EnvIntOrNil(keyDbMaxOpenConns, nil),
+		MaxIdleConns:    EnvIntOrNil(keyDbMaxIdleConns, nil),
+		MaxConnLifetime: EnvDurationOrNil(keyDbMaxConnLifetime, nil),
 	}, nil
+}
+
+func ValidateDBConfig(c database.Config) error {
+	var errs []error
+	if c.Host == "" {
+		errs = append(errs, errors.New("db_host is required"))
+	}
+	if c.Database == "" {
+		errs = append(errs, errors.New("db_database is required"))
+	}
+	if c.Username == "" {
+		errs = append(errs, errors.New("db_username is required"))
+	}
+	if c.Password == "" {
+		errs = append(errs, errors.New("db_password is required"))
+	}
+	if c.Port == 0 {
+		errs = append(errs, errors.New("db_port is required"))
+	}
+	if c.BatchSize != nil && *c.BatchSize < 1 {
+		errs = append(errs, errors.New("db_batch_size must be greater than 0 if set"))
+	}
+	if c.MaxOpenConns != nil && *c.MaxOpenConns < 1 {
+		errs = append(errs, errors.New("db_max_open_conns must be greater than 0 if set"))
+	}
+	if c.MaxIdleConns != nil && *c.MaxIdleConns < 1 {
+		errs = append(errs, errors.New("db_max_idle_conns must be greater than 0 if set"))
+	}
+	if c.MaxConnLifetime != nil && *c.MaxConnLifetime < 1 {
+		errs = append(errs, errors.New("db_max_conn_lifetime must be greater than 0 if set"))
+	}
+	if len(errs) > 0 {
+		return ErrorsToError(errs)
+	}
+	return nil
 }
 
 func readConfig() (sys.Config, error) {
@@ -120,7 +161,7 @@ func readConfig() (sys.Config, error) {
 		}
 	}
 
-	dbConfig, err := readDbConfig()
+	dbConfig, err := ReadDBConfig()
 	if err != nil {
 		return sys.Config{}, errors.Wrapf(err, "failed to parse db config")
 	}
