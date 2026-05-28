@@ -59,7 +59,7 @@ func NewRequest(baseUrl string) (*Request, error) {
 	}, nil
 }
 
-func (r *Request) WithClient(client *http.Client) *Request {
+func (r *Request) SetClient(client *http.Client) *Request {
 	r.client = client
 	return r
 }
