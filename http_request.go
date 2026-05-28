@@ -208,8 +208,8 @@ func (r *Request) Send(cx context.Context) (*http.Response, error) {
 		return response, errors.Wrap(err, "failed to send request")
 	}
 
-	if response.StatusCode > 299 {
-		return response, errors.Wrapf(err, "received error response: %s", response.Status)
+	if response.StatusCode > 399 {
+		return response, errors.Errorf("received error response: %s", response.Status)
 	}
 
 	return response, nil
