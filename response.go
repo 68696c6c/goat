@@ -31,7 +31,7 @@ func logHandlerWarn(cx *gin.Context, err error) {
 
 func respondRequestError(cx *gin.Context, err error, status int) {
 	logHandlerWarn(cx, err)
-	cx.AbortWithStatusJSON(status, hal.NewApiProblem(status, debugError(err)))
+	cx.AbortWithStatusJSON(status, hal.NewApiProblem(status, err))
 }
 
 func respondServerError(cx *gin.Context, err error, status int) {
