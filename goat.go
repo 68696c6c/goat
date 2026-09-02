@@ -13,6 +13,7 @@ import (
 	"go.uber.org/zap"
 	"gopkg.in/gin-contrib/cors.v1"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	"github.com/68696c6c/goat/hal"
 	"github.com/68696c6c/goat/query"
@@ -276,8 +277,13 @@ func ApplyQueryToGorm(db *gorm.DB, q query.Builder, paginate bool) (error, query
 	for _, p := range t.Joins {
 		db = db.Preload(p.Query, p.Args...)
 	}
-	if t.OrderBy != "" {
-		db = db.Order(t.OrderBy)
+	for _, s := range t.OrderBy.GetSorts() {
+		db = db.Order(clause.OrderByColumn{
+			Column: clause.Column{
+				Name: s.Field,
+			},
+			Desc: s.Direction == query.Descending,
+		})
 	}
 	if paginate {
 		if t.Limit > 0 {
