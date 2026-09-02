@@ -4,8 +4,10 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 
 	"github.com/68696c6c/goat/sys/log"
 )
@@ -24,16 +26,59 @@ func Test_Service_GetMainDB(t *testing.T) {
 	require.NotNil(t, db)
 }
 
-func Test_Service_GetMainDB_Mysql(t *testing.T) {
+func Test_Service_BatchSize(t *testing.T) {
+	input := 2000
 	subject := setupDbTest(t, Config{
-		Dialect:   DialectMysql,
 		Debug:     true,
 		Host:      "test-db-mysql",
 		Port:      3306,
 		Username:  "root",
 		Password:  "secret",
-		Database:  "goat",
-		BatchSize: 1000,
+		BatchSize: &input,
+	})
+
+	db, err := subject.GetMainDB()
+	require.Nil(t, err)
+	require.NotNil(t, db)
+
+	session := db.Session(&gorm.Session{})
+	require.NotNil(t, session)
+	assert.Equal(t, input, session.CreateBatchSize)
+}
+
+func Test_Service_MaxOpenConns(t *testing.T) {
+	input := 100
+	subject := setupDbTest(t, Config{
+		Debug:        true,
+		Host:         "test-db-mysql",
+		Port:         3306,
+		Username:     "root",
+		Password:     "secret",
+		MaxOpenConns: &input,
+	})
+
+	db, err := subject.GetMainDB()
+	require.Nil(t, err)
+	require.NotNil(t, db)
+
+	sqlDB, err := db.DB()
+	require.Nil(t, err)
+	require.NotNil(t, sqlDB)
+	stats := sqlDB.Stats()
+	assert.Equal(t, input, stats.MaxOpenConnections)
+}
+
+// It seems the sql.DB package does not provide a way to see the configured MaxIdleConns or MaxConnLifetime properties once they have been set.
+
+func Test_Service_GetMainDB_Mysql(t *testing.T) {
+	subject := setupDbTest(t, Config{
+		Dialect:  DialectMysql,
+		Debug:    true,
+		Host:     "test-db-mysql",
+		Port:     3306,
+		Username: "root",
+		Password: "secret",
+		Database: "goat",
 	})
 
 	db, err := subject.GetMainDB()
@@ -43,14 +88,13 @@ func Test_Service_GetMainDB_Mysql(t *testing.T) {
 
 func Test_Service_GetMainDB_Postgres(t *testing.T) {
 	subject := setupDbTest(t, Config{
-		Dialect:   DialectPostgres,
-		Debug:     true,
-		Host:      "test-db-postgres",
-		Port:      5432,
-		Username:  "postgres",
-		Password:  "secret",
-		Database:  "goat",
-		BatchSize: 1000,
+		Dialect:  DialectPostgres,
+		Debug:    true,
+		Host:     "test-db-postgres",
+		Port:     5432,
+		Username: "postgres",
+		Password: "secret",
+		Database: "goat",
 	})
 
 	db, err := subject.GetMainDB()

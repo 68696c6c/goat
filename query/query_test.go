@@ -15,7 +15,7 @@ func Test_Query_NewQueryFromUrl(t *testing.T) {
 			expected: Template{
 				Where:   "",
 				Params:  nil,
-				OrderBy: "",
+				OrderBy: &Order{sort: []Sort{}},
 				Joins:   []Join{},
 				Limit:   0,
 				Offset:  0,
@@ -24,23 +24,37 @@ func Test_Query_NewQueryFromUrl(t *testing.T) {
 		{
 			input: mustMakeQuery("sort=a&dir=desc"),
 			expected: Template{
-				Where:   "",
-				Params:  nil,
-				OrderBy: "a DESC",
-				Joins:   []Join{},
-				Limit:   0,
-				Offset:  0,
+				Where:  "",
+				Params: nil,
+				OrderBy: &Order{
+					sort: []Sort{
+						{
+							Field:     "a",
+							Direction: "DESC",
+						},
+					},
+				},
+				Joins:  []Join{},
+				Limit:  0,
+				Offset: 0,
 			},
 		},
 		{
 			input: mustMakeQuery("sort=a&dir=desc&page=10&size=5"),
 			expected: Template{
-				Where:   "",
-				Params:  nil,
-				OrderBy: "a DESC",
-				Joins:   []Join{},
-				Limit:   5,
-				Offset:  45,
+				Where:  "",
+				Params: nil,
+				OrderBy: &Order{
+					sort: []Sort{
+						{
+							Field:     "a",
+							Direction: "DESC",
+						},
+					},
+				},
+				Joins:  []Join{},
+				Limit:  5,
+				Offset: 45,
 			},
 		},
 	}
@@ -61,7 +75,10 @@ func Test_Query_Build(t *testing.T) {
 	require.Nil(t, err)
 	assert.Equal(t, "(a = ?)", result.Where)
 	assert.Equal(t, []any{"example"}, result.Params)
-	assert.Equal(t, "a DESC", result.OrderBy)
+	require.NotNil(t, result.OrderBy)
+	orderBy, orderParams := result.OrderBy.Generate()
+	assert.Equal(t, "? DESC", orderBy)
+	assert.Equal(t, []string{"a"}, orderParams)
 	assert.Equal(t, "RelationA", result.Joins[0].Query)
 	assert.Equal(t, []any{"args"}, result.Joins[0].Args)
 	assert.Equal(t, 3, result.Limit)
@@ -257,9 +274,9 @@ func Test_Query_GetPagination(t *testing.T) {
 
 func Test_Query_GetOrder(t *testing.T) {
 	input := mustMakeQuery("sort=a&dir=desc")
-	expected := sort{field: "a", direction: "DESC"}
+	expected := Sort{Field: "a", Direction: "DESC"}
 	result := NewQueryFromUrl(input).GetOrder()
 	require.Len(t, result.sort, 1)
-	assert.Equal(t, expected.field, result.sort[0].field)
-	assert.Equal(t, expected.direction, result.sort[0].direction)
+	assert.Equal(t, expected.Field, result.sort[0].Field)
+	assert.Equal(t, expected.Direction, result.sort[0].Direction)
 }

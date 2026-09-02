@@ -1,6 +1,7 @@
 package goat
 
 import (
+	"math"
 	"math/rand"
 	"time"
 
@@ -40,4 +41,9 @@ func RandomDecimalExp(min, max int64, exp int32) decimal.Decimal {
 
 func RandomIndex(length int) int {
 	return RandomInt(0, length)
+}
+
+func RandomPercentage() float64 {
+	ratio := math.Pow(10, float64(5))
+	return math.Round(rand.Float64()*ratio) / ratio
 }

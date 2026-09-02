@@ -1,6 +1,7 @@
 package goat
 
 import (
+	"context"
 	"net/http/httptest"
 	"net/url"
 )
@@ -47,7 +48,7 @@ func (h *HandlerTest) SetRequest(request *Request) *HandlerTest {
 
 func (h *HandlerTest) Send() (*httptest.ResponseRecorder, error) {
 	rr := httptest.NewRecorder()
-	request, err := h.request.Build()
+	request, err := h.request.Build(context.Background())
 	if err != nil {
 		return nil, err
 	}

@@ -14,12 +14,28 @@ func YMDHISStringToTime(str string) (time.Time, error) {
 	return time.Parse(ymdhisTemplate, str)
 }
 
+func MustYMDHISStringToTime(input string) time.Time {
+	result, err := YMDHISStringToTime(input)
+	if err != nil {
+		panic(err)
+	}
+	return result
+}
+
 func TimeToYMDHISString(t time.Time) string {
 	return t.Format(ymdhisTemplate)
 }
 
 func YMDStringToTime(str string) (time.Time, error) {
 	return time.Parse(ymdTemplate, str)
+}
+
+func MustYMDStringToTime(input string) time.Time {
+	end, err := YMDStringToTime(input)
+	if err != nil {
+		panic(err)
+	}
+	return end
 }
 
 func TimeToYMDString(t time.Time) string {
@@ -40,4 +56,16 @@ func TimeToPrettyString(t time.Time) string {
 	d := t.Day()
 	y := t.Year()
 	return fmt.Sprintf("%s %d%s %d", m, d, suffix, y)
+}
+
+func RFCToTime(input string) (time.Time, error) {
+	return time.Parse(time.RFC3339, input)
+}
+
+func MustRFC3339ToTime(input string) time.Time {
+	result, err := RFCToTime(input)
+	if err != nil {
+		panic(err)
+	}
+	return result
 }

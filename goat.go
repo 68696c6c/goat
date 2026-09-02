@@ -13,6 +13,7 @@ import (
 	"go.uber.org/zap"
 	"gopkg.in/gin-contrib/cors.v1"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	"github.com/68696c6c/goat/hal"
 	"github.com/68696c6c/goat/query"
@@ -33,12 +34,13 @@ var once sync.Once
 // This function only needs to be called if you intend to use the database, http, or log services.
 func Init() error {
 	var err error
+	var c sys.Config
 	once.Do(func() {
-		config, err := readConfig()
+		c, err = readConfig()
 		if err != nil {
 			return
 		}
-		g, err = sys.Init(config)
+		g, err = sys.Init(c)
 	})
 	if err != nil {
 		return err
@@ -55,12 +57,18 @@ func MustInit() {
 
 const (
 	keyBaseUrl              = "base_url"
+	keyDbDialect            = "db_dialect"
 	keyDbDebug              = "db_debug"
 	keyDbHost               = "db_host"
 	keyDbPort               = "db_port"
 	keyDbDatabase           = "db_database"
 	keyDbUsername           = "db_username"
 	keyDbPassword           = "db_password"
+	keyDbSsl                = "db_ssl"
+	keyDbBatchSize          = "db_batch_size"
+	keyDbMaxOpenConns       = "db_max_open_conns"
+	keyDbMaxIdleConns       = "db_max_idle_conns"
+	keyDbMaxConnLifetime    = "db_max_conn_lifetime"
 	keyLogLevel             = "log_level"
 	keyLogStacktrace        = "log_stacktrace"
 	keyHttpDebug            = "http_debug"
@@ -71,6 +79,70 @@ const (
 	keyHttpAllowMethods     = "http_allow_methods"
 	keyHttpAllowCredentials = "http_allow_credentials"
 )
+
+func ReadDBConfig() (database.Config, error) {
+	var errs []error
+	dialect, err := database.DialectFromString(EnvString(keyDbDialect, string(database.DialectDefault)))
+	if err != nil {
+		errs = append(errs, err)
+	}
+	ssl, err := database.SSLModeFromString(EnvString(keyDbSsl, string(database.SSLModeDefault)))
+	if err != nil {
+		errs = append(errs, err)
+	}
+	if len(errs) > 0 {
+		return database.Config{}, ErrorsToError(errs)
+	}
+	return database.Config{
+		Dialect:         dialect,
+		Debug:           EnvBool(keyDbDebug, false),
+		Host:            EnvString(keyDbHost, ""),
+		Port:            EnvInt(keyDbPort, 3306),
+		Database:        EnvString(keyDbDatabase, ""),
+		Username:        EnvString(keyDbUsername, ""),
+		Password:        EnvString(keyDbPassword, ""),
+		SSL:             ssl,
+		BatchSize:       EnvIntOrNil(keyDbBatchSize, Ref(1000)),
+		MaxOpenConns:    EnvIntOrNil(keyDbMaxOpenConns, nil),
+		MaxIdleConns:    EnvIntOrNil(keyDbMaxIdleConns, nil),
+		MaxConnLifetime: EnvDurationOrNil(keyDbMaxConnLifetime, nil),
+	}, nil
+}
+
+func ValidateDBConfig(c database.Config) error {
+	var errs []error
+	if c.Host == "" {
+		errs = append(errs, errors.New("db_host is required"))
+	}
+	if c.Database == "" {
+		errs = append(errs, errors.New("db_database is required"))
+	}
+	if c.Username == "" {
+		errs = append(errs, errors.New("db_username is required"))
+	}
+	if c.Password == "" {
+		errs = append(errs, errors.New("db_password is required"))
+	}
+	if c.Port == 0 {
+		errs = append(errs, errors.New("db_port is required"))
+	}
+	if c.BatchSize != nil && *c.BatchSize < 1 {
+		errs = append(errs, errors.New("db_batch_size must be greater than 0 if set"))
+	}
+	if c.MaxOpenConns != nil && *c.MaxOpenConns < 1 {
+		errs = append(errs, errors.New("db_max_open_conns must be greater than 0 if set"))
+	}
+	if c.MaxIdleConns != nil && *c.MaxIdleConns < 1 {
+		errs = append(errs, errors.New("db_max_idle_conns must be greater than 0 if set"))
+	}
+	if c.MaxConnLifetime != nil && *c.MaxConnLifetime < 1 {
+		errs = append(errs, errors.New("db_max_conn_lifetime must be greater than 0 if set"))
+	}
+	if len(errs) > 0 {
+		return ErrorsToError(errs)
+	}
+	return nil
+}
 
 func readConfig() (sys.Config, error) {
 	viper.AutomaticEnv()
@@ -90,15 +162,13 @@ func readConfig() (sys.Config, error) {
 		}
 	}
 
+	dbConfig, err := ReadDBConfig()
+	if err != nil {
+		return sys.Config{}, errors.Wrapf(err, "failed to parse db config")
+	}
+
 	return sys.Config{
-		DB: database.Config{
-			Debug:    EnvBool(keyDbDebug, false),
-			Host:     EnvString(keyDbHost, ""),
-			Port:     EnvInt(keyDbPort, 3306),
-			Database: EnvString(keyDbDatabase, ""),
-			Username: EnvString(keyDbUsername, ""),
-			Password: EnvString(keyDbPassword, ""),
-		},
+		DB: dbConfig,
 		HTTP: http.Config{
 			BaseUrl: baseUrl,
 			Debug:   EnvBool(keyHttpDebug, false),
@@ -164,7 +234,7 @@ func GetDB(c DatabaseConfig) (*gorm.DB, error) {
 }
 
 func GetMigrationDB(db *gorm.DB) (*sql.DB, error) {
-	err := goose.SetDialect("mysql")
+	err := goose.SetDialect(db.Config.Dialector.Name())
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to set sql dialect")
 	}
@@ -207,8 +277,13 @@ func ApplyQueryToGorm(db *gorm.DB, q query.Builder, paginate bool) (error, query
 	for _, p := range t.Joins {
 		db = db.Preload(p.Query, p.Args...)
 	}
-	if t.OrderBy != "" {
-		db = db.Order(t.OrderBy)
+	for _, s := range t.OrderBy.GetSorts() {
+		db = db.Order(clause.OrderByColumn{
+			Column: clause.Column{
+				Name: s.Field,
+			},
+			Desc: s.Direction == query.Descending,
+		})
 	}
 	if paginate {
 		if t.Limit > 0 {
