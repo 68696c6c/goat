@@ -110,6 +110,13 @@ func ReadDBConfig() (database.Config, error) {
 }
 
 func ValidateDBConfig(c database.Config) error {
+	if c.Dialect == database.DialectSqlite {
+		if c.Host == "" {
+			return errors.New("db_host is required and should be a filepath or ':memory:'")
+		} else {
+			return nil
+		}
+	}
 	var errs []error
 	if c.Host == "" {
 		errs = append(errs, errors.New("db_host is required"))

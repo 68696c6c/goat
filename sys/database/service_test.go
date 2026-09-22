@@ -102,6 +102,28 @@ func Test_Service_GetMainDB_Postgres(t *testing.T) {
 	require.NotNil(t, db)
 }
 
+func Test_Service_GetMainDB_Sqlite(t *testing.T) {
+	subject := setupDbTest(t, Config{
+		Dialect: DialectSqlite,
+		Host:    "./test.db",
+	})
+
+	db, err := subject.GetMainDB()
+	require.Nil(t, err)
+	require.NotNil(t, db)
+}
+
+func Test_Service_GetMainDB_SqliteMemory(t *testing.T) {
+	subject := setupDbTest(t, Config{
+		Dialect: DialectSqlite,
+		Host:    ":memory:",
+	})
+
+	db, err := subject.GetMainDB()
+	require.Nil(t, err)
+	require.NotNil(t, db)
+}
+
 func Test_Service_ConnectionStringSSL(t *testing.T) {
 	cases := map[Dialect][]struct {
 		name          string
