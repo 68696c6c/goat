@@ -67,7 +67,6 @@ type Builder interface {
 	// Order methods
 
 	Order(field string, dir ...Direction) Builder
-	GetOrderBy() string
 	GetOrder() *Order
 
 	// Pagination methods
@@ -385,10 +384,6 @@ func (q *query) Order(field string, dir ...Direction) Builder {
 	return q
 }
 
-func (q *query) GetOrderBy() string {
-	return q.order.Generate()
-}
-
 func (q *query) GetOrder() *Order {
 	return q.order
 }
@@ -446,7 +441,7 @@ type Template struct {
 	From    string
 	Where   string
 	Params  []any
-	OrderBy string
+	OrderBy *Order
 	Joins   []Join
 	Limit   int
 	Offset  int
@@ -462,7 +457,7 @@ func (q *query) Build() (Template, error) {
 		From:    q.from,
 		Where:   where,
 		Params:  params,
-		OrderBy: q.GetOrderBy(),
+		OrderBy: q.GetOrder(),
 		Joins:   q.GetJoins(),
 		Limit:   q.GetLimit(),
 		Offset:  q.GetOffset(),
@@ -497,8 +492,14 @@ func (q *query) ToSQL() (string, []any, error) {
 		clauses = append(clauses, fmt.Sprintf("WHERE %s", t.Where))
 		sqlParams = append(sqlParams, t.Params...)
 	}
-	if t.OrderBy != "" {
-		clauses = append(clauses, fmt.Sprintf("ORDER BY %s", t.OrderBy))
+	if t.OrderBy != nil {
+		orderBy, params := t.OrderBy.Generate()
+		if orderBy != "" {
+			clauses = append(clauses, fmt.Sprintf("ORDER BY %s", orderBy))
+			for _, f := range params {
+				sqlParams = append(sqlParams, any(f))
+			}
+		}
 	}
 	if t.Limit > 0 {
 		clauses = append(clauses, fmt.Sprintf("LIMIT %d", t.Limit))

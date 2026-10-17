@@ -29,7 +29,7 @@ func DirectionFromString(input string) (Direction, error) {
 
 func NewOrder() *Order {
 	return &Order{
-		sort: []*sort{},
+		sort: []Sort{},
 	}
 }
 
@@ -50,7 +50,7 @@ func NewOrderFromUrl(q url.Values) *Order {
 }
 
 type Order struct {
-	sort []*sort
+	sort []Sort
 }
 
 func (o *Order) By(field string, dir ...Direction) *Order {
@@ -58,52 +58,45 @@ func (o *Order) By(field string, dir ...Direction) *Order {
 	if len(dir) > 0 {
 		d = dir[0]
 	}
-	o.sort = append(o.sort, newSort().By(field).Dir(d))
+	o.sort = append(o.sort, Sort{
+		Field:     field,
+		Direction: d,
+	})
 	return o
 }
 
-func (o *Order) Generate() string {
+func (o *Order) Generate() (string, []string) {
 	if len(o.sort) == 0 {
-		return ""
+		return "", []string{}
 	}
 	var result []string
+	var params []string
 	for _, s := range o.sort {
-		result = append(result, s.Generate())
+		template, field := s.Generate()
+		result = append(result, template)
+		params = append(params, field)
 	}
-	return strings.Join(result, ", ")
+	return strings.Join(result, ", "), params
+}
+
+func (o *Order) GetSorts() []Sort {
+	return o.sort
 }
 
 func (o *Order) ApplyToUrl(q url.Values) {
 	// TODO: support sorting by multiple fields
 	if len(o.sort) > 0 {
 		s := o.sort[0]
-		q.Set(sortKey, s.field)
-		q.Set(sortDirKey, string(s.direction))
+		q.Set(sortKey, s.Field)
+		q.Set(sortDirKey, string(s.Direction))
 	}
 }
 
-func newSort() *sort {
-	return &sort{
-		field:     "",
-		direction: "",
-	}
+type Sort struct {
+	Field     string
+	Direction Direction
 }
 
-type sort struct {
-	field     string
-	direction Direction
-}
-
-func (s *sort) Generate() string {
-	return fmt.Sprintf("%s %s", s.field, strings.ToUpper(string(s.direction)))
-}
-
-func (s *sort) By(field string) *sort {
-	s.field = field
-	return s
-}
-
-func (s *sort) Dir(dir Direction) *sort {
-	s.direction = dir
-	return s
+func (s *Sort) Generate() (string, string) {
+	return fmt.Sprintf("? %s", strings.ToUpper(string(s.Direction))), s.Field
 }

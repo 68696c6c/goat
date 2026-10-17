@@ -2,6 +2,7 @@ package goat
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -12,21 +13,25 @@ import (
 )
 
 const (
-	HeaderContentType string = "Content-Type"
-	ContentTypeJson   string = "application/json"
-	ContentTypeForm   string = "application/x-www-form-urlencoded"
+	HeaderAuthorization string = "Authorization"
+	HeaderContentType   string = "Content-Type"
+	ContentTypeJson     string = "application/json"
+	ContentTypeForm     string = "application/x-www-form-urlencoded"
 )
 
 type Request struct {
-	baseURL         *url.URL
-	query           url.Values
-	formData        url.Values
-	jsonBody        any
-	contentType     string
-	redirectHandler RedirectHandler
-	Method          string
-	URL             string
-	Headers         map[string]string
+	client            *http.Client
+	baseURL           *url.URL
+	query             url.Values
+	formData          url.Values
+	jsonBody          any
+	contentType       string
+	redirectHandler   RedirectHandler
+	basicAuthUsername string
+	basicAuthPassword string
+	Method            string
+	URL               string
+	Headers           map[string]string
 }
 
 func NewRequest(baseUrl string) (*Request, error) {
@@ -42,6 +47,7 @@ func NewRequest(baseUrl string) (*Request, error) {
 		}
 	}
 	return &Request{
+		client:          http.DefaultClient,
 		baseURL:         u,
 		query:           query,
 		formData:        make(url.Values),
@@ -51,6 +57,11 @@ func NewRequest(baseUrl string) (*Request, error) {
 		URL:             "",
 		Headers:         make(map[string]string),
 	}, nil
+}
+
+func (r *Request) SetClient(client *http.Client) *Request {
+	r.client = client
+	return r
 }
 
 func (r *Request) SetMethod(method string) *Request {
@@ -83,6 +94,17 @@ func (r *Request) SetHeader(key, value string) *Request {
 	if key == HeaderContentType {
 		r.contentType = value
 	}
+	return r
+}
+
+func (r *Request) SetBasicAuth(username, password string) *Request {
+	r.basicAuthUsername = username
+	r.basicAuthPassword = password
+	return r
+}
+
+func (r *Request) SetBearerAuth(token string) *Request {
+	r.SetHeader(HeaderAuthorization, "Bearer "+token)
 	return r
 }
 
@@ -133,7 +155,7 @@ func (r *Request) SetRedirectHandler(handler RedirectHandler) *Request {
 	return r
 }
 
-func (r *Request) Build() (*http.Request, error) {
+func (r *Request) Build(cx context.Context) (*http.Request, error) {
 	r.baseURL.RawQuery = r.query.Encode()
 	reqURL := r.baseURL.String()
 
@@ -155,9 +177,13 @@ func (r *Request) Build() (*http.Request, error) {
 		body = nil
 	}
 
-	req, err := http.NewRequest(r.Method, reqURL, body)
+	req, err := http.NewRequestWithContext(cx, r.Method, reqURL, body)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create http request")
+	}
+
+	if r.basicAuthUsername != "" {
+		req.SetBasicAuth(r.basicAuthUsername, r.basicAuthPassword)
 	}
 
 	for key, value := range r.Headers {
@@ -167,32 +193,30 @@ func (r *Request) Build() (*http.Request, error) {
 	return req, nil
 }
 
-func (r *Request) Send() (*http.Response, error) {
-	req, err := r.Build()
+func (r *Request) Send(cx context.Context) (*http.Response, error) {
+	req, err := r.Build(cx)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to build request")
 	}
 
-	client := http.DefaultClient
-
 	if r.redirectHandler != nil {
-		client.CheckRedirect = r.redirectHandler
+		r.client.CheckRedirect = r.redirectHandler
 	}
 
-	response, err := client.Do(req)
+	response, err := r.client.Do(req)
 	if err != nil {
 		return response, errors.Wrap(err, "failed to send request")
 	}
 
-	if response.StatusCode > 299 {
-		return response, errors.Wrapf(err, "received error response: %s", response.Status)
+	if response.StatusCode > 399 {
+		return response, errors.Errorf("received error response: %s", response.Status)
 	}
 
 	return response, nil
 }
 
-func (r *Request) SendAndRead(output any) (*http.Response, error) {
-	response, err := r.Send()
+func (r *Request) SendAndRead(cx context.Context, output any) (*http.Response, error) {
+	response, err := r.Send(cx)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to send request")
 	}

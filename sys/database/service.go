@@ -2,7 +2,9 @@ package database
 
 import (
 	"fmt"
+	"time"
 
+	"github.com/glebarez/sqlite"
 	"github.com/pkg/errors"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
@@ -32,23 +34,64 @@ const (
 	SSLModeVerifyFull SSLMode = "verify-full" // I want my data encrypted, and I accept the overhead. I want to be sure that I connect to a server I trust, and that it's the one I specify.
 )
 
+func SSLModeFromString(input string) (SSLMode, error) {
+	values := []SSLMode{
+		SSLModeDefault,
+		SSLModeSkipVerify,
+		SSLModePreferred,
+		SSLModeStrict,
+		SSLModeOff,
+		SSLModeDisable,
+		SSLModeAllow,
+		SSLModePrefer,
+		SSLModeRequire,
+		SSLModeVerifyCA,
+		SSLModeVerifyFull,
+	}
+	for _, v := range values {
+		if string(v) == input {
+			return SSLMode(input), nil
+		}
+	}
+	return "", errors.Errorf("'%s' is not a valid ssl mode", input)
+}
+
 type Dialect string
 
 const (
 	DialectMysql    Dialect = "mysql"
 	DialectPostgres Dialect = "postgres"
+	DialectSqlite   Dialect = "sqlite"
+	DialectDefault          = DialectMysql
 )
 
+func DialectFromString(input string) (Dialect, error) {
+	values := []Dialect{
+		DialectMysql,
+		DialectPostgres,
+		DialectSqlite,
+	}
+	for _, v := range values {
+		if string(v) == input {
+			return Dialect(input), nil
+		}
+	}
+	return "", errors.Errorf("'%s' is not a valid dialect", input)
+}
+
 type Config struct {
-	Dialect   Dialect
-	Debug     bool
-	Host      string
-	Port      int
-	Database  string
-	Username  string
-	Password  string
-	SSL       SSLMode
-	BatchSize int
+	Dialect         Dialect
+	Debug           bool
+	Host            string
+	Port            int
+	Database        string
+	Username        string
+	Password        string
+	SSL             SSLMode
+	BatchSize       *int
+	MaxOpenConns    *int
+	MaxIdleConns    *int
+	MaxConnLifetime *time.Duration
 }
 
 func (c Config) String() string {
@@ -56,10 +99,14 @@ func (c Config) String() string {
 }
 
 func (c Config) ConnectionString() string {
-	if c.Dialect == DialectPostgres {
+	switch c.Dialect {
+	case DialectPostgres:
 		return c.postgresConnectionString()
+	case DialectSqlite:
+		return c.sqliteConnectionString()
+	default:
+		return c.mysqlConnectionString()
 	}
-	return c.mysqlConnectionString()
 }
 
 func (c Config) mysqlConnectionString() string {
@@ -73,7 +120,6 @@ func (c Config) mysqlConnectionString() string {
 }
 
 func (c Config) postgresConnectionString() string {
-	// result := fmt.Sprintf("host=%v user=%v password=%v dbname=%v port=%v", c.Host, c.Username, c.Password, c.Database, c.Port)
 	result := fmt.Sprintf("postgres://%v:%v@%v:%v/%v", c.Username, c.Password, c.Host, c.Port, c.Database)
 	if c.SSL == "" {
 		result += fmt.Sprintf("?sslmode=%s", string(SSLModePrefer))
@@ -83,11 +129,19 @@ func (c Config) postgresConnectionString() string {
 	return result
 }
 
+func (c Config) sqliteConnectionString() string {
+	return fmt.Sprintf("%v?_pragma=foreign_keys(1)&_pragma=journal_mode(WAL)", c.Host)
+}
+
 func (c Config) Dialector() gorm.Dialector {
-	if c.Dialect == DialectPostgres {
+	switch c.Dialect {
+	case DialectPostgres:
 		return postgres.Open(c.postgresConnectionString())
+	case DialectSqlite:
+		return sqlite.Open(c.sqliteConnectionString())
+	default:
+		return mysql.Open(c.mysqlConnectionString())
 	}
-	return mysql.Open(c.mysqlConnectionString())
 }
 
 type Service interface {
@@ -127,13 +181,32 @@ func (s service) GetConnection(c Config) (*gorm.DB, error) {
 	gormConfig := gorm.Config{
 		Logger: s.log.GormLogger().LogMode(logLevel),
 	}
-	if c.BatchSize > 0 {
-		gormConfig.CreateBatchSize = c.BatchSize
+	if c.BatchSize != nil && *c.BatchSize > 0 {
+		gormConfig.CreateBatchSize = *c.BatchSize
 	}
 
 	connection, err := gorm.Open(c.Dialector(), &gormConfig)
 	if err != nil {
 		return nil, err
+	}
+
+	haveMaxOpenConns := c.MaxOpenConns != nil && *c.MaxOpenConns > 0
+	haveMaxIdleConns := c.MaxIdleConns != nil && *c.MaxIdleConns > 0
+	haveMaxConnLifetime := c.MaxConnLifetime != nil && *c.MaxConnLifetime > 0
+	if haveMaxOpenConns || haveMaxIdleConns || haveMaxConnLifetime {
+		sqlDB, err := connection.DB()
+		if err != nil {
+			return nil, errors.Wrap(err, "db connection pool configuration: failed to load sql db")
+		}
+		if haveMaxOpenConns {
+			sqlDB.SetMaxOpenConns(*c.MaxOpenConns)
+		}
+		if haveMaxIdleConns {
+			sqlDB.SetMaxIdleConns(*c.MaxIdleConns)
+		}
+		if haveMaxConnLifetime {
+			sqlDB.SetConnMaxLifetime(*c.MaxConnLifetime)
+		}
 	}
 
 	return connection, nil

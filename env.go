@@ -79,10 +79,24 @@ func EnvString(key string, defaultValue string) string {
 	return defaultValue
 }
 
+func EnvStringOrNil(key string, defaultValue *string) *string {
+	if viper.IsSet(key) {
+		return Ref(viper.GetString(key))
+	}
+	return defaultValue
+}
+
 // EnvBool returns the value of the specified env var or defaultValue if the env var is not set.
 func EnvBool(key string, defaultValue bool) bool {
 	if viper.IsSet(key) {
 		return viper.GetBool(key)
+	}
+	return defaultValue
+}
+
+func EnvBoolOrNil(key string, defaultValue *bool) *bool {
+	if viper.IsSet(key) {
+		return Ref(viper.GetBool(key))
 	}
 	return defaultValue
 }
@@ -95,10 +109,24 @@ func EnvInt(key string, defaultValue int) int {
 	return defaultValue
 }
 
+func EnvIntOrNil(key string, defaultValue *int) *int {
+	if viper.IsSet(key) {
+		return Ref(viper.GetInt(key))
+	}
+	return defaultValue
+}
+
 // EnvInt32 returns the value of the specified env var or defaultValue if the env var is not set.
 func EnvInt32(key string, defaultValue int32) int32 {
 	if viper.IsSet(key) {
 		return viper.GetInt32(key)
+	}
+	return defaultValue
+}
+
+func EnvInt32OrNil(key string, defaultValue *int32) *int32 {
+	if viper.IsSet(key) {
+		return Ref(viper.GetInt32(key))
 	}
 	return defaultValue
 }
@@ -111,10 +139,24 @@ func EnvInt64(key string, defaultValue int64) int64 {
 	return defaultValue
 }
 
+func EnvInt64OrNil(key string, defaultValue *int64) *int64 {
+	if viper.IsSet(key) {
+		return Ref(viper.GetInt64(key))
+	}
+	return defaultValue
+}
+
 // EnvUint16 returns the value of the specified env var or defaultValue if the env var is not set.
 func EnvUint16(key string, defaultValue uint16) uint16 {
 	if viper.IsSet(key) {
 		return viper.GetUint16(key)
+	}
+	return defaultValue
+}
+
+func EnvUint16OrNil(key string, defaultValue *uint16) *uint16 {
+	if viper.IsSet(key) {
+		return Ref(viper.GetUint16(key))
 	}
 	return defaultValue
 }
@@ -127,10 +169,24 @@ func EnvUint32(key string, defaultValue uint32) uint32 {
 	return defaultValue
 }
 
+func EnvUint32OrNil(key string, defaultValue *uint32) *uint32 {
+	if viper.IsSet(key) {
+		return Ref(viper.GetUint32(key))
+	}
+	return defaultValue
+}
+
 // EnvUint64 returns the value of the specified env var or defaultValue if the env var is not set.
 func EnvUint64(key string, defaultValue uint64) uint64 {
 	if viper.IsSet(key) {
 		return viper.GetUint64(key)
+	}
+	return defaultValue
+}
+
+func EnvUint64OrNil(key string, defaultValue *uint64) *uint64 {
+	if viper.IsSet(key) {
+		return Ref(viper.GetUint64(key))
 	}
 	return defaultValue
 }
@@ -143,6 +199,13 @@ func EnvFloat64(key string, defaultValue float64) float64 {
 	return defaultValue
 }
 
+func EnvFloat64OrNil(key string, defaultValue *float64) *float64 {
+	if viper.IsSet(key) {
+		return Ref(viper.GetFloat64(key))
+	}
+	return defaultValue
+}
+
 // EnvTime returns the value of the specified env var or defaultValue if the env var is not set.
 func EnvTime(key string, defaultValue time.Time) time.Time {
 	if viper.IsSet(key) {
@@ -151,10 +214,24 @@ func EnvTime(key string, defaultValue time.Time) time.Time {
 	return defaultValue
 }
 
+func EnvTimeOrNil(key string, defaultValue *time.Time) *time.Time {
+	if viper.IsSet(key) {
+		return Ref(viper.GetTime(key))
+	}
+	return defaultValue
+}
+
 // EnvDuration returns the value of the specified env var or defaultValue if the env var is not set.
 func EnvDuration(key string, defaultValue time.Duration) time.Duration {
 	if viper.IsSet(key) {
 		return viper.GetDuration(key)
+	}
+	return defaultValue
+}
+
+func EnvDurationOrNil(key string, defaultValue *time.Duration) *time.Duration {
+	if viper.IsSet(key) {
+		return Ref(viper.GetDuration(key))
 	}
 	return defaultValue
 }
