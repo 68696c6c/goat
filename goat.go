@@ -122,16 +122,16 @@ func ValidateDBConfig(c database.Config) error {
 		errs = append(errs, errors.New("db_host is required"))
 	}
 	if c.Database == "" {
-		errs = append(errs, errors.New("db_database is required"))
+		errs = append(errs, errors.New("db_database is required unless using sqlite"))
 	}
 	if c.Username == "" {
-		errs = append(errs, errors.New("db_username is required"))
+		errs = append(errs, errors.New("db_username is required unless using sqlite"))
 	}
 	if c.Password == "" {
-		errs = append(errs, errors.New("db_password is required"))
+		errs = append(errs, errors.New("db_password is required unless using sqlite"))
 	}
 	if c.Port == 0 {
-		errs = append(errs, errors.New("db_port is required"))
+		errs = append(errs, errors.New("db_port is required unless using sqlite"))
 	}
 	if c.BatchSize != nil && *c.BatchSize < 1 {
 		errs = append(errs, errors.New("db_batch_size must be greater than 0 if set"))
