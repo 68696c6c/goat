@@ -71,6 +71,11 @@ func Filter[M any](db *gorm.DB, q query.Builder) ([]*M, query.Builder, error) {
 	return result, q.Pagination(pagination), nil
 }
 
+func FilterCx[M any](cx context.Context, db *gorm.DB, q query.Builder) ([]*M, query.Builder, error) {
+	var table M
+	return Filter[M](db.WithContext(cx).Model(&table), q)
+}
+
 func paginate(db *gorm.DB, p *query.Pagination) (*query.Pagination, error) {
 	var count int64
 	err := db.Count(&count).Error
@@ -98,16 +103,55 @@ func First[M any](db *gorm.DB, where ...any) (*M, error) {
 	return &result, nil
 }
 
+func FirstCx[M any](cx context.Context, db *gorm.DB, where ...any) (*M, error) {
+	return First[M](db.WithContext(cx), where...)
+}
+
+func Exists[M any](db *gorm.DB, where ...any) (result *M, found bool, err error) {
+	result, err = First[M](db, where...)
+	if err != nil {
+		if goat.RecordNotFound(err) {
+			return nil, false, nil
+		}
+		return nil, false, err
+	}
+	return result, true, err
+}
+
+func ExistsCx[M any](cx context.Context, db *gorm.DB, where ...any) (result *M, found bool, err error) {
+	return Exists[M](db.WithContext(cx), where...)
+}
+
 func Create[M any](db *gorm.DB, input M) error {
 	return handleGormErrors(db.Create(input))
+}
+
+func CreateCx[M any](cx context.Context, db *gorm.DB, input M) error {
+	return Create[M](db.WithContext(cx), input)
 }
 
 func Update[M any](db *gorm.DB, input M) error {
 	return handleGormErrors(db.Save(input))
 }
 
+func UpdateCx[M any](cx context.Context, db *gorm.DB, input M) error {
+	return Update(db.WithContext(cx), input)
+}
+
+func Save[M any](db *gorm.DB, input M) error {
+	return handleGormErrors(db.Save(input))
+}
+
+func SaveCx[M any](cx context.Context, db *gorm.DB, input M) error {
+	return Save(db.WithContext(cx), input)
+}
+
 func Delete[M any](db *gorm.DB, input M) error {
 	return handleGormErrors(db.Delete(input))
+}
+
+func DeleteCx[M any](cx context.Context, db *gorm.DB, input M) error {
+	return Delete[M](db.WithContext(cx), input)
 }
 
 func handleGormErrors(db *gorm.DB) error {
