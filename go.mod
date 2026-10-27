@@ -14,7 +14,7 @@ require (
 	github.com/icrowley/fake v0.0.0-20180203215853-4178557ae428
 	github.com/pkg/errors v0.9.1
 	github.com/pressly/goose/v3 v3.11.2
-	github.com/shopspring/decimal v1.3.1
+	github.com/shopspring/decimal v1.4.0
 	github.com/spf13/viper v1.14.0
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/zap v1.23.0
